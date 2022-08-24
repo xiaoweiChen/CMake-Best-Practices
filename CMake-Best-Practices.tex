@@ -368,9 +368,12 @@
 		\\[9pt]
 		\normalsize
 		Discover proven techniques for creating and maintaining programming projects with CMake
+		\\[9pt]
+		\normalsize
+		(用CMake创建和维护项目)
 		\\[10pt]
 		\normalsize 
-		作者: Dominik Berner，Mustafa Kemal Gilor
+		作者: Dominik Berner, Mustafa Kemal Gilor  
 		\\[8pt]
 		\normalsize
 		译者：陈晓伟
@@ -379,36 +382,51 @@
 	\hspace*{\fill} \\ %插入空行
 	\noindent\textbf{本书概述}
 	
-	模板是C++中一个强大的特性，但对模板的误解，并未随着C++语言和开发社区的发展而消弭，从而无法使模板无法发挥其全力。本书的三位作者，同时作为C++专家，展示了如何使用现代模板来构建干净、快捷、高效、容易维护的软件。
+	CMake是一个强大的工具，用于执行各种各样的任务，所以很难找到一个起点进行学习CMake。这本书更专注于了最常见的任务，边实践边学习CMake。CMake文档很全面，但缺少具有代表性的例子，说明如何将源码组合在一起，特别是互联网上还有有很奇淫技巧和过时的解决方案。本书的重点是帮助读者把需要做的事情串在一起，编写CMake，从而创建简洁和可维护的项目。
 	
-	第二版对C++11、C++14和C++17标准进行了更新，对改进模板或与模板交互的特性进行了解释，包括可变参数模板、泛型Lambda、类模板参数演绎、编译时if、转发引用和用户定义文字。还深入研究了一些基本的语言概念(比如值类别)，并包含了所有标准类型特征。
+	阅读本书后，不仅可以掌握CMake的基础知识，而且还可以通过构建大型复杂项目和创建在任何编程环境中运行的构建示例。还可以使用集成和自动化的各种工具，以提高整体软件质量的方法，例如：测试框架、模糊测试器和自动生成文档。编写代码只是工作的一半，本书还会引导读者对程序进行安装、打包和分发，这些都是为使用CI/CD的现代开发工作流程需要的基础功能。
 	
-	本书从基本概念和相关语言特征开始，其余部分作为参考。先关注语言，再是编码、高级应用程序和复杂的惯用法。过程中，示例清楚地说明了抽象概念，并演示了模板的最佳实践。
+	读完这本书，将能以最好的方式使用CMake建立和维护复杂的软件项目。
+	
 	
 	\hspace*{\fill} \\ %插入空行
 	\noindent\textbf{关键特性}
 	\begin{itemize}
-		\item 准确理解模板的行为，避免陷阱
-		\item 使用模板编写有效、灵活、可维护的软件
-		\item 掌握有效的习语和技巧
-		\item 保持性能或安全的情况下重用源码
-		\item C++标准库中的泛型编程
-		\item 预览即将发布的“概念"特性
+		\item 理解CMake是什么，如何工作的，如何与其交互
+		\item 了解如何正确地创建和维护结构良好的CMake项目
+		\item 探索工具和技术，以最大程度的使用CMake管理项目
+	\end{itemize}
+
+	\hspace*{\fill} \\ %插入空行
+	\noindent\textbf{将会学到}
+	\begin{itemize}
+		\item 着手构建一个结构良好的CMake项目
+		\item 跨项目模块化和重用CMake代码
+		\item 将各种静态分析、检测、格式化和文档生成工具集成到CMake项目中
+		\item 尝试进行跨平台构建
+		\item 了解如何使用不同的工具链
+		\item 为项目构建一个定义良好，且可移植的构建环境
 	\end{itemize}
 	
 	\hspace*{\fill} \\ %插入空行
 	\noindent\textbf{作者简介}
 	
-	\textbf{David Vandevoorde}在20世纪80年代后期开始用C++编程。从伦斯勒理工学院获得博士学位后，成为惠普C++编译器团队的技术负责人。1999年，加入了爱迪生设计集团(EDG)，该集团的C++编译器技术是业界领先的。他是C++标准委员会的活跃成员，也是comp.lang.c++新闻组的主持人(参与创办)。也是《C++ Solutions》的作者，该书是《C++ Programming Language, 3rd Edition》的配套书籍。
+	\textbf{Dominik Berner}是一位拥有20年专业软件开发经验的软件工程师、博客作者和演讲者。主要使用C++，还参与了许多软件项目，从为初创公司的外科手术模拟器编写前沿软件，到为MedTech行业的大型企业维护大型平台，再到为介于两者之间的公司创建物联网解决方案。他相信，良好设计和维护的构建环境是使团队高效编写软件，并创建高质量软件的关键因素之一。当他不写代码的时候，偶尔会去博客写一些文章，或者在会议上发表一些关于软件开发的演讲。
 	
-	\textbf{Nicolai M. Josuttis}因其畅销的标准书籍《The C++ Standard Library - A Tutorial and Reference》而闻名于世，是一名独立技术顾问，为电信、交通、金融和制造业设计面向对象的软件。也是C++标准委员会的活跃成员，也是System Bauhaus的合伙人，System Bauhaus是一个由面向对象系统开发专家组成的德国团体。Josuttis还写过其他几本关于面向对象编程和C++的书。
+	\textbf{Mustafa Kemal Gilor}是一位经验丰富的专业人员，从事电信、国防工业和开源软件的性能关键软件开发。他的专长是高性能和可扩展的软件设计、网络技术、DevOps和软件架构。他对计算机的兴趣在童年时期就显现出来了。他在12岁左右学习编程破解MMORPG游戏，从那时起他就一直在编写软件。他最喜欢的编程语言是C++，并且喜欢做框架设计和系统编程，也是CMake的坚定倡导者。他的职业生涯中，维护了许多代码库，并将许多遗留(非CMamek)项目移植到CMake。
 	
-	\textbf{Douglas Gregor}是苹果公司的高级Swift/C++/Objective-C编译工程师，拥有伦斯勒理工学院的计算机科学博士学位，并在印第安纳大学从事博士后工作。
+	\hspace*{\fill} \\ %插入空行
+	\noindent\textbf{审评者介绍}
+	
+	\textbf{Richard Von Lehe} 住在明尼苏达州的双城地区。过去的几年中，他在软件项目中经常使用CMake，包括正畸建模、建筑控制、无人机避免碰撞和专用打印机。闲暇时，他喜欢和家人以及他们的宠物兔子Gus一起放松。他还喜欢骑自行车和弹吉他。
+	
+	\textbf{Toni Solarin-Solada} 是一名软件工程师，专门设计抽象底层操作系统服务的跨平台编程库。
+	
 	
 	\hspace*{\fill} \\ %插入空行
 	\noindent\textbf{本书相关}
 	\begin{itemize}
-	\item Github地址：\\\url{https://github.com/xiaoweiChen/XXX}
+	\item Github地址：\url{https://github.com/xiaoweiChen/CMake-Best-Practices}
 	\end{itemize}
 	\newpage
 	

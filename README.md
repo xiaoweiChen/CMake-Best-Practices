@@ -1,10 +1,12 @@
 # CMake Best Practices
 
-*Discover proven techniques for creating and maintaining programming projects with CMake*
+*Discover proven techniques for creating and maintaining programming projects with CMake *
+
+*(用CMake创建和维护项目)*
 
 <a href="https://www.packtpub.com/product/cmake-best-practices/9781803239729?utm_source=github&utm_medium=repository&utm_campaign="><img src="https://static.packt-cdn.com/products/9781803239729/cover/smaller" alt="CMake Best Practices " height="256px" align="right"></a>
 
-* 作者：Dominik Berner , Mustafa Kemal Gilor  
+* 作者：Dominik Berner, Mustafa Kemal Gilor  
 * 译者：陈晓伟
 * 首次发布时间：2022年5月27日([来源](https://www.amazon.com/dp/1803239727))
 
@@ -14,49 +16,49 @@
 
 ## 本书概述
 
-CMake is a powerful tool used to perform a wide variety of tasks, so finding a good starting point for learning CMake is difficult. This book cuts to the core and covers the most common tasks that can be accomplished with CMake without taking an academic approach. While the CMake documentation is comprehensive, it is often hard to find good examples of how things fit together, especially since there are lots of dirty hacks and obsolete solutions available on the internet. This book focuses on helping you to tie things together and create clean and maintainable projects with CMake.
+CMake是一个强大的工具，用于执行各种各样的任务，所以很难找到一个起点进行学习CMake。这本书更专注于了最常见的任务，边实践边学习CMake。CMake文档很全面，但缺少具有代表性的例子，说明如何将源码组合在一起，特别是互联网上还有有很奇淫技巧和过时的解决方案。本书的重点是帮助读者把需要做的事情串在一起，编写CMake，从而创建简洁和可维护的项目。
 
-You'll not only get to grips with the basics but also work through real-world examples of structuring large and complex maintainable projects and creating builds that run in any programming environment. You'll understand the steps to integrate and automate various tools for improving the overall software quality, such as testing frameworks, fuzzers, and automatic generation of documentation. And since writing code is only half of the work, the book also guides you in creating installers and packaging and distributing your software. All this is tailored to modern development workflows that make heavy use of CI/CD infrastructure.
+阅读本书后，不仅可以掌握CMake的基础知识，而且还可以通过构建大型复杂项目和创建在任何编程环境中运行的构建示例。还可以使用集成和自动化的各种工具，以提高整体软件质量的方法，例如：测试框架、模糊测试器和自动生成文档。编写代码只是工作的一半，本书还会引导读者对程序进行安装、打包和分发，这些都是为使用CI/CD的现代开发工作流程需要的基础功能。
 
-By the end of this CMake book, you'll be able to set up and maintain complex software projects using CMake in the best way possible.
+读完这本书，将能以最好的方式使用CMake建立和维护复杂的软件项目。
 
 #### 关键特性
 
-- Understand what CMake is, how it works, and how to interact with it
-- Discover how to properly create and maintain well-structured CMake projects
-- Explore tools and techniques to get the most out of your CMake project
+- 理解CMake是什么，如何工作的，如何与其交互
+- 了解如何正确地创建和维护结构良好的CMake项目
+- 探索工具和技术，以最大程度的使用CMake管理项目
 
 #### 将会学到
 
-- Get to grips with architecting a well-structured CMake project
+- 着手构建一个结构良好的CMake项目
 
-- Modularize and reuse CMake code across projects
+- 跨项目模块化和重用CMake代码
 
-- Integrate various tools for static analysis, linting, formatting, and documentation into a CMake project
+- 将各种静态分析、检测、格式化和文档生成工具集成到CMake项目中
 
-- Get hands-on with performing cross-platform builds
+- 尝试进行跨平台构建
 
-- Discover how you can easily use different toolchains with CMake
+- 了解如何使用不同的工具链
 
-- Get started with crafting a well-defined and portable build environment for your project、
+- 为项目构建一个定义良好，且可移植的构建环境
 
   
 
 ## 适读人群
 
-This book is for software engineers and build system maintainers working with C or C++ on a regular basis and trying to use CMake to better effect for their everyday tasks. Basic C++ and general programming knowledge will help you to better understand the examples covered in the book.
+这本书针对软件工程师和构建系统维护人员，他们经常使用C或C++，使用CMake可以更好地完成他们的日常任务。对C++和一般编程知识有所了解的话，会有助于您更好地理解书中的例子。
 
 ## 作者简介
 
-Dominik Berner is a software engineer, blogger and conference speaker with 20 years of professional software development under his belt. He codes mainly in C++ and has worked on many software projects, from writing bleeding edge software for surgical simulators in a startup, over maintaining large legacy platforms for large corporations in the MedTech industry to creating IoT solutions for companies in between. He beliefs that well designed and maintained build environments are one of the key elements to enable teams to write software efficiently and excel at creating quality software. When he is not writing code, he occasionally writes articles for his blog or speaks at conferences about software development.
+**Dominik Berner**是一位拥有20年专业软件开发经验的软件工程师、博客作者和演讲者。主要使用C++，还参与了许多软件项目，从为初创公司的外科手术模拟器编写前沿软件，到为MedTech行业的大型企业维护大型平台，再到为介于两者之间的公司创建物联网解决方案。他相信，良好设计和维护的构建环境是使团队高效编写软件，并创建高质量软件的关键因素之一。当他不写代码的时候，偶尔会去博客写一些文章，或者在会议上发表一些关于软件开发的演讲。
 
-> "I would like to thank the people who contributed to this book: my co author, Mustafa Gilor, for complementing my expertise, Kinnari Chohan for being a superb editor, Gebin George for kickstarting this book, and the whole team at Packt. Many thanks go to our technical reviewers, Richard  von Lehe, Horváth V., and Toni Solarin-Sodara. And finally, thanks to my family, Brigitte, Alice, and Theo, for having the patience and giving me all their support when writing this book!"  
+> "我想感谢为本书做出贡献的人们:合著者Mustafa Gilor，他补充了我的专业知识；Kinnari Chohan是一个出色的编辑；Gebin George启动了这本书，以及Packt的整个团队。非常感谢我们的技术评审，Richard von Lehe, Horváth V.和Toni Solarin-Sodara。最后，感谢我的家人，Brigitte、Alice和Theo，在我写这本书的时候给予我耐心和支持!"  
 >
 > <p align="right"> —Dominik Berner</p>
 
-Mustafa Kemal Gilor  is an experienced professional working in performance-critical software development for the telecommunication, defense industries, and open-source software. His expertise is in high-performance and scalable software design, network technologies, DevOps, and software architecture. His interest in computers emerged very early on in his childhood. He learned programming to hack MMORPG games at around the age of 12, and he has been writing software ever since. His favorite programming language is C++, and he enjoys doing framework design & system programming. He is also a strong advocate of CMake; he maintained many codebases and ported many legacy projects to CMake throughout his career.
+**Mustafa Kemal Gilor**是一位经验丰富的专业人员，从事电信、国防工业和开源软件的性能关键软件开发。他的专长是高性能和可扩展的软件设计、网络技术、DevOps和软件架构。他对计算机的兴趣在童年时期就显现出来了。他在12岁左右学习编程破解MMORPG游戏，从那时起他就一直在编写软件。他最喜欢的编程语言是C++，并且喜欢做框架设计和系统编程，也是CMake的坚定倡导者。他的职业生涯中，维护了许多代码库，并将许多遗留(非CMamek)项目移植到CMake。
 
-> "First, I'd like to thank my co author, Dominik Berner, Packt Publishing, and all the technical reviewers who made this book possible with their valuable work. I also would like to thank the kindest and most understanding person in my life – my wife, Büşra – for providing me with the support and encouragement I needed during the writing phase. Lastly, I'd like to give credit to my family and also my friends Gürcan Pehlevan, Ramazan Cömert, Mustafa Hergül, Habip İşler, and Ahmet Aksoy for believing in me and backing me up throughout the process."  
+> "首先，我要感谢我的合著者，Packt Publishing的Dominik Berner，以及所有用他们宝贵的工作使这本书成为可能的技术审评。我还要感谢我生命中最善良、最理解我的人——我的妻子Büşra，在写作的过程中，她给了我所需要的支持和鼓励。最后，我要感谢家人和朋友Gürcan Pehlevan, Ramazan Cömert, Mustafa Hergül, Habip İşler，以及Ahmet Aksoy，感谢他们在整个过程中对我的信任和支持。"  
 >
 > <p align="right"> —Mustafa Kemal Gilor </p>
 
@@ -64,11 +66,9 @@ Mustafa Kemal Gilor  is an experienced professional working in performance-criti
 
 ## 审评者介绍
 
-Richard Von Lehe lives in Minnesota in the Twin Cities area. He has spent considerable time using CMake in the past several years on software projects, including orthodontic modeling, building control, drone collision avoidance, and specialty printers. In his free time, he enjoys relaxing with his family and their pet rabbit, Gus. He also enjoys biking and playing guitar.
+**Richard Von Lehe** 住在明尼苏达州的双城地区。过去的几年中，他在软件项目中经常使用CMake，包括正畸建模、建筑控制、无人机避免碰撞和专用打印机。闲暇时，他喜欢和家人以及他们的宠物兔子Gus一起放松。他还喜欢骑自行车和弹吉他。
 
-Toni Solarin-Solada is a software engineer specializing in the design of cross-platform programming libraries that abstract low-level operating system services.  
-
-
+**Toni Solarin-Solada** 是一名软件工程师，专门设计抽象底层操作系统服务的跨平台编程库。
 
 ## 本书相关
 
