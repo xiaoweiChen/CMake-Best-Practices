@@ -1,10 +1,12 @@
-# C++ Templates
+# CMake Best Practices
 
-*Second Edition*
+*Discover proven techniques for creating and maintaining programming projects with CMake*
 
-* 作者：David Vandevoorde，Nicolai M. Josuttis，Douglas Gregor
+<a href="https://www.packtpub.com/product/cmake-best-practices/9781803239729?utm_source=github&utm_medium=repository&utm_campaign="><img src="https://static.packt-cdn.com/products/9781803239729/cover/smaller" alt="CMake Best Practices " height="256px" align="right"></a>
+
+* 作者：Dominik Berner , Mustafa Kemal Gilor  
 * 译者：陈晓伟
-* 首次发布时间：2017年9月8日([来源](https://www.amazon.com/C-Templates-Complete-Guide-2nd/dp/0321714121))
+* 首次发布时间：2022年5月27日([来源](https://www.amazon.com/dp/1803239727))
 
 > 翻译是译者用自己的思想，换一种语言，对原作者想法的重新阐释。鉴于我的学识所限，误解和错译在所难免。如果你能买到本书的原版，且有能力阅读英文，请直接去读原文。因为与之相较，我的译文可能根本不值得一读。
 >
@@ -12,58 +14,66 @@
 
 ## 本书概述
 
-模板是C++中一个强大的特性，但对模板的误解，并未随着C++语言和开发社区的发展而消弭，从而无法使模板无法发挥其全力。本书的三位作者，同时作为C++专家，展示了如何使用现代模板来构建干净、快捷、高效、容易维护的软件。
+CMake is a powerful tool used to perform a wide variety of tasks, so finding a good starting point for learning CMake is difficult. This book cuts to the core and covers the most common tasks that can be accomplished with CMake without taking an academic approach. While the CMake documentation is comprehensive, it is often hard to find good examples of how things fit together, especially since there are lots of dirty hacks and obsolete solutions available on the internet. This book focuses on helping you to tie things together and create clean and maintainable projects with CMake.
 
-第二版对C++11、C++14和C++17标准进行了更新，对改进模板或与模板交互的特性进行了解释，包括可变参数模板、泛型Lambda、类模板参数演绎、编译时if、转发引用和用户定义文字。还深入研究了一些基本的语言概念(比如值类别)，并包含了所有标准类型特征。
+You'll not only get to grips with the basics but also work through real-world examples of structuring large and complex maintainable projects and creating builds that run in any programming environment. You'll understand the steps to integrate and automate various tools for improving the overall software quality, such as testing frameworks, fuzzers, and automatic generation of documentation. And since writing code is only half of the work, the book also guides you in creating installers and packaging and distributing your software. All this is tailored to modern development workflows that make heavy use of CI/CD infrastructure.
 
-本书从基本概念和相关语言特征开始，其余部分作为参考。先关注语言，再是编码、高级应用程序和复杂的惯用法。过程中，示例清楚地说明了抽象概念，并演示了模板的最佳实践。
+By the end of this CMake book, you'll be able to set up and maintain complex software projects using CMake in the best way possible.
 
 #### 关键特性
 
-- 准确理解模板的行为，避免陷阱
+- Understand what CMake is, how it works, and how to interact with it
+- Discover how to properly create and maintain well-structured CMake projects
+- Explore tools and techniques to get the most out of your CMake project
 
-- 使用模板编写有效、灵活、可维护的软件
+#### 将会学到
 
-- 掌握有效的习语和技巧
+- Get to grips with architecting a well-structured CMake project
 
-- 保持性能或安全的情况下重用源码
+- Modularize and reuse CMake code across projects
 
-- C++标准库中的泛型编程
+- Integrate various tools for static analysis, linting, formatting, and documentation into a CMake project
 
-- 预览即将发布的“概念"特性
+- Get hands-on with performing cross-platform builds
+
+- Discover how you can easily use different toolchains with CMake
+
+- Get started with crafting a well-defined and portable build environment for your project、
 
   
 
 ## 适读人群
 
-如果您是使用C++的开发人员，想要学习或复习模板，请仔细阅读第1部分。即使已经非常熟悉模板，快速浏览这一部分也有助于熟悉本书使用的编程方式和术语。该部分也涵盖了如何组织模板相关代码的内容。
-
-可以按自己喜欢方式学习。第2部分中有模板更多的许多细节信息，也可以在第3部分中阅读实用的编码技术(并参考第2部分了解相关的语言问题)。如果阅读这本书是为了应对开发中的具体问题，那么后一种方法可能有助于问题的解决。
-
-附录包含了许多在正文中经常提到的信息，我们也试图让其变得更有趣。
-
-根据经验，学习新东西的最好方法是看例子。因此，可以在本书中找到大量的例子。有些只是用几行代码解释一个抽象概念，而另一些是具体应用的完整源码。后一种示例将通过注释来说明需要包含程序代码的文件。可以在这本书的网站http://www.tmplbook.com上找到这些文件。
+This book is for software engineers and build system maintainers working with C or C++ on a regular basis and trying to use CMake to better effect for their everyday tasks. Basic C++ and general programming knowledge will help you to better understand the examples covered in the book.
 
 ## 作者简介
 
-**David Vandevoorde**在20世纪80年代后期开始用C++编程。从伦斯勒理工学院获得博士学位后，成为惠普C++编译器团队的技术负责人。1999年，加入了爱迪生设计集团(EDG)，该集团的C++编译器技术是业界领先的。他是C++标准委员会的活跃成员，也是comp.lang.c++新闻组的主持人(参与创办)。也是《C++ Solutions》的作者，该书是《C++ Programming Language, 3rd Edition》的配套书籍。
+Dominik Berner is a software engineer, blogger and conference speaker with 20 years of professional software development under his belt. He codes mainly in C++ and has worked on many software projects, from writing bleeding edge software for surgical simulators in a startup, over maintaining large legacy platforms for large corporations in the MedTech industry to creating IoT solutions for companies in between. He beliefs that well designed and maintained build environments are one of the key elements to enable teams to write software efficiently and excel at creating quality software. When he is not writing code, he occasionally writes articles for his blog or speaks at conferences about software development.
 
-**Nicolai M. Josuttis**因其畅销的标准书籍《The C++ Standard Library - A Tutorial and Reference》而闻名于世，是一名独立技术顾问，为电信、交通、金融和制造业设计面向对象的软件。也是C++标准委员会的活跃成员，也是System Bauhaus的合伙人，System Bauhaus是一个由面向对象系统开发专家组成的德国团体。Josuttis还写过其他几本关于面向对象编程和C++的书。
+> "I would like to thank the people who contributed to this book: my co author, Mustafa Gilor, for complementing my expertise, Kinnari Chohan for being a superb editor, Gebin George for kickstarting this book, and the whole team at Packt. Many thanks go to our technical reviewers, Richard  von Lehe, Horváth V., and Toni Solarin-Sodara. And finally, thanks to my family, Brigitte, Alice, and Theo, for having the patience and giving me all their support when writing this book!"  
+>
+> <p align="right"> —Dominik Berner</p>
 
-**Douglas Gregor**是苹果公司的高级Swift/C++/Objective-C编译工程师，拥有伦斯勒理工学院的计算机科学博士学位，并在印第安纳大学从事博士后工作。
+Mustafa Kemal Gilor  is an experienced professional working in performance-critical software development for the telecommunication, defense industries, and open-source software. His expertise is in high-performance and scalable software design, network technologies, DevOps, and software architecture. His interest in computers emerged very early on in his childhood. He learned programming to hack MMORPG games at around the age of 12, and he has been writing software ever since. His favorite programming language is C++, and he enjoys doing framework design & system programming. He is also a strong advocate of CMake; he maintained many codebases and ported many legacy projects to CMake throughout his career.
+
+> "First, I'd like to thank my co author, Dominik Berner, Packt Publishing, and all the technical reviewers who made this book possible with their valuable work. I also would like to thank the kindest and most understanding person in my life – my wife, Büşra – for providing me with the support and encouragement I needed during the writing phase. Lastly, I'd like to give credit to my family and also my friends Gürcan Pehlevan, Ramazan Cömert, Mustafa Hergül, Habip İşler, and Ahmet Aksoy for believing in me and backing me up throughout the process."  
+>
+> <p align="right"> —Mustafa Kemal Gilor </p>
+
+
+
+## 审评者介绍
+
+Richard Von Lehe lives in Minnesota in the Twin Cities area. He has spent considerable time using CMake in the past several years on software projects, including orthodontic modeling, building control, drone collision avoidance, and specialty printers. In his free time, he enjoys relaxing with his family and their pet rabbit, Gus. He also enjoys biking and playing guitar.
+
+Toni Solarin-Solada is a software engineer specializing in the design of cross-platform programming libraries that abstract low-level operating system services.  
 
 
 
 ## 本书相关
 
-* github地址：https://github.com/xiaoweiChen/Cpp-Templates-2nd
+* github地址：https://github.com/xiaoweiChen/CMake-Best-Practices
 * 译文的LaTeX 环境配置：https://www.cnblogs.com/1625--H/p/11524968.html 
 * vscode中配置latex：https://blog.csdn.net/Ruins_LEE/article/details/123555016
-* 开源示例：https://github.com/downdemo/Cpp-Templates-2ed
-* 开源翻译：
-
-  * https://github.com/Walton1128/CPP-Templates-2nd--
-  * https://github.com/r00tk1ts/cpp-templates-2nd
-  * https://www.zhihu.com/column/c_1397602018500890624
-
+* 原书示例：https://github.com/PacktPublishing/CMake-Best-Practices
 
