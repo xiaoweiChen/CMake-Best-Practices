@@ -1,0 +1,111 @@
+Now, it's time to get your hands dirty and see whether your installation worked. We have provided an example of a simple hello world project that you can download and build right away. Open a console, type in the following, and you'll be ready to go:
+
+\begin{tcblisting}{commandshell={}}
+git clone https://github.com/PacktPublishing/CMake-BestPractices.git
+cd CMake-Best-Practices/chapter_1
+mkdir build
+cd build
+cmake ..
+cmake -–build .
+\end{tcblisting}
+
+This will result in an executable called Chapter\_1 that prints out Welcome to CMake Best Practices on the console.
+
+Let's have a detailed look at what happened here:
+
+\begin{enumerate}
+\item 
+First, the example repository is checked out using Git and then the build folder is created. The file structure of the example CMake project will look like this before the build:
+
+\begin{tcblisting}{commandshell={}}
+.
+├── CMakeLists.txt
+└── build
+└── src
+      └── main.cpp
+\end{tcblisting}
+
+Apart from the folder containing the source code, there is a file called CMakeLists.txt. This file contains the instructions for CMake on how to create build instructions for the project and how to build it. Every CMake project has a CMakeLists.txt file at the root of the project, but there might be many files with that name in various subfolders.
+
+\item 
+After cloning the repository, the build process is started with cmake. CMake's build process is a two-stage process. The first step, which is usually called configuration, reads the CMakeLists.txt file and generates an instruction for the native build toolchain of the system. In the second step, these build instructions are executed and the executables or libraries are built.
+
+During the configuration step, the build requirements are checked, the dependencies are resolved, and the build instructions are generated.
+
+\item 
+Configuring a project also creates a file called CMakeCache.txt that contains all the information that's needed to create the build instructions. The next call to cmake -{}-build . executes the build by internally calling CMake; if you are on Windows, it does so by invoking the Visual Studio compiler. This is the actual step for compiling the binaries. If everything went well, there should be an executable named Chapter1 in the build folder.
+\end{enumerate}
+
+For brevity, we cd'd into the build directory in the previous examples and used relative paths to find the source folders. This is often convenient, but if you want to call CMake from somewhere else, you can use the -{}-S option to select the source file and the -{}-B option to select the build folder:
+
+\begin{tcblisting}{commandshell={}}
+cmake -S /path/to/source -B /path/to/build
+cmake -build /path/to/build
+\end{tcblisting}
+
+Explicitly passing the build and source directories often comes in handy when using CMake in a continuous integration environment since being explicit helps with maintainability. It is also helpful if you want to create different build directories for different configurations, such as when you're building cross-platform software.
+
+\subsubsubsection{1.4.1\hspace{0.2cm}A minimal CMakeLists.txt file}
+
+For a very simple hello world example, the CMakeLists.txt file only consists of a few lines of instructions:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+project(
+  "chapter1"
+  VERSION 1.0
+  DESCRIPTION "A simple project to demonstrate basic CMake
+    usage" LANGUAGES CXX)
+
+add_executable(Chapter1)
+target_sources(Chapter1 PRIVATE src/main.cpp)
+\end{lstlisting}
+
+Let's understand these instructions in a bit more detail:
+
+\begin{itemize}
+\item 
+The first line defines the minimum version of CMake that's required to build this project. Every CMakeLists.txt file starts with this directive. This is used to warn the user if the project uses features of CMake that are only available from a certain version upward. Generally, we recommend setting the version to the lowest version that supports the features that are used in the project.
+
+\item 
+The next directive is the name, version, and   description of the project to be built, followed by the programming languages that are used in the project. Here, we use CXX to mark this as a C++ project.
+
+\item 
+The add\_executable directive tells CMake that we want to build an executable (as opposed to a library or a custom artifact, which we will cover later in this book).
+
+\item 
+The target\_sources statement tells CMake where to look for the sources for the executable called Chapter1 and that the visibility of the sources is limited to the executable. We will go into the specifics of the single commands later in this book.
+\end{itemize}
+
+Congratulations – you are now able to create software programs with CMake. But to understand what is going on behind the commands, let's look at the CMake build process in detail.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
