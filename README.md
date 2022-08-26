@@ -4,7 +4,7 @@
 
 *(用CMake创建和维护项目)*
 
-<a href="https://www.packtpub.com/product/cmake-best-practices/9781803239729?utm_source=github&utm_medium=repository&utm_campaign="><img src="https://static.packt-cdn.com/products/9781803239729/cover/smaller" alt="CMake Best Practices " height="256px" align="right"></a>
+<a><img src="cover.jpg" alt="CMake Best Practices " height="256px" align="right"></a>
 
 * 作者：Dominik Berner, Mustafa Kemal Gilor  
 * 译者：陈晓伟

@@ -1,0 +1,125 @@
+\begin{flushright}
+	\zihao{1} 前言
+\end{flushright}
+
+The software world and the tooling we use to create software are evolving every single day. CMake is no exception here, as after over 20 years of constantly evolving, it can now be considered something of an industry standard when it comes to building C++ applications. But while CMake is very feature-rich and its documentation is very comprehensive, real-world examples and guidelines on how to use the features together are rare. This is where CMake Best Practices jumps in.
+
+Instead of explaining every last detail and feature of CMake, this book contains examples to illustrate how CMake is best for various tasks when building software without covering every single edge case. There are other books for that. The aim of this book is to keep things as simple as possible while covering the recommended best practices for getting things done. The rationale behind this approach is that you don't need to know about all of CMake's capabilities to achieve your everyday tasks.
+
+We will try to explain a concept first and then illustrate it with concrete examples. This way, you will learn by practice and be able to apply that knowledge to your daily work with CMake. Since the audience of this book will be mostly engineers, we have tailored the book's content accordingly. While writing this book, we are software engineers first and then authors. As a result, the content of the book is more practical than theoretical. It is a compendium of carefully selected, proven techniques that you can use in your everyday CMake workflow.
+
+From engineers to engineers, we hope that you enjoy this book.
+
+\hspace*{\fill} \\ %插入空行
+\textbf{适宜读者}
+
+This book is for software engineers and build-system maintainers working with C or C++ on a regular basis and trying to use CMake to improve their everyday tasks. Basic C++ and general programming knowledge will help you to better understand the examples covered in the book.
+
+\hspace*{\fill} \\ %插入空行
+\textbf{本书内容}
+
+Chapter 1, Kickstarting CMake, explains what CMake is in a nutshell and then jumps right into installing CMake and building something with CMake. You will learn how to install the latest stable version manually, even if it's not provided by your package manager. You'll also learn about the basic concepts behind CMake and why it is a build system generator and not a build system itself. You will learn how it fits into modern software development with C++ (and C).
+
+Chapter 2, Accessing CMake in the Best Ways, shows how to best use CMake from the command line with a GUI and how CMake integrates with some common IDEs and editors.
+
+Chapter 3, Creating a CMake Project, takes you through setting up a project to build an executable and a library and linking the two together.
+
+Chapter 4, Packaging, Deploying, and Installing a CMake Project, shows you how to create a distributable version of your software project. You will learn how to add installation instructions and package the project using CMake and CPack (CMake's packaging program).
+
+Chapter 5, Integrating Third-Party Libraries and Dependency Management, explains how to integrate existing third-party libraries into your project. It also shows you how to add libraries already installed on your system, external CMake projects, and non-CMake projects.
+
+Chapter 6, Automatically Generating Documentation, explores how to generate documentation from your code with CMake as part of the build process with doxygen, dot (graphviz), and plantuml.
+
+Chapter 7, Seamlessly Integrating Code-Quality Tools with CMake, shows you how to integrate unit testing, code sanitizers, static code analysis, and code coverage tools into your project. It will show you how CMake can help to discover and execute tests.
+
+Chapter 8, Executing Custom Tasks with CMake, explains how you can integrate almost any tool into your build process. You will learn how to wrap external programs into custom targets or hook them into the build process to execute them. We will cover how custom tasks can be used to generate files and how they can consume files produced by other targets. You will also learn how to execute system commands during the configuration of the CMake build and how to create platform-agnostic commands using the CMake script mode.
+
+Chapter 9, Creating Reproducible Build Environments, shows how you can build an environment portable between various machines including CI/CD pipelines, and how to work with Docker, sysroots, and CMake presets to make your build work "out of the box" everywhere.
+
+Chapter 10, Handling Big Projects and Distributed Repositories in a Superbuild, simplifies managing projects that are distributed across multiple git repositories with CMake. You will learn how to create a super-build that allows you to build specific versions as well as the latest nightly builds. You will explore what prerequisites it needs and how to combine them.
+
+Chapter 11, Automated Fuzzing with CMake, shows how you can integrate and use fuzzing tools with CMake.
+
+Chapter 12, Cross-Platform Compiling and Custom Toolchains, demonstrates how you can use cross-platform toolchains. You will also learn how to write your own toolchain definitions and conveniently use different toolchains with CMake.
+
+Chapter 13, Reusing CMake Code, explains CMake modules and how you can generalize your CMake files. You will learn how to write broadly used modules, which you can ship individually from your project.
+
+Chapter 14, Optimizing and Maintaining CMake Projects, suggests how to get faster build times and provides tips and tricks for keeping a CMake project neat and tidy over a long period of time. 
+
+Chapter 15, Migrating to CMake, explains a high-level strategy on how to migrate a large existing codebase to CMake without the need to completely stop your development.
+
+Chapter 16, Contributing to CMake and Further Reading Material, suggests where to go if you want to contribute, what is looked for, and basic contributing guidelines. It will also guide you on where to find additional in-depth information or more specific literature.
+
+\hspace*{\fill} \\ %插入空行
+\textbf{编译环境}
+
+You will need CMake version 3.21 or newer and a modern C++ compiler that understands at least C++14 installed on your computer to run the examples. Some examples may require additional software to run, which will be mentioned in the relevant chapters. All software used for the examples are open source and available for free.
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		书中涉及的软件/硬件                                                                                                                  & 操作系统                                                             \\ \hline
+		CMake 3.13.4或更高版本                                                                                                                                  &                                                                           Linux, Windows或macOS       \\  \hline
+		GCC、Clang或MSVC              &                                                                                  Linux, Windows或macOS\\  \hline
+		Git  &  Linux, Windows或macOS                                                                                \\ \hline
+	\end{tabular}
+\end{table}
+
+\textbf{If you are using the digital version of this book, we advise you to type the code yourself or access the code from the book's GitHub repository (a link is available in the next section). Doing so will help you avoid any potential errors related to the copying and pasting of code.}
+
+\hspace*{\fill} \\ %插入空行
+\textbf{下载示例}
+
+ou can download the example code files for this book from GitHub at \url{https://github.com/PacktPublishing/CMake-Best-Practices}. If there's an update to the code, it will be updated in the GitHub repository.
+
+We also have other code bundles from our rich catalog of books and videos available at \url{https://github.com/PacktPublishing/}. Check them out!
+
+\hspace*{\fill} \\ %插入空行
+\textbf{下载彩图}
+
+We also provide a PDF file that has color images of the screenshots and diagrams used in this book. You can download it here: \url{https://static.packt-cdn.com/downloads/9781803239729_ColorImages.pdf}
+
+\hspace*{\fill} \\ %插入空行
+\textbf{联系方式}
+
+我们欢迎读者的反馈。
+
+反馈：如果你对这本书的任何方面有疑问，需要在你的信息的主题中提到书名，并给我们发邮件到\url{customercare@packtpub.com}。
+
+勘误：尽管我们谨慎地确保内容的准确性，但错误还是会发生。如果您在本书中发现了错误，请向我们报告，我们将不胜感激。请访问\url{www.packtpub.com/support/errata}，选择相应书籍，点击勘误表提交表单链接，并输入详细信息。
+
+盗版:如果您在互联网上发现任何形式的非法拷贝，非常感谢您提供地址或网站名称。请通过\url{copyright@packt.com}与我们联系，并提供材料链接。
+
+如果对成为书籍作者感兴趣：如果你对某主题有专长，又想写一本书或为之撰稿，请访问\url{authors.packtpub.com}。
+
+\hspace*{\fill} \\ %插入空行
+\textbf{分享你的想法}
+
+Once you've read CMake Best Practices, we'd love to hear your thoughts! Please click here to go straight to the Amazon review page for this book and share your feedback.
+
+Your review is important to us and the tech community and will help us make sure we're delivering excellent quality content.
+
+\newpage
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
