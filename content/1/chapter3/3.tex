@@ -1,0 +1,82 @@
+First, we will create a simple executable from a simple hello world C++ program. The following C++ program will print out Welcome to CMake Best Practices:
+
+\begin{lstlisting}[style=styleCXX]
+#include <iostream>
+int main(int, char **) {
+	std::cout << "Welcome to CMake Best Practices\n";
+	return 0;
+}
+\end{lstlisting}
+
+To build this, we need to compile it and give the executable a name. Let's see what the CMakeLists.txt file to build this executable looks like:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+
+project(
+	hello_world_standalone
+	VERSION 1.0
+	DESCRIPTION"A simple C++ project"
+	HOMEPAGE_URL https://github.com/PacktPublishing/CMake-BestPractices
+	LANGUAGES CXX
+)
+
+add_executable(hello_world)
+target_sources(hello_world PRIVATE src/main.cpp)
+\end{lstlisting}
+
+With the first line, cmake\_minimum\_required(VERSION 3.21), we tell CMake which version of CMake we are expecting to see and which features CMake will enable. For this book, we are using CMake 3.21 for all the examples, but for compatibility reasons, you could select a lower version.
+
+For this example, version 3.1 would be the absolute minimum because, before that, the target\_sources command is not available. It is good practice to put the cmake\_minimum\_required command at the top of each CMakeLists.txt file. 
+
+Next, the project is set up using the project() command. The first argument is the project's name – in our case, "hello\_world\_standalone".
+
+Next, the version of the project is set to version 1.0. What follows is a brief description and the home page's URL. Finally, the LANGUAGES CXX attribute specifies that we are building a C++ project. Apart from the project's name, all the arguments are optional.
+
+Invoking the add\_executable(hello\_world) command creates a target called hello\_world. This will also be the name of the executable file that's created by this target.
+
+Now that the target has been created, adding the C++ source files to the target is done with target\_sources. Chapter3 is the target name, as specified in add\_executable. PRIVATE defines that the sources are only used to build this target and not for any dependent targets. After the scope specifier, there's a list of source files that are relative to the path of the current CMakeLists.txt file. If needed, the location of the currently processed CMakeLists.txt file can be accessed with the CMAKE\_CURRENT\_SOURCE\_DIR variable.
+
+Sources can be added directly to the add\_executable function or separately using the target\_sources functions. Adding them with target\_sources allows you to explicitly define where the sources can be used by using PRIVATE, PUBLIC, or INTERFACE. However, specifying anything other than PRIVATE only makes sense for library targets.
+
+A common pattern that you often see is naming the main executable of a project after the project's name, like this:
+
+\begin{lstlisting}[style=styleCMake]
+project(hello_world
+...
+)
+add_executable(${PROJECT_NAME})
+\end{lstlisting}
+
+While this seems to be convenient at first glance, it should be avoided. The project's name and the target carry a different semantic meaning, so they should be treated as separate things, so using PROJECT\_NAME as the name for targets should be avoided.
+
+Executables are important and quite easy to create, but unless you're building a huge monolith, you should be using libraries to modularize and distribute code. In the next section, we will learn how libraries are built and how to handle different linking methods.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

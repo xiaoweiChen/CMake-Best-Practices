@@ -1,0 +1,66 @@
+Although CMake can work with almost any file structure for a project, there are some good practices regarding how to organize files. The examples in this book use the following common pattern:
+
+\begin{tcblisting}{commandshell={}}
+├── CMakeLists.txt
+├── build
+├── include/project_name
+└── src
+\end{tcblisting}
+
+There are three folders and one file present in a minimal project structure. They are as follows:
+
+\begin{itemize}
+\item 
+build: The folder where the build files and binaries are placed.
+
+\item 
+include/project\_name: This folder contains all the header files that are publicly accessible from outside the project. Adding a subfolder that contains the project's name is helpful since includes are done with <project\_name/somefile.h>, making it easier to figure out which library a header file is coming from.
+
+\item 
+src: This folder contains all the source and header files that are private.
+
+\item 
+CMakeLists.txt: This is the root CMake file.
+\end{itemize}
+
+The build folder can be placed almost anywhere. Placing it in the project root is just very convenient. However, we strongly advise against choosing any non-empty folder as the build folder. Especially putting the built files into either include or src is considered as a bad practice. Additional folders such as test or doc can come in handy for organizing test projects and documentation pages.
+
+\subsubsubsection{3.2.1\hspace{0.2cm}Working with nested projects}
+
+When you're nesting projects inside each other, each project should map the file structure above and each CMakeLists.txt should be written so that the subproject can be built standalone. This means that each CMakeLists.txt file of a subproject should specify cmake\_minimum\_required and, optionally, a project definition as well. We will cover large projects and superbuilds in depth in Chapter 9, Creating Reproducible Build Environments.
+
+Nested projects look something like this:
+
+\begin{tcblisting}{commandshell={}}
+├── CMakeLists.txt
+├── build
+├── include/project_name
+├── src
+└── subproject
+        ├── CMakeLists.txt
+        ├── include
+        │       └── subproject
+        └── src
+\end{tcblisting}
+
+Here, the folder structure is repeated inside the subproject folder. Sticking to such a folder structure and making the subproject buildable on its own makes it easier to move projects around. It also allows you to only build parts of a project, which can come in handy for big projects where build times may get rather long.
+
+Now that we have the file structure covered, let's start by creating a simple executable without any special dependencies. Later in this chapter, we will create various kinds of libraries and bring them all together.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

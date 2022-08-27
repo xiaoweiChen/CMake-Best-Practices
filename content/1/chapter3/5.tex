@@ -1,0 +1,130 @@
+So far, we have created three different libraries – a binary library to be linked either statically or dynamically, an interface or header-only library, and a precompiled but not linked object library.
+
+Let's learn how to use them in an executable in a shared project. Installing them as system libraries or using them as external dependencies will be covered in Chapter 5, Integrating Third-Party Libraries and Dependency Management.
+
+So, we can either put the add\_library calls in the same CMakeLists.txt file or we can integrate them by using add\_subdirectory. Both are valid options and depend on how the project is set up, as described in the Setting up a project and Working with nested projects sections of this chapter.
+
+In the following example, we're assuming that three libraries have been defined with CMakeLists.txt files in the hello\_lib, hello\_header\_only, and hello\_object directories. These libraries can be included using the add\_subdirectory command. Here, a new target called chapter3, which is our executable, is created. Then, the libraries are added to the executable by target\_link\_libraries:
+
+\begin{lstlisting}[style=styleCMake]
+add_subdirectory(hello_lib)
+add_subdirectory(hello_header_only)
+add_subdirectory(hello_object)
+
+add_executable(chapter3)
+target_sources(chapter3 PRIVATE src/main.cpp)
+target_link_libraries(chapter3 PRIVATE hello_header_only hello
+	hello_object)
+\end{lstlisting}
+
+The target of target\_link\_libraries can also be another library. Again, the libraries are linked using an access specifier, which is either of the following:
+
+\begin{itemize}
+\item 
+PRIVATE: The library is used to link against, but it is not a part of the public interface. The linked library is only a requirement when you're building the target.
+
+\item 
+INTERFACE: The library is not linked against, but it is part of the public interface. The linked library is a requirement when you're using the target somewhere else. This is usually only used when you're linking header-only libraries from other header-only libraries.
+
+\item 
+PUBLIC: The library is linked against, and it is part of the public interface. So, the library is both a build dependency and a usage dependency.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Attention ——{} Bad Practices]
+The following practices are actively discouraged by the authors of this book as they tend to create unmaintainable projects that make it hard to port between different build environments. However, we have included them for completeness.
+
+Instead of passing another target after PUBLIC, PRIVATE, or INTERFACE, you can also pass full paths to libraries or the filename of a library, such as  /usr/share/lib/mylib.so or just mylib.so. These practices are possible but discouraged as it makes the CMake project less portable. Additionally, it is possible to pass linker flags here by passing something such as -nolibc, though again, this is discouraged. If special linker flags are needed for all the targets, then passing them using the command line is the preferred way. If a single library needs special flags, then using target\_link\_options is the preferred way to do this, preferably in combination with the options that are set over the command line.
+\end{tcolorbox}
+\end{itemize}
+
+In the next section, we'll look at setting compiler and linker options.
+
+\subsubsubsection{3.5.1\hspace{0.2cm}Setting compiler and linker options}
+
+C++ compilers have lots of options regarding some of the most common flags to be set and it is also a common practice to set preprocessor definitions from the outside. In CMake, these are passed using the target\_compile\_options command. Changing linker behavior is done with the target\_link\_options command. Unfortunately, compilers and linkers may have different ways of how flags are set. For instance, in GCC and Clang, options are passed with a dash (-), while the Microsoft compiler takes slashes (/) as prefixes for its options. But by using generator expressions, which we covered in Chapter 1, Kickstarting CMake, this can be conveniently handled in CMake, as shown in the following example:
+
+\begin{lstlisting}[style=styleCMake]
+target_compile_options(
+	hello
+	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/SomeOption>
+			$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-
+			someOption>
+)
+\end{lstlisting}
+
+Let's look at the generator expression in detail.
+
+\$<\$<CXX\_COMPILER\_ID:MSVC>:/SomeOption> is a nested generator expression that is evaluated inside out. Generator expressions are evaluated during build system generation. First, \$<CXX\_COMPILER\_ID:MSVC> evaluates to true if the C++ compiler equals MSVC. If this is the case, then the outer expression will return /SomeOption, which is then passed to the compiler. If the inner expression evaluates to false, then nothing is passed on.
+
+\$<\$<CXX\_COMPILER\_ID:GNU,Clang,AppleClang>:-fopenmp> works similarly, but instead of just checking against a single value, a list containing GNU,Clang,AppleClang is passed. If CXX\_COMPILER\_ID matches either of these, the inner expression evaluates to true and someOption is passed to the compiler.
+
+Passing compiler or linker options as PRIVATE marks them as a build requirement for this target that is not needed for interfacing the library. if PRIVATE is substituted with PUBLIC, then the compile option also becomes a usage requirement and all the targets that depend on the original targets will use the same compiler options. Exposing compiler options to the dependent targets is something that needs to be done with caution. If a compiler option is only needed to use a target but not to build it, then keyword INTERFACE can be used. This is mostly the case when you're building header-only libraries.
+
+A special case of compiler options is compile definitions, which are passed to the underlying program. These are passed with the target\_compile\_definitions function.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Debugging compiler options}
+
+To see all the compile options, you can look at the generated build files, such as Makefiles or Visual Studio projects. A much more convenient way is to let CMake export all the compile commands as a JSON compilation database.
+
+By enabling the CMAKE\_EXPORT\_COMPILE\_COMMANDS variable, a file called compile\_commands.json containing the full commands for compiling is created in the build folder.
+
+Enabling this option and running CMake will produce results similar to the following:
+
+\begin{lstlisting}[style=styleCMake]
+{
+	"directory": "/workspaces/CMake-Best-Practices/build",
+	"command": "/usr/bin/g++ -I/workspaces/CMake-Best-Practices/
+	chapter_3/hello_header_only/include
+    -I/workspaces/CMake-BestPractices/chapter_3/hello_lib/include
+    -I/workspaces/CMakeBest-Practices/chapter_3/hello_object_lib/include
+    -g -fopenmp -o
+	chapter_3/CMakeFiles/chapter3.dir/src/main.cpp.o -c /
+	workspaces/CMake-Best-Practices/chapter_3/src/main.cpp",
+	"file": "/workspaces/CMake-Best-Practices/chapter_3/src/
+	main.cpp"
+},
+\end{lstlisting}
+
+Note the addition of the manually specified -fopenMP flag from the previous example. compile\_commands.json can be used as a build system-agnostic way to load the commands. Some IDEs, such as VS Code and CLion, can interpret the JSON file and generate project information themselves. It also often comes in handy for debugging compiler options in case something did not work as expected. The full specifications of the compile commands database can be found at \url{https://clang.llvm.org/docs/JSONCompilationDatabase.html}.
+
+\subsubsubsection{3.5.2\hspace{0.2cm}Library aliases}
+
+Library aliases are a way to refer to a library without creating a new build target,
+sometimes referred to as namespaces. A common pattern is to create a library alias in
+the form of MyProject::Library for each library that is installed from a project.
+They can be used to semantically group multiple targets. They also help avoid clashes in
+naming, especially when projects contain common targets such as libraries named utils,
+helpers, and similar. It is good practice to collect all the targets of the same project
+under the same namespace. When you're linking libraries from other projects, including
+the namespace avoids you accidentally including the wrong library. All the library targets
+in this chapter will be aliased with a namespace to group them so that they can be
+referenced by their namespace:
+
+\begin{lstlisting}[style=styleCMake]
+add_library(Chapter3::hello ALIAS hello)
+...
+target_link_libraries(SomeLibrary PRIVATE Chapter3::hello)
+\end{lstlisting}
+
+In addition to helping with determining the origin of a target, CMake uses namespaces to recognize imported targets and create better diagnostic messages, as we will see when we look at installing and packaging in Chapter 4, Packaging, Deploying, and Installing a CMake Project, as well as in Chapter 5, Integrating Third-Party Libraries and Dependency Management, where we will cover dependency management.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Always Use Namespaces]
+As a good practice, always ALIAS your targets with a namespace and reference them using the namespace:: prefix.
+\end{tcolorbox}
+
+Namespaces are a great way to organize build artifacts, but sometimes, they are not enough. Sometimes, we want to see the bigger picture of what is using what and which artifact depends on which library. CMake can help with creating dependency graphs that provide such insights, as we'll see in the next chapter.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
