@@ -162,6 +162,301 @@ Figure 2.9 – Passing flags to the C++ compiler
 
 Build flags can be customized for a per-build type by suffixing them with capitalized build type string. There are four variables for four  different build types, as listed next. They are useful for specifying build types depending on compiler flags. Flags specified in such variables are only valid when the configuration build type matches:
 
+\begin{enumerate}
+\item 
+CMAKE\_<LANG>\_FLAGS\_DEBUG
+
+\item 
+CMAKE\_<LANG>\_FLAGS\_RELEASE
+
+\item 
+CMAKE\_<LANG>\_FLAGS\_RELWITHDEBINFO
+
+\item 
+CMAKE\_<LANG>\_FLAGS\_MINSIZEREL
+\end{enumerate}
+
+In addition to the previous example, if you want to treat warnings as errors only in the Release builds, build type-specific compiler flags allow you to do so.
+
+Here is an example that illustrates the usage of the build type-specific compiler flags:
+
+\begin{tcblisting}{commandshell={}}
+cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
+  -Werror" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O3" -DCMAKE_BUILD_
+  TYPE:STRING=Debug -S . -B ./build
+\end{tcblisting}
+
+Notice that an additional CMAKE\_CXX\_FLAGS\_RELEASE parameter is present in the preceding command. The contents in this variable will only be passed to the compiler when the build type is Release. Since the build type is specified as Debug, we can see the -O3 flag is not present in the flags passed to the compiler, as shown in the following figure:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/10.jpg}\\
+Figure 2.10 – Specifying flags based on the build type; the –O3 flag is missing in the Debug build
+\end{center}
+
+In Figure 2.10, notice that CMake is issuing a warning about a specified but unused variable, CMAKE\_CXX\_FLAGS\_RELEASE. This confirms that the CMAKE\_CXX\_FLAGS\_RELEASE variable is not used in the Debug build type. When the build type is specified as Release, we can see that the -O3 flag is present:
+
+\begin{tcblisting}{commandshell={}}
+cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
+-Werror" -DCMAKE_CXX_FLAGS_RELEASE:STRING="-O3"
+-DCMAKE_BUILD_TYPE:STRING= "Release" -S . -B ./build
+\end{tcblisting}
+
+In this line, you are saying to CMake, Configure the CMake project located at the current directory to build/folder using the "Unix Makefiles" generator. For all build types, pass the -Wall flag to the compiler unconditionally. If the build type is Release, pass the -O3 flag as well.
+
+Here is the output of the command when the build type is set to Release:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/11.jpg}\\
+Figure 2.11 – Specifying flags based on build type; the -O3 flag is present in the Release build
+\end{center}
+
+In Figure 2.11, we can confirm that the -O3 flag is passed to the compiler as well. Be aware that even though RelWithDebInfo and MinSizeRel are also release builds, they are separate from the Release build type, and so flags specified in the CMAKE\_<LANG>\_FLAGS\_RELEASE variable will not apply to them.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Listing cached variables}
+
+You can list all the cached variables by issuing the cmake -L ./build/ command (see Figure 2.12). This, by default, does not show the advanced variables and help strings associated with each variable. To show them as well, use the cmake -LAH ./build/ command instead.
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/12.jpg}\\
+Figure 2.12 – List of cached variables dumped by CMake
+\end{center}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Building a configured project via CLI}
+
+To build the configured project, issue the cmake -{}-build ./build command. This command tells DCMake to Build the CMake project already configured in the build folder.
+
+You can also equivalently issue cd build \&\& make. The benefit of using cmake -{}-build is that it saves you from invoking build system-specific commands. It is especially helpful when building CI pipelines or build scripts. In this way, you can change your build system generator without changing your build command.
+
+You can see an example output for the cmake --build ./build command in the following example:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/13.jpg}\\
+Figure 2.13 – Building a configured project
+\end{center}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Building in parallel}
+
+You can also customize build time details while issuing the build command. The most prominent build time configuration is the number of jobs that will be used to build the project. To specify job count, append -{}-parallel <job\_count> to your cmake -{}-build command.
+
+To build in parallel, issue cmake -{}-build ./build -{}-parallel 2, where the number 2 specifies the job count. The recommended number of jobs for a build system is, at most, one job per hardware thread. In multi-core systems, it is also recommended to use at least one less than the available hardware thread count to not affect the system's responsivity during the build process.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+You can usually use more than one job per hardware thread and get faster build times since the build process is mostly I/O bound, but your mileage may vary. Experiment and observe.
+
+Also, some of the build systems, such as Ninja, will try to utilize as many hardware threads as are available in the system, so it is redundant to specify the job count for such build systems if your target is to use all hardware threads in your system. You can retrieve the hardware thread count by issuing the nproc command in Linux environments.
+\end{tcolorbox}
+
+It is a good practice not to use fixed values for environment-dependent variables in the commands that are expected to be invoked in different environments, such as CI/CD scripts and build scripts. Here is an example build command that utilizes nproc to determine the number of parallel jobs dynamically:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build/ --parallel $(($(nproc)-1))
+\end{tcblisting}
+
+Let's observe how different job counts affect the build time. We will use the time tool to measure how long each command invocation is. The environment details are as follows:
+
+\begin{itemize}
+\item 
+OS: Ubuntu 20.04.3 LTS (Focal Fossa)
+
+\item 
+CPU: AMD Ryzen Threadripper 1950X 16-Core Processor (32 hardware threads)
+
+\item 
+RAM: 32 GB
+\end{itemize}
+
+With one job (--parallel 1), the build time result would be as follows:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/14.jpg}\\
+Figure 2.14 – Parallelized build time result with one job
+\end{center}
+
+The build time result with two jobs (-{}-parallel 2) would be as follows:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/15.jpg}\\
+Figure 2.15 – Parallelized build time result with two jobs
+\end{center}
+
+This is the build time result with four jobs (-{}-parallel 3):
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/16.jpg}\\
+Figure 2.16 – Parallelized build time result with three jobs
+\end{center}
+
+This is the build time result with four jobs (-{}-parallel 4):
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/17.jpg}\\
+Figure 2.17 – Parallelized build time result with four jobs
+\end{center}
+
+Even though invoked on a very simple project, we can clearly see how extra jobs help get faster build times. Going from one job to two jobs reduces the build time by 0.3 seconds, whereas going from two jobs to three jobs gives us an additional 0.2 seconds. But, going from three jobs to four jobs makes only a 0.01-second difference, which means we've reached the limit of build parallelism for this project. From this point on, throwing more jobs will not achieve a notable difference in build time.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Building specific target(s) only}
+
+By default, CMake will build all available targets that are configured. Since building all the targets is not always desirable, CMake allows building a subset of targets via the -{}-target sub-option. This sub-option may be specified multiple times, as shown here:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build/ --target "ch2_framework_component1"
+--target "ch2_framework_component2"
+\end{tcblisting}
+
+This command will limit the build scope to just the ch2\_framework\_component1 and ch2\_framework\_component2 targets. If these targets also depend on other targets, they will be built as well.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Removing previous build artifacts before the build}
+
+If you want to run a clean build, you may want to remove the artifacts from the  previous run first. To do that, the -{}-clean-first sub-option can be used. This sub-option will invoke a special target that cleans all the artifacts generated by the build process (for example, invokes make clean).
+
+Here is an example of how you can do it for a build folder named build:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build/ --clean-first
+\end{tcblisting}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Debugging your build process}
+
+As we did in the Passing flags to the compiler section previously, you may want to inspect
+
+which commands are invoked with which arguments in the build process. The -{}-verbose sub-command instructs CMake to invoke all build commands with verbose mode given that verbose mode is supported by the command. This enables us to investigate nasty compilation and linkage errors with ease.
+
+To build a folder named build in verbose mode, invoke -{}-build, as shown in the following example:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build/ --verbose
+\end{tcblisting}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Passing command-line arguments to the build tool}
+
+If you ever need to pass arguments to the underlying build tool, you can append -{}- at the end of the command and write the arguments that will be given:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build/ -- --trace
+\end{tcblisting}
+
+In the preceding case, -{}-trace will be directly forwarded to the build tool, which is make in our case. This will cause make to print tracing information for each recipe built.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing a project via the CLI}
+
+CMake natively allows installation of artifacts in the environment, if desired. In order to do that, CMake code must be already using CMake install() instructions to specify what to install when cmake -{}-install (or the build system equivalent) is invoked. The content of chapter\_2 is already configured in such a way for illustrating the command. We'll learn how to make CMake targets installable later in Chapter 4, Packaging, Deploying, and Installing a CMake Project.
+
+The cmake -{}-install command requires an already configured and built project. Configure and build the CMake project if you haven't done it yet. Afterward, issue the cmake -{}-install <project\_binary\_dir> command to install the CMake project. Since, in our examples, build is used as a project binary directory, <project\_binary\_dir> will be replaced with build.
+
+The following figure shows an example of the install command:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/18.jpg}\\
+Figure 2.18 – Installing a project
+\end{center}
+
+The default installation directory varies between environments. For Unix-like environments, it defaults to /usr/local, whereas in a Windows environment, it defaults to C:/Program Files.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Tip]
+Keep in mind that the project must be already built before trying to install the project.
+
+In order to be able to install the project successfully, you must have the appropriate rights/permissions to write to the installation target directory.
+\end{tcolorbox}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Changing the default installation path}
+
+To change the default installation directory, you may specify the additional -{}-prefix parameter, as shown here, to change the installation directory:
+
+\begin{tcblisting}{commandshell={}}
+cmake --install build --prefix /tmp/example
+\end{tcblisting}
+
+The following figure shows the contents of the /tmp/example folder after invoking cmake -{}-install with the /tmp/example prefix:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/19.jpg}\\
+Figure 2.19 – Installing a project to a different path
+\end{center}
+
+As can be seen here, the installation root is successfully changed to /tmp/example.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Stripping binaries while installing}
+
+In the software world, build artifacts are usually bundled with some extra information, for example, a symbol table required for debugging. This information may not be necessary for executing the end product and may drastically increase binary sizes. If you're looking to reduce your end product's storage footprint, stripping binaries may be a good option. One additional benefit of stripping is that it makes it harder to reverse engineer binaries since essential symbol information is stripped away from the binaries.
+
+CMake's -{}-install command allows the stripping of binaries while installing the operation. It can be enabled by specifying an additional -{}-strip option in the -{}-install command, as shown next:
+
+\begin{tcblisting}{commandshell={}}
+cmake --install build --strip
+\end{tcblisting}
+
+In the following example, you can observe the size difference between unstripped and stripped binaries. Note that stripping static libraries has its own limitations and CMake does not perform it by default. You can see the size of the unstripped binaries in this figure:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/20.jpg}\\
+Figure 2.20 – Artifact size (unstripped)
+\end{center}
+
+With a stripped (cmake –install build -{}-strip) binary, the size difference looks as shown in the following figure:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/21.jpg}\\
+Figure 2.21 – Artifact size (stripped)
+\end{center}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing specific components only (component-based install)}
+
+If the project is using CMake's COMPONENT feature in the install() commands, you may install specific components by specifying their component names. The COMPONENT feature allows the installation to be separated into sub-parts. For illustrating this functionality, the chapter\_2 example is structured into two components named libraries and executables.
+
+In order to install a specific component, an additional -{}-component argument is needed along with the cmake -{}-install command:
+
+\begin{tcblisting}{commandshell={}}
+cmake --install build --component executables
+\end{tcblisting}
+
+Here is an example invocation:
+
+\begin{center}
+\includegraphics[width=1.\textwidth]{content/1/chapter2/images/22.jpg}\\
+Figure 2.22 – Installing a specific component only
+\end{center}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing a specific configuration (for multiple-configuration 	generators only)}
+
+Some of the generators support multiple configurations for the same build configuration (for example, Visual Studio). For that kind of generator, the -{}-install option provides an additional -{}-config argument to specify which configuration of binaries is intended to be installed.
+
+Here's an example:
+
+\begin{tcblisting}{commandshell={}}
+cmake --install build --config Debug
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+As you may have noticed, the command parameters used in examples are pretty long and explicit. This is intentional. Explicitly specifying arguments allows us to get consistent results in each run, no matter which environment we're running our commands in. For example, without the -G argument, CMake will default to the environment's preferred build system generator, which may not be our intention. Our motto here is, Being explicit is almost always better than being implicit. The former makes our intention clearer and naturally enables more future-proof and maintainable CMake code in CI systems/scripts as well.
+\end{tcolorbox}
+
+We have covered the fundamentals of CMake command-line usage. Let's continue to learn about the other available interface form – the graphical interface of the CMake.
+
 
 
 
