@@ -1,0 +1,109 @@
+The power of CMake comes from the fact that you can use the same build specification – that is, CMakeLists.txt – for various compiler toolchains without the need to rewrite anything. A toolchain typically consists of a series of programs that can compile and link binaries, as well as creating archives and similar.
+
+CMake supports a variety of languages that the toolchains can be configured for. In this book, we will focus on C++. Configuring the toolchain for different programming languages is done by replacing the CXX part of the following variables with the respective language tag:
+
+\begin{itemize}
+\item 
+C
+
+\item 
+CXX – C++
+
+\item 
+CUDA
+
+\item 
+OBJC – Objective C
+
+\item 
+OBJCXX – Objective C++
+
+\item 
+Fortran
+
+\item 
+HIP – HIP C++ runtime API for NVIDIA and AMD GPUs
+
+\item 
+ISPC – C-based SPMD programming language
+
+\item 
+ASM – Assembler
+\end{itemize}
+
+If a project does not specify its language, it's assumed that C and CXX are being used. CMake will automatically detect the toolchain to use by inspecting the system, but if needed, this can be configured by environment variables or, in the case of cross-compiling, by providing a toolchain file. This toolchain is stored in the cache, so if the toolchain changes, the cache must be deleted and rebuilt. If multiple compilers are installed, you can specify a non-default compiler by either setting the environment variables as CC for C or CXX for a C++ compiler before calling CMake. Here, we're using the CXX environment variable to overwrite the default compiler to be used in CMake:
+
+
+\begin{tcblisting}{commandshell={}}
+CXX=g++-7 cmake /path/to/the/source
+\end{tcblisting}
+
+Alternatively, you can overwrite the C++ compiler to use by passing the respective cmake variable using -D, as shown here:
+
+\begin{tcblisting}{commandshell={}}
+cmake -D CMAKE_CXX_COMPILER=g++-7 /path/to/source
+\end{tcblisting}
+
+Both methods ensure that CMake is using GCC version 7 to build instead of whatever default compiler is available in the system. Avoid setting the compiler toolchain inside the CMakeLists.txt files as this clashes with the paradigm that states that CMake files should be platform- and compiler-agnostic.
+
+By default, the linker is automatically selected by the chosen compiler, but it is possible to select a different one by passing the path to the linker executable with the CMAKE\_CXX\_LINKER variable.
+
+\subsubsubsection{1.7.1\hspace{0.2cm}Build types}
+
+When you're building C++ applications, it is quite common to have various buildtypes, such as a debug build that contains all debug symbols and release builds that are optimized.
+
+CMake natively provides four build types:
+
+\begin{itemize}
+\item 
+Debug: This is non-optimized and contains all the debug symbols. Here, all the asserts are enabled. This is the same as setting -O0 -g for GCC and Clang.
+
+\item 
+Release: This is optimized for speed without debugging symbols and asserts disabled. Usually, this is the build type that is shipped. This is the same as -O3 -DNDEBUG.
+
+\item 
+RelWithDebInfo: This provides optimized code and includes debug symbols but disabled asserts, which is the same as -O2 -g -DNDEBUG.
+
+\item 
+MinSizeRel: This is the same as Release but optimized for a small binary size instead of speed, which would be -Os -DNDEBUG. Note that this configuration is not supported for all generators on all platforms.
+
+\end{itemize}
+
+Note that the build types must be passed during the configuration state and are only relevant for single-target generators such as CMake or Ninja. For multi-target generators such as MSVC, they are not used, as the build-system itself can build all build types. It is possible to create custom build types, but since they do not work for every generator, this is usually not encouraged.
+
+Since CMake supports such a wide variety of toolchains, generators, and languages, a frequent question is how to find and maintain working combinations of these options. Here, presets can help.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
