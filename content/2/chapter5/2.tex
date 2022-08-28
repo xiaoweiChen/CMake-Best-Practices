@@ -1,0 +1,236 @@
+
+Most projects quickly grow to a size and complexity where they depend on files, libraries, and perhaps even programs that are managed outside the project. CMake provides built-in commands to find these things. At first glance, the process of searching and finding things appears to be quite simple. However, on closer analysis, there are quite a few things to consider. First, we have to handle the search order of where to look for files. Then, we might want to add additional locations where the file might be, and finally, we have to account for the differences between different operating systems.
+
+On an abstraction level higher than the individual files, CMake has the ability to find whole packages that define targets, include paths, and package specific variables. Refer to the libraries in your CMake project section for more detail.
+
+There are five find\_... commands that share very similar options and behaviors:
+
+\begin{itemize}
+\item 
+find\_file: This locates a single file.
+
+\item 
+find\_path: This finds a directory containing a specific file.
+
+\item 
+find\_library: This finds library files.
+
+\item 
+find\_program: This finds executable programs.
+
+\item 
+find\_package: This finds complete sets of packages.
+\end{itemize}
+
+All of these commands work in a similar way, but there are some small but important differences when it comes to where they look for things. In particular, find\_package does more than just locate files; it not only looks for packages but makes the file content available for easy use in the CMake project. In this chapter, first, we will look at the simpler find functions before we cover how to find complex packages.
+
+\subsubsubsection{5.2.1\hspace{0.2cm}Finding files and paths}
+
+The most low-level and basic things to find are files and paths. The find\_file and find\_path functions share the same signature. The only difference between them is that find\_path stores the directory in which a file is found in the result, while find\_file will store the full path, including the filename. The signature of the find\_file command is shown as follows:
+
+\begin{lstlisting}[style=styleCMake]
+find_file (
+	<VAR>
+	name | NAMES name1 [name2 ...]
+	[HINTS [path | ENV var]... ]
+	[PATHS [path | ENV var]... ]
+	[PATH_SUFFIXES suffix1 [suffix2 ...]]
+	[DOC "cache documentation string"]
+	[NO_CACHE]
+	[REQUIRED]
+	[NO_DEFAULT_PATH]
+	[NO_PACKAGE_ROOT_PATH]
+	[NO_CMAKE_PATH]
+	[NO_CMAKE_ENVIRONMENT_PATH]
+	[NO_SYSTEM_ENVIRONMENT_PATH]
+	[NO_CMAKE_SYSTEM_PATH]
+	[CMAKE_FIND_ROOT_PATH_BOTH |
+	ONLY_CMAKE_FIND_ROOT_PATH |
+	NO_CMAKE_FIND_ROOT_PATH]
+	)
+\end{lstlisting}
+
+The preceding command either searches for a single file, if the name has been passed directly, or for a list of likely names if the NAMES option has been used. The resulting path is stored in the variable passed as <VAR>. If the file cannot be found, the variable will contain <VARIABLENAME>-NOTFOUND.
+
+Passing a list of names is useful if the files being searched for have variations in their names such as different capitalizations or naming conventions that may or may not include version numbers and so on. When passing a list of names, the names should be ordered in a preferred way, as the search stops once the first file has been found.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Searching for Files Containing Version Numbers]
+It is recommended that you search for filenames without version numbers before searching for those that contain some form of version numbering. This is so that locally built files are preferred to the ones installed by the operating system.
+\end{tcolorbox}
+
+The HINTS and PATHS options contain additional locations to the default locations where the file is searched for. PATH\_SUFFIXES could contain a number of subdirectories that are searched below each of the other locations.
+
+The find\_… commands search for things in defined places and within a defined order. The NO\_...\_PATH arguments of the commands can be used to skip the respective location. The following table shows the order of the search locations and the options for skipping a location:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Location}                     & \textbf{The skip option in the command} \\ \hline
+		Package root variables                & NO\_PACKAGE\_ROOT\_PATH                 \\ \hline
+		CMake-specific cache variables        & NO\_CMAKE\_PATH                         \\ \hline
+		CMake-specific environment variables  & NO\_CMAKE\_ENVIRONMENT\_PATH            \\ \hline
+		Paths from the HINTS option           &                                         \\ \hline
+		System-specific environment variables & NO\_SYSTEM\_ENVIRONMENT\_PATH           \\ \hline
+		System-specific cache variables       & NO\_CMAKE\_SYSTEM\_PATH                 \\ \hline
+		Paths from the PATHS option           &                                         \\ \hline
+	\end{tabular}
+\end{table}
+
+Let's look at the search order more closely along with what the different locations mean:
+
+\begin{itemize}
+\item 
+Package root variables: This is only used when find\_file is used as part of the find\_package command. Please refer to the Using third-party libraries in your CMake project section for an in-depth discussion.
+
+\item 
+CMake-specific cache variables: The locations derived from the CMAKE\_PREFIX\_PATH, CMAKE\_INCLUDE\_PATH, and CMAKE\_FRAMEWORK\_PATH cache variables for macOS. Generally, setting the CMAKE\_PREFIX\_PATH cache variable is preferred over the other two types, as this is used for all of the find\_ commands. The prefix path is the base point for any searches under which the common file structures such as bin, lib, include, and more are located. CMAKE\_PREFIX\_PATH is a list of paths, and for each entry, find\_file will search <prefix>/include or <prefix>/include/\$\{CMAKE\_LIBRARY\_ARCHITECTURE\} if the respective variable has been set. Generally, CMake sets the variable automatically, and they should not be changed by developers. Architecture-specific paths take precedence over generic paths.
+
+\item 
+The CMAKE\_INCLUDE\_PATH and CMAKE\_FRAMEWORK\_PATH cache variables should only be used if the standard directory structure is not applicable. They do not add additional include suffixes to the paths.
+
+\item 
+Searching these paths can be skipped by passing the NO\_CMAKE\_PATH option to the command or, globally, by setting the CMAKE\_FIND\_USE\_PATH variable to false.
+
+\item 
+System-specific environment variables: These are derived from the CMAKE\_PREFIX\_PATH, CMAKE\_INCLUDE\_PATH, and CMAKE\_FRAMEWORK\_PATH system environment variables. The variables work in the same way as the cache variables, but they are usually set from outside the call to CMake.
+
+\item 
+Note that, on Unix platforms, the lists are separated by colons (:) instead of semicolons (;) in order to conform to the platform-specific environment variables.
+
+\item 
+Paths from the HINTS option: These are the additional search locations that are manually specified. They could be constructed from other values such as property values, or they could depend on a previously found file or path.
+
+\item 
+System-specific environment variables: The INCLUDE and PATH environment variables could each contain a list of directories to be searched. Again, on Unix platforms, the list is separated by colons (:) instead of semicolons (;).
+
+\item 
+On Windows, the PATHS entries are handled in a more complex manner. For each entry, a base path is extracted by dropping any trailing bin or sbin directories. If CMAKE\_LIBRARY\_ARCHITECTURE is set, the include/\$\{CMAKE\_LIBRARY\_ARCHITECTURE\} subdirectory is added as the first priority for each path. After that, include (without a postfix) is searched. Only then, the original path, which might or might not end in bin or sbin, is searched. Passing either the NO\_SYSTEM\_ENVIRONMENT\_PATH variable or setting the CMAKE\_FIND\_USE\_CMAKE\_SYSTEM\_PATH variable to false will skip the locations in the environment variables.
+
+\item 
+Assuming that the PATH option contains C:\verb|\|myfolder\verb|\|bin;C:\verb|\|yourfolder, and CMAKE\_LIBRARY\_ARCHITECTURE is set to x86\_64, the search order will be as follows:
+
+\begin{enumerate}
+\item 
+C:\verb|\|myfolder\verb|\|include\verb|\|x86\_64
+
+\item 
+C:\verb|\|myfolder\verb|\|include\verb|\|
+
+\item 
+C:\verb|\|myfolder\verb|\|bin
+
+\item 
+C:\verb|\|yourfolder\verb|\|include\verb|\|x86\_64
+
+\item 
+C:\verb|\|yourfolder\verb|\|include\verb|\|
+
+\item 
+C:\verb|\|yourfolder\verb|\|
+\end{enumerate}
+
+\item 
+System-specific cache variables: Here, the CMAKE\_SYSTEM\_PREFIX\_PATH and CMAKE\_SYSTEM\_FRAMEWORK\_PATH variables work similarly to the CMake-specific cache variables. These variables are not supposed to be changed by the developer but are configured when CMake sets up the platform toolchain. One exception here is if an own toolchain file is provided, such as when using sysroots or cross-compiling, as explained in Chapter 11, Automated Fuzzing with CMake.
+
+\item 
+In addition to the NO\_CMAKE\_SYSTEM\_PATH option, the CMAKE\_FIND\_USE\_CMAKE\_SYSTEM\_PATH variable can be set to false to skip searching in locations provided by the system-specific cache variables.
+
+\item 
+Paths specified in the PATHS option: In the same way as the HINTS option, these are additional search locations that are manually provided. Although not technically prevented, it is the convention that the PATHS variables should be fixed paths and not dependable on other values.
+\end{itemize}
+
+If only the locations provided by HINTS or PATHS are to be searched, adding the NO\_DEFAULT\_PATH option skips all the other locations.
+
+Occasionally, you might want to ignore particular paths for searching. In such cases, a list of paths might be specified in CMAKE\_IGNORE\_PATH or CMAKE\_SYSTEM\_IGNORE\_PATH. Both of these variables were designed with cross-compiling scenarios in mind and are rarely used in other circumstances.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Searching for files when cross-compiling}
+
+When cross-compiling, the process of searching for files is often different because crosscompilation toolchains are collected under their own self-contained directory structure, which does not mix with the system toolchain. Generally, first, you will want to look inside the toolchain's directory for files. By setting the CMAKE\_FIND\_ROOT variable, the origin for all searches can be changed to a new location.
+
+Additionally, the CMAKE\_SYSROOT, CMAKE\_SYSROOT\_COMPILE, and CMAKE\_SYSROOT\_LINK variables affect the search locations, but they should only be set in a toolchain file, not by a project itself. If any of the regular search locations are already under the sysroot or the location specified by CMAKE\_FIND\_ROOT, they will not be changed. Any path that starts with a tilde (~), and is passed to the find\_ commands, will not be changed to avoid skipping directories that are under the user's home directory.
+
+By default, first, CMake searches in the locations provided by any of the variables from the preceding paragraph and then continues to search the host system. This behavior can be changed globally by setting the CMAKE\_FIND\_ROOT\_PATH\_MODE\_INCLUDE variable to either BOTH, NEVER, or ONLY. Alternatively, you can set the CMAKE\_FIND\_ROOT\_PATH\_BOTH option, the ONLY\_CMAKE\_FIND\_ROOT\_PATH option, or the NO\_CMAKE\_FIND\_ROOT\_PATH option to find\_file.
+
+The following table shows the search order when setting either of the options or the variables in the different search modes:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Mode} & \textbf{Option}             & \textbf{Search order}         \\ \hline
+		Both &
+		CMAKE\_FIND\_ROOT\_PATH\_BOTH &
+		\begin{tabular}[c]{@{}l@{}}·CMAKE\_FIND\_ROOT\_PATH\\ ·CMAKE\_SYSROOT\_COMPILE\\ ·CMAKE\_SYSROOT\_LINK\\ ·CMAKE\_SYSROOT\\ ·All regular search locations\end{tabular} \\ \hline
+		NEVER         & NO\_CMAKE\_FIND\_ROOT\_PATH & ·All regular search locations \\ \hline
+		ONLY &
+		ONLY\_CMAKE\_FIND\_ROOT\_PATH &
+		\begin{tabular}[c]{@{}l@{}}CMAKE\_FIND\_ROOT\_PATH\\ ·CMAKE\_SYSROOT\_COMPILE\\ ·CMAKE\_SYSROOT\_LINK\\ ·CMAKE\_SYSROOT\\ ·Any regular paths, one of the\\   other locations, or under \\   CMAKE\_STAGINF\_PREFIX\end{tabular} \\ \hline
+	\end{tabular}
+\end{table}
+
+The CMAKE\_STAGING\_PREFIX variable is used to provide installation paths for crosscompiling. The CMAKE\_SYSROOT variable should not be changed by installing things on it. Setting up cross-compilation toolchains will be covered, in detail, in Chapter 11, Automated Fuzzing with CMake, where we talk about cross-compiling.
+
+\subsubsubsection{5.2.2\hspace{0.2cm}Finding programs}
+
+Finding executables is very similar to finding files and paths, and the find\_program command has almost the same signature as find\_file. Additionally, find\_program has the NAMES\_PER\_DIR option, which tells the command to search one directory at a time and search for all provided filenames in each directory instead of searching through each directory for each file.
+
+On Windows, the .exe and .com file extensions are automatically added to the filenames provided, but not .bat or .cmd.
+
+The cache variables used by find\_program are slightly different from the ones used by find\_file:
+
+\begin{itemize}
+\item 
+find\_program automatically adds bin and sbin to the search locations provided by CMAKE\_PREFIX\_PATH.
+
+\item 
+Values in CMAKE\_LIBRARY\_ARCHITECTURE are ignored and have no effect.
+
+\item 
+CMAKE\_PROGRAM\_PATH is used instead of CMAKE\_INCLUDE\_PATH.
+
+\item 
+CMAKE\_APPBUNDLE\_PATH is used instead of CMAKE\_FRAMEWORK\_PATH.
+
+\item 
+CMAKE\_FIND\_ROOT\_PATH\_MODE\_PROGRAM is used to change the mode for searching programs.
+\end{itemize}
+
+As with the other find commands, find\_program will set the <varname>-NOTFOUND variable if CMake is unable to find the program. This is often handy to determine whether a custom build step that depends on a certain external program should be enabled.
+
+\subsubsubsection{5.2.3\hspace{0.2cm}Finding libraries}
+
+Finding libraries is a special case of finding files, so the find\_library command supports the same set of options as find\_file. And similar to the find\_program command, it has the additional NAMES\_PER\_DIR option that checks for all filenames first, before moving to the next directory. The difference between finding regular files and finding libraries is that find\_library automatically applies the platform-specific naming conventions to the filenames. On Unix platforms, the names will be prefixed with lib, while on Windows, the.dll or .lib extensions will be added.
+
+Again, the cache variables are slightly different from the ones used in find\_file and find\_program:
+
+\begin{itemize}
+\item 
+find\_library adds lib to the search locations by CMAKE\_PREFIX\_PATH, and it uses CMAKE\_LIBRARY\_PATH instead of CMAKE\_INCLUDE\_PATH to find libraries. The CMAKE\_FRAMEWORK\_PATH variable is used similarly to find\_file. The CMAKE\_LIBRARY\_ARCHITECTURE variable works the same as in find\_file.
+
+\item 
+This is done by appending the respective folders to the search paths. find\_library searches the locations in the PATH environment variable in the same way as find\_file, but it appends lib to each prefix. Also, it uses the LIB environment variable if this has been set instead of the INCLUDE variable.
+
+\item 
+CMAKE\_FIND\_ROOT\_PATH\_MODE\_LIBRARY is used to change the mode for searching libraries.
+\end{itemize}
+
+CMake is generally aware of conventions regarding 32-bit and 64-bit search locations such as platforms using the lib32 and lib64 folders for different libraries of the same name. The behavior is controlled by the FIND\_LIBRARY\_USE\_LIB[32|64|X32]\_PATHS variables, which control what should be searched first. Additionally, projects can define their own suffix using the CMAKE\_FIND\_LIBRARY\_CUSTOM\_LIB\_SUFFIX variable, which overrides the behavior of the other variables. However, the need to do this is very rare, and tampering with the search order inside a CMakeLists.txt file quickly makes projects hard to maintain and heavily impacts the portability between systems.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Finding static or shared libraries}
+
+In most cases, simply passing the base name of a library to CMake works well enough, but sometimes, the behavior has to be overridden. One reason for this is if, on some platform, the static version of a library should be preferred over the shared one or vice versa. The best way to do this is to split up the find\_library call into two calls instead of trying to achieve this in a single call. It is more robust if the static library is in a different directory from the dynamic one:
+
+\begin{lstlisting}[style=styleCMake]
+find_library(MYSTUFF_LIBRARY libmystuff.a)
+find_library(MYSTUFF_LIBRARY mystuff)
+\end{lstlisting}
+
+On Windows, this approach cannot be used, as static libraries and import libraries for DLLs do have the same.lib suffix, so they are not distinguishable by name. The find\_file, find\_path, find\_program, and find\_library commands are often handy when looking for specific things. On the other hand, finding dependencies happens on a higher level. This is where CMake really excels by providing the find\_package methods. With find\_package, we do not need to, first, search for all the include files, followed by all the library files, and then add them manually to each target and, in the end, account for all platform-specific behaviors. Let's dive into the process of how to find dependencies next.
+
+
+

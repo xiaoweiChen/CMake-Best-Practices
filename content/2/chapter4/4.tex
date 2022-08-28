@@ -1,0 +1,160 @@
+So far, we have seen how CMake can structure software projects. Although CMake is the star of the show, CMake has some powerful friends too. It is time to introduce you to CPack, the packaging tool of CMake. It is shipped with CMake installations by default. It allows you to leverage existing CMake code to generate platform-specific installations and packages. CPack is similar to CMake in concept. It is based on generators that generate packages instead of build system files. The following table shows the available CPack generator types, as of CPack version 3.21.3:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Generator} & \textbf{Description}             \\ \hline
+		7Z                 & 7-zip archive                    \\ \hline
+		DEB                & Debian package                   \\ \hline
+		External           & CPack external package           \\ \hline
+		IFW                & Qt Installer Framework           \\ \hline
+		NSIS               & Null Soft Installer              \\ \hline
+		NSIS64             & Null Soft Installer (64bit)      \\ \hline
+		NuGet              & NuGet Packages                   \\ \hline
+		RPM                & RPM packages                     \\ \hline
+		STGZ               & Self-extracting TAR gzip archive \\ \hline
+		TBZ2               & Tar BZip2 archive                \\ \hline
+		TGZ                & Tar GZIP archive                 \\ \hline
+		TXZ                & Tar XZ archive                   \\ \hline
+		TZ                 & Tar Compress archive             \\ \hline
+		TZST               & Tar Zstandard archive            \\ \hline
+		ZIP                & Zip archive                      \\ \hline
+	\end{tabular}
+\end{table}
+
+CPack uses CMake's installation mechanism to populate the content of the packages. CPack uses the configuration details that are present in the CPackConfig.cmake and CPackSourceConfig.cmake files to generate packages. These files can either be populated manually or generated automatically by CMake with the help of the CPack module. Using CPack on an existing CMake project is as easy as including the CPack module, given that the project already has proper install(…) commands. Including the CPack module will cause CMake to generate the CPackConfig.cmake and CPackSourceConfig.cmake files, which are the CPack configurations that are needed to pack the project. Also, an additional package target will become available for the build step. This step will build the project and run CPack so that it starts packaging. CPack can be used when the CPack configuration files have been populated properly, either by CMake or the user. The CPack module allows you to customize the packaging process. A large amount of CPack variables can be set. These variables are separated into two groups – common variables and generator-specific variables. Common variables affect all of the package generators, whereas generator-specific variables only affect a specific type of generator. We'll be inspecting the most basic and prominent ones and we will mostly deal with the common variables. The following table shows the most common CPack variables we will use in our examples: 
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Variable Name}         & \textbf{Description}            & \textbf{Default Value} \\ \hline
+		CPACK\_PACKAGE\_NAME           & Package name                    & Project name           \\ \hline
+		CPACK\_PACKAGE\_VENDOR         & Package vendor name             & "Humanity"             \\ \hline
+		CPACK\_PACKAGE\_VERSION\_MAJOR & Package major version           & Project major version  \\ \hline
+		CPACK\_PACKAGE\_VERSION\_MINOR & Package minor version           & Project minor version  \\ \hline
+		CPACK\_PACKAGE\_VERSION\_PATCH & Package patch version           & Project patch version  \\ \hline
+		CPACK\_GENERATOR               & List of CPack generators to use & N/A                    \\ \hline
+		CPACK\_THREADS & \begin{tabular}[c]{@{}l@{}}Number of threads to use them\\ parallelism is supported.\end{tabular} & 1 \\ \hline
+	\end{tabular}
+\end{table}
+
+Any changes that must be made to the variables must be made before you include the CPack module. Otherwise, the defaults will be used. Let's dive into an example to see CPack in action. We will be following the Chapter 4, Example 6 (chapter4/ex06\_pack) example. This example is structured as a standalone project and is not part of the root example project. It is a regular project with two subdirectories named executable and library. The CMakeLists.txt file of the executable directory looks as follows:
+
+\begin{lstlisting}[style=styleCMake]
+add_executable(ch4_ex06_executable src/main.cpp)
+target_compile_features(ch4_ex06_executable PRIVATE cxx_std_11)
+target_link_libraries(ch4_ex06_executable PRIVATE ch4_ex06_
+	library)
+install(TARGETS ch4_ex06_executable)
+\end{lstlisting}
+
+The CMakeLists.txt file of the library directory looks as follows:
+
+\begin{lstlisting}[style=styleCMake]
+add_library(ch4_ex06_library STATIC src/lib.cpp)
+target_compile_features(ch4_ex06_library PRIVATE cxx_std_11)
+target_include_directories(ch4_ex06_library PUBLIC include)
+set_target_properties(ch4_ex06_library PROPERTIES PUBLIC_HEADER
+	include/chapter4/ex06/lib.hpp)
+include(GNUInstallDirs) # Defines the ${CMAKE_INSTALL_
+	INCLUDEDIR} variable.
+install(TARGETS ch4_ex06_library)
+install (
+	DIRECTORY ${PROJECT_SOURCE_DIR}/include/
+	DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+\end{lstlisting}
+
+The CMakeLists.txt files for these folders do not contain anything out of the ordinary. They contain regular, installable CMake targets and declare nothing about CPack. Let's take a look at the top-level CMakeLists.txt file as well:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+project(
+	ch4_ex06_pack
+	VERSION 1.0
+	DESCRIPTION "Chapter 4 Example 06, Packaging with CPack"
+	LANGUAGES CXX)
+if(NOT PROJECT_IS_TOP_LEVEL)
+	message(FATAL_ERROR "The chapter-4, ex06_pack project is
+		intended to be a standalone, top-level project.
+		Do not include this directory.")
+endif()
+
+add_subdirectory(executable)
+add_subdirectory(library)
+
+set(CPACK_PACKAGE_VENDOR "CTT Authors")
+set(CPACK_GENERATOR "DEB;RPM;TBZ2")
+set(CPACK_THREADS 0)
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "CTT Authors")
+include(CPack)
+\end{lstlisting}
+
+The top-level CMakeLists.txt file is pretty much a regular, top-level CMakeLists.txt file, except for the last four lines. It sets three CPack-related variables and then includes the CPack module. These four lines are enough to provide basic CPack support. The CPACK\_PACKAGE\_NAME and CPACK\_PACKAGE\_VERSION\_* variables are not set to let CPack deduce them from the top-level project's name and version parameters. Let's configure the project to see whether it works:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_4/ex06_pack
+cmake –S . -B build/
+\end{tcblisting}
+
+After configuring the project, the CpackConfig.cmake and CpackConfigSource. cmake files should be generated by the CPack module to the build/CPack* directory. Let's check if they're present:
+
+\begin{tcblisting}{commandshell={}}
+$ ls build/CPack*
+build/CPackConfig.cmake build/CPackSourceConfig.cmake
+\end{tcblisting}
+
+Here, we can see that the CPack configuration files are automatically generated. Let's build this and try to package the project with CPack:
+
+\begin{tcblisting}{commandshell={}}
+cmake --build build/
+cpack --config build/CPackConfig.cmake -B build/
+\end{tcblisting}
+
+The -{}-config argument is the main input of the CPack command. The -B argument overrides the default package directory that CPack will write its artifacts to. Let's look at CPack's output:
+
+\begin{tcblisting}{commandshell={}}
+CPack: Create package using DEB
+/*…*/
+CPack: - package: /home/user/workspace/personal/CMake-BestPractices/
+chapter_4/ex06_pack/build/ch4_ex06_pack-1.0-Linux.deb
+generated.
+CPack: Create package using RPM
+/*…*/
+CPack: - package: /home/user/workspace/personal/CMake-BestPractices/
+chapter_4/ex06_pack/build/ch4_ex06_pack-1.0-Linux.rpm
+generated.
+CPack: Create package using TBZ2
+/*…*/
+CPack: - package: /home/user/workspace/personal/CMake-BestPractices/
+chapter_4/ex06_pack/build/ch4_ex06_pack-1.0-Linux.tar.
+bz2 
+generated.
+\end{tcblisting}
+
+Here, we can see that CPack has used the DEB, RPM, and TBZ2 generators to generate the ch4\_ex06\_pack-1.0-Linux.deb, ch4\_ex06\_pack-1.0-Linux.rpm, and ch4\_ex06\_pack-1.0-Linux.tar.bz2 packages, respectively. Let's try to install the generated Debian package on a Debian environment: 
+
+\begin{tcblisting}{commandshell={}}
+sudo dpkg -i build/ch4_ex06_pack-1.0-Linux.deb
+\end{tcblisting}
+
+If the packaging was correct, we should be able to invoke ch4\_ex06\_executable directly on the command line:
+
+\begin{tcblisting}{commandshell={}}
+13:38 $ ch4_ex06_executable
+Hello, world!
+\end{tcblisting}
+
+It works! As an exercise, try to install the RPM and tar.bz2 packages as well. In this
+
+section, we learned how to use CPack to pack our project. This is by no means an exhaustive guide. CPack itself deserves several chapters so that it can be covered in detail. With that, we've successfully reached the end of this chapter.
+
+
+
+
+
+
+
+

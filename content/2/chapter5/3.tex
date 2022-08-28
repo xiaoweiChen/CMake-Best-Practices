@@ -1,0 +1,180 @@
+
+If you're writing software in earnest, sooner or later, you will hit the point where your project will rely on libraries from outside your project. Instead of looking for individual library files or header files, the recommended way by the CMake community and us authors is to do this with the find\_package command. The preferred approach for finding dependencies in CMake is using packages.
+
+Packages provide a set of information about dependencies for CMake and the generated build systems. They can be integrated into a project in two forms. This is either by their configuration details (also called config-file packages), which are provided by the upstream project, or as so-called find module packages, which are usually defined somewhere that is unrelated to the package, either by CMake itself or by the project using the package. Both types can be found by using find\_package, and the result is a set of imported targets and/or a set of variables containing information that is relevant to the build system.
+
+The findPkgConfig module, which uses find-pkg to find the relevant metainformation for a dependency, also provides indirect support for packages.
+
+Typically, Find modules are used for locating dependencies, for instance, when the upstream does not provide the necessary information for package configuration. They are not to be confused with CMake utility modules, which are used with include(). Whenever possible, using a package provided by the upstream should be used instead of the find modules. If possible, fixing the upstream project to provide the necessary information is preferred over writing a find module.
+
+Note that the find\_package command has two signatures: a basic or short signature and a full or long signature. In almost all scenarios, using the short signature is sufficient to find the packages we're looking for, and it should be preferred because it is easier to maintain. The short form supports both the module and config packages, but the long form only supports configuration mode.
+
+The signature of the short mode is as follows:
+
+\begin{lstlisting}[style=styleCMake]
+find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
+	[REQUIRED] [[COMPONENTS] [components...]]
+	[OPTIONAL_COMPONENTS components...]
+	[NO_POLICY_SCOPE])
+\end{lstlisting}
+
+Let's suppose we want to write a program that converts a string into a sha256 hash by using the appropriate functionality of the OpenSSL library. To compile and link this example, we have to inform CMake that this project needs the OpenSSL library and then attach it to the target. For the moment, let's assume that the necessary libraries have been installed at a default location on your system; for example, by using a regular package manager such as apt, RPM, or similar for Linux, chocolatey for Windows, or brew for macOS.
+
+A sample CMakeLists.txt file might look like this:
+
+\begin{lstlisting}[style=styleCMake]
+find_package(OpenSSL REQUIRED COMPONENTS SSL)
+add_executable(find_package_example)
+target_link_libraries(find_package_example PRIVATE
+	OpenSSL::SSL)
+\end{lstlisting}
+
+The preceding example does the following things:
+
+\begin{enumerate}
+\item 
+On the first line in the example, there is a find\_package(OpenSSL REQUIRED COMPONENTS SSL) call. This tells CMake that we're looking for a set of libraries and header files for OpenSSL. Specifically, we're looking for the SSL component and ignoring the crypto component. The REQUIRED keyword tells CMake that it is required to build this project. This means that CMake will stop the configuration process with an error if the library is not found.
+
+\item 
+Once the package has been found, we tell CMake to link the library to the target using target\_link\_libary. Specifically, we tell CMake to link the OpenSSL::SSL target provided by the package OpenSSL.
+\end{enumerate}
+
+If a dependency has to be of a certain version, it can be specified either as a single version of the major[.minor[.patch[.tweak]]] format or as a version range with the versionMin..[<]versionMax format. For version ranges, both versionMin and versionMax should have the same format, and by specifying <, the upper version will be excluded.
+
+Unfortunately, as of version 3.21, CMake cannot query the modules for the available components. So, we have to rely on the documentation of the modules or library providers to find out which components are available. The available modules can be queried with the following commands:
+
+\begin{tcblisting}{commandshell={}}
+cmake --help-module-list #< lists all available modules
+cmake --help-module <mod> #< prints the documentation for
+  module
+  <mod>
+cmake --help-modules #< lists all modules and their
+  documentation
+\end{tcblisting}
+
+A list of modules shipped with CMake can be found at \url{https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html}.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Finding Individual Libraries and Files]
+It is possible to look for individual libraries and files, but the preferred way is to use packages. Finding individual files and making them available to CMake will be covered in the Writing your own find module section.
+\end{tcolorbox}
+
+When run in module mode, the find\_package command searches for files called Find<PackageName>.cmake; this occurs, first, in the paths specified by CMAKE\_MODULE\_PATH and then among the find modules provided by the CMake installation. If you wish to learn how to create CMake packages, head over to Chapter 4, Packaging, Deploying, and Installing a CMake Project.
+
+When run in config mode, find\_package searches for files called after either of the following patterns:
+
+\begin{itemize}
+\item 
+<lowercasePackageName>-config.cmake
+
+\item 
+<PackageName>Config.cmake
+
+\item 
+<lowercasePackageName>-config-version.cmake (if the version details were specified)
+
+\item 
+<PackageName>ConfigVersion.cmake (if the version details were specified)
+\end{itemize}
+
+All searches will be conducted over a set of locations in a well-defined order; if needed, some of the locations can be skipped by passing the respective option to CMake. find\_package contains a few more options than the other find\_ commands. The following table shows the search order from a high level:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\textbf{Location}                     & \textbf{Skip option in the command}  \\ \hline
+		Package root variables                & NO\_PACKAGE\_ROOT\_PATH              \\ \hline
+		CMake-specific cache variables        & NO\_CMAKE\_PATH                      \\ \hline
+		CMake-specific environment variables  & NO\_CMAKE\_ENVIRONMENT\_PATH         \\ \hline
+		Paths specified int the HINTS option  &                                      \\ \hline
+		System-specific environment variables & NO\_SYSTEM\_ENVIRONMENT\_PATH        \\ \hline
+		User package registry                 & NO\_CMAKE\_PACKAGE\_REGISTRY         \\ \hline
+		System-specific cache variables       & NO\_CMAKE\_SYSTEM\_PATH              \\ \hline
+		System package registry               & NO\_CMAKE\_SYSTEM\_PACKAGE\_REGISTRY \\ \hline
+		Paths specified in the PATHS option   &                                      \\ \hline
+	\end{tabular}
+\end{table}
+
+Let's look at the search order and search locations more closely:
+
+\begin{itemize}
+\item 
+Package root variables: The package root for each find\_package call is stored in a variable called <PackageName>\_ROOT. They are the first priority for searching files belonging to a package. The package root variables work in the same way as CMAKE\_PREFIX\_PATH, not just for the call to find\_package but for all other find\_ calls that might happen inside the find module belonging to the package.
+
+\item 
+CMake-specific cache variables: These are the locations derived from CMAKE\_PREFIX\_PATH. For macOS, the CMAKE\_FRAMEWORK\_PATH variable is also considered a search location.
+
+\item 
+By setting the CMAKE\_FIND\_USE\_CMAKE\_PATH variable to false, the locations from the CMake-specific cache variables will be skipped.
+
+\item 
+CMake-specific environment variables: In addition to specifying CMAKE\_PREFIX\_PATH and CMAKE\_FRAMEWORK\_PATH as cache variables, CMake will also consider them if they are set as environment variables.
+
+\item 
+Setting the CMAKE\_FIND\_USE\_ENVIRONMENT\_PATH variable to false will disable this behavior.
+
+\item 
+HINTS from find\_package: These are optional paths passed to find\_package.
+
+\item 
+System-specific environment variables: The PATH environment variable is used to look for packages and files and the trailing bin and sbin directories are removed. The default locations for each system, such as /usr, /lib, and similar locations, are usually searched at this point.
+
+\item 
+User package registry: Often, packages are found either in the standard locations or in the locations passed to CMake by using the CMAKE\_PREFIX\_PATH option. Package registries are another way to tell CMake where to look for dependencies. Package registries are special locations where collections of packages reside. The user registry is valid for the current user account, while the system package registry is valid system-wide. On Windows, the location for the user package registry is stored in the Windows registry under the following:
+
+\item 
+HKEY\_CURRENT\_USER\verb|\|Software\verb|\|Kitware\verb|\|CMake\verb|\|Packages\verb|\|<packageName>\
+
+\item 
+On the Unix platform, it is stored in the user's home directory as follows: ~/.cmake/packages/<PackageName>
+
+\item 
+Platform-specific cache variables: For find\_package, the platformspecific cache variables, CMAKE\_SYSTEM\_PREFIX\_PATH, CMAKE\_SYSTEM\_FRAMEWORK\_PATH, and CMAKE\_SYSTEM\_APPBUNDLE\_PATH, work in a similar way to the other find calls. They are set by CMake itself and should not be changed by the project.
+
+\item 
+System package registry: Similar to the user package registry, this is a location where CMake is looking for packages. On Windows, it is stored under HKEY\_LOCAL\_MACHINE\verb|\|Software\verb|\|itware\verb|\|CMake\verb|\|Packages\verb|\|<packageName>\verb|\|.
+
+\item 
+Unix systems do not provide a system package registry.
+
+\item 
+PATHS from find\_package: These are optional paths that are passed to find\_package. Usually, the HINTS options are computed from other values or depend on variables, whereas PATHS options are fixed paths.
+\end{itemize}
+
+Specifically, when looking for packages in config mode, CMake will look for the following file structure under the various prefixes:
+
+\begin{lstlisting}[style=styleCMake]
+<prefix>/
+<prefix>/(cmake|CMake)/
+<prefix>/<packageName>*/
+<prefix>/<packageName>*/(cmake|CMake)/
+<prefix>/(lib/<arch>|lib*|share)/cmake/<packageName>*/
+<prefix>/(lib/<arch>|lib*|share)/<packageName>*/
+<prefix>/(lib/<arch>|lib*|share)/<packageName>*/(cmake|CMake)/
+<prefix>/<packageName>*/(lib/<arch>|lib*|share)/cmake/
+  <packageName>*/
+<prefix>/<packageName>*/(lib/<arch>|lib*|share)/<packageName>*/
+<prefix>/<packageName>*/(lib/<arch>|lib*|share)/<packageName>*/
+  (cmake|CMake)/
+\end{lstlisting}
+
+On macOS platforms, the following folders are also searched:
+
+\begin{lstlisting}[style=styleCMake]
+<prefix>/<packageName>.framework/Resources/
+<prefix>/<packageName>.framework/Resources/CMake/
+<prefix>/<packageName>.framework/Versions/*/Resources/
+<prefix>/<packageName>.framework/Versions/*/Resources/CMake/
+<prefix>/<packageName>.app/Contents/Resources/
+<prefix>/<packageName>.app/Contents/Resources/CMake/
+\end{lstlisting}
+
+You can find out more about packages in the official CMake documentation at \url{https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html}.
+
+In terms of modules, so far, we've only covered how to find existing modules. But what happens if we want to look for dependencies that are neither integrated into CMake, nor in the standard places, or they do not provide configuration instructions for CMake? Well, let's find out about that in the next section.
+
+\subsubsubsection{5.3.1\hspace{0.2cm}Writing your own find module}
+
+
+
+

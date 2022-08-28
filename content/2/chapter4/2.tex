@@ -1,0 +1,319 @@
+The most primitive way of supporting deployment in a project is by making it installable. The term installable here does not refer to installing a pre-made package of the software. On the contrary, the end user still has to acquire the source code for the project and build it from scratch. An installable project has extra build system code for installing the runtime or development artifacts on the system. The build system will perform the install action here, given that it has proper instructions on how to do so. Since we're using CMake to generate the build system files, CMake must generate the relevant install code. In this section, we will dive into the basics of how to instruct CMake to generate such code for the CMake targets.
+
+\subsubsubsection{4.2.1\hspace{0.2cm}The install() command}
+
+The install(...) command is a built-in CMake command that allows you to generate build system instructions for installing targets, files, directories, and more. CMake will not generate install instructions unless it is explicitly told to do so. Therefore, what gets installed is always under your control. Let's inspect its basic usage.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing CMake targets}
+
+To make a CMake target installable, the TARGETS parameter must be specified with at least one argument. The command signature for this usage is as follows:
+
+\begin{lstlisting}[style=styleCMake]
+install(TARGETS <target>... [...])
+\end{lstlisting}
+
+The TARGETS parameter denotes that install will accept a set of CMake targets to generate the installation code for. In this form, only the output artifacts of the target will be installed. The most common output artifacts for a target are defined as follows:
+
+\begin{itemize}
+\item 
+ARCHIVE (static libraries, DLL import libraries, and linker import files):
+
+\begin{itemize}
+\item 
+Except for targets marked as FRAMEWORK in macOS
+\end{itemize}
+
+\item 
+LIBRARY (shared libraries):
+
+\begin{itemize}
+\item 
+Except for targets marked as FRAMEWORK in macOS
+
+\item 
+Except for DLLs (in Windows)
+\end{itemize}
+
+\item 
+RUNTIME (executables and DLLs):
+
+\begin{itemize}
+\item 
+Except for targets marked as MACOSX\_BUNDLE in macOS
+\end{itemize}
+\end{itemize}
+
+After making a target installable, CMake will generate the necessary installation code to install the output artifacts that will be produced for the target. To illustrate this, let's make a basic executable target installable together. To see the install(...) command in action, let's inspect the CMakeLists.txt file of Chapter 4, Example 1, which can be found in the chapter4/ex01\_executable folder:
+
+\begin{lstlisting}[style=styleCMake]
+add_executable(ch4_ex01_executable)
+target_sources(ch4_ex01_executable src/main.cpp)
+target_compile_features(ch4_ex01_executable PRIVATE cxx_std_11)
+install(TARGETS ch4_ex01_executable)
+\end{lstlisting}
+
+In the preceding code, an executable target called ch4\_ex01\_executable is being defined and its properties are being populated in the subsequent two lines. The last line, install(...), is the line we're interested in. It tells CMake to create the required install code for ch4\_ex01\_executable.
+
+To check whether ch4\_ex01\_executable can be installed, let's build the project and
+install it via the CLI:
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build
+cmake --build ./build
+cmake --install ./build --prefix /tmp/install-test
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Instead of having to specify the -{}-prefix parameter for cmake -{}-install, you can also use the CMAKE\_INSTALL\_PREFIX variable to provide the non-default install prefix.
+
+Please specify the -{}-config argument for the cmake -{}-build and cmake -{}-install commands while using CMake with multi-config generators, such as Ninja multi-config and Visual Studio:
+
+\begin{tcblisting}{commandshell={}}
+# For multi-config generators:
+cmake --build ./build --config Debug
+cmake --install ./build --prefix /tmp/install-test
+--config Debug
+\end{tcblisting}
+\end{tcolorbox}
+
+Let's inspect what the cmake --install command did:
+
+\begin{tcblisting}{commandshell={}}
+-- Install configuration: ""
+-- Installing: /tmp/install-test/lib/libch2.framework.
+    component1.a
+-- Installing: /tmp/install-test/lib/libch2.framework.
+    component2.so
+-- Installing: /tmp/install-test/bin/ch2.driver_application
+-- Set runtime path of "/tmp/install-test/bin/
+    ch2.driver_application" to ""
+-- Installing: /tmp/install-test/bin/ch4_ex01_executable
+\end{tcblisting}
+
+In the last line of the preceding output, we can see the output artifact of the ch4\_ex01\_executable target – that is, the ch4\_ex01\_executable binary is installed. Since that was the only output artifact that ch4\_ex01\_executable target had, we can conclude that our target has indeed become installable.
+
+Notice that ch4\_ex01\_executable is not directly installed in the /tmp/installtest (prefix) directory. Instead, the install command put it in the bin/ subdirectory. This is because CMake is being smart about what kind of artifact should go where. In a traditional UNIX system, binaries go into /usr/bin, while libraries go into /usr/lib. CMake knows that the add\_executable() command produces an executable binary artifact and puts it into the /bin subdirectory. These directories are provided by CMake by default, depending on the target type. The CMake module that provides the default installation path information is known as the GNUInstallDirs module. The GNUInstallDirs module defines various CMAKE\_INSTALL\_ paths when included. The following table shows the default installation directories for the targets:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Target Type} & \textbf{GNUInstallDirs Variable} & \textbf{Build-In Default} \\ \hline
+		RUNTIME              & \$\{CMAKE\_INSTALL\_BINDIR\}     & bin                       \\ \hline
+		LIBRARY              & \$\{CMAKE\_INSTALL\_LIBDIR\}     & lib                       \\ \hline
+		ARCHIVE              & \$\{CMAKE\_INSTALL\_LIBDIR\}     & lib                       \\ \hline
+		PRIVATE\_HEADER      & \$\{CMAKE\_INSTALL\_INCLUDEDIR\} & include                   \\ \hline
+		PUBLIC\_HEADER       & \$\{CMAKE\_INSTALL\_INCLUDEDIR\} & include                   \\ \hline
+	\end{tabular}
+\end{table}
+
+To override the built-in defaults, an additional <TARGET\_TYPE> DESTINATION parameter is required in the install(...) command. To illustrate this, let's try to change the default RUNTIME install directory to qbin instead of bin. Doing so only requires that we make a small modification to our original install(...) command:
+
+\begin{lstlisting}[style=styleCMake]
+# …
+install(TARGETS ch4_ex01_executable
+	RUNTIME DESTINATION qbin
+)
+\end{lstlisting}
+
+After making this change, we can rerun the configure, build, and install commands. We can confirm that the RUNTIME destination has changed by inspecting the cmake -{}-install command's output. Different from the first time, we can observe that the ch4\_ex01\_executable binary is put into qbin instead of the default (bin) directory:
+
+\begin{tcblisting}{commandshell={}}
+# ...
+-- Installing: /tmp/install-test/qbin/ch4_ex01_executable
+\end{tcblisting}
+
+Now, let's look at another example. We will be installing a STATIC library this time. Let's look in the CMakeLists.txt file of Chapter 4, Example 2, which can be found in the chapter4/ex02\_static folder. Comments and the project(...) command have been omitted due to space reasons. Let's start inspecting the file:
+
+\begin{lstlisting}[style=styleCMake]
+add_library(ch4_ex02_static STATIC)
+target_sources(ch4_ex02_static PRIVATE src/lib.cpp)
+target_include_directories(ch4_ex02_static PUBLIC include)
+target_compile_features(ch4_ex02_static PRIVATE cxx_std_11)
+include(GNUInstallDirs)
+install(TARGETS ch4_ex02_static)
+install (
+	DIRECTORY include/
+	DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}"
+)
+\end{lstlisting}
+
+As you may have noticed, it is a little bit different from our previous example. First, there is an additional install(...) command with the DIRECTORY argument. This is required to make the header files of the static library installable. The reason for this is that CMake will not install any file that is not an output artifact and the STATIC library target only produces a binary file as an output artifact. Header files are not considered output artifacts and should be installed separately.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The trailing slash in the DIRECTORY argument causes CMake to copy the folder's content instead of copying the folder by name. CMake handles trailing slashes in the same fashion with the Linux rsync command.
+\end{tcolorbox}
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing files and directories}
+
+As we saw in the previous section, the things we meant to install are not always part of a target's output artifacts. They may be runtime dependencies of the target, such as images, assets, resource files, scripts, and configuration files. CMake provides the install(FILES...) and install(DIRECTORY...) commands for installing any specific files or directories. Let's begin with installing files.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing files}
+ 
+The install(FILES...) command accepts one or more files as an argument. It requires an additional TYPE or DESTINATION parameter as well. Both parameters are used for determining the destination directory of the specified files. The TYPE parameter is used to indicate which files will use the default path for that file type as an installation directory. Defaults can be overridden by setting the relevant GNUInstallDirs variable. The following table shows the valid TYPE values, along with their directory mappings:
+
+\begin{table}[H]
+	\centering
+	\begin{tabular}{|l|l|l|}
+		\hline
+		\textbf{Type} & \textbf{GUNInstallDirs Variable}    & \textbf{Built-in Default}                 \\ \hline
+		BIN           & \$\{CMAKE\_INSTALL\_BINDIR\}        & bin                                       \\ \hline
+		LIB           & \$\{CMAKE\_INSTALL\_SBINDIR\}       & sbin                                      \\ \hline
+		LIB           & \$\{CMAKE\_INSTALL\_LIBDIR\}        & lib                                       \\ \hline
+		INCLUDE       & \$\{CMAKE\_INSTALL\_INCLUDEDIR\}    & include                                   \\ \hline
+		SYSCONF       & \$\{CMAKE\_INSTALL\_SYSCONFDIR\}    & etc                                       \\ \hline
+		SHAREDSTATE   & \$\{CMAKE\_INSTALL\_SHARESTATEDIR\} & com                                       \\ \hline
+		LOCALSTATE    & \$\{CMAKE\_INSTALL\_LOCALSTATEDIR\} & var                                       \\ \hline
+		RUNSTATE & \$\{CMAKE\_INSTALL\_RUNSTATEDIR\} & \textless{}LOCALSTATE dir\textgreater{}/run  \\ \hline
+		DATA          & \$\{CMAKE\_INSTALL\_DATADIR\}       & \textless{}DATAROOT dir\textgreater{}     \\ \hline
+		INFO     & \$\{CMAKE\_INSTALL\_INFODIR\}     & \textless{}DATAROOT dir\textgreater{}/info   \\ \hline
+		LOCALE   & \$\{CMAKE\_INSTALL\_LOCALEDIR\}   & \textless{}DATAROOT dir\textgreater{}/locale \\ \hline
+		MAN           & \$\{CMAKE\_INSTALL\_MANDIR\}        & \textless{}DATAROOT dir\textgreater{}/man \\ \hline
+		DOC           & \$\{CMAKE\_INSTALL\_DOCDIR\}        & \textless{}DATAROOT dir\textgreater{}/doc \\ \hline
+	\end{tabular}
+\end{table}
+
+If you don't wish to use the TYPE parameter, you can use the DESTINATION parameter instead. It lets you provide a custom destination for the specified files in the install(...) command.
+
+An alternative form of install(FILES...) is install(PROGRAMS...), which is the same as install(FILES...) except it also sets OWNER\_EXECUTE, GROUP\_EXECUTE, and WORLD\_EXECUTE permissions for installed files. This makes sense for binaries or script files that must be executed by the end user.
+
+To understand install(FILES|PROGRAMS...), let's look at an example. The example we're going to look into is Chapter 4, Example 3 (chapter\_4/ex03\_file). It essentially contains three files: chapter4\_greeter\_content, chapter4\_greeter.py, and CMakeLists.txt. First, let's look at its CMakeLists.txt file:
+
+\begin{lstlisting}[style=styleCMake]
+install(FILES "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter_content"
+	DESTINATION "${CMAKE_INSTALL_BINDIR}")
+	install(PROGRAMS "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter.py"
+	DESTINATION "${CMAKE_INSTALL_BINDIR}" RENAME chapter4_greeter)
+\end{lstlisting}
+
+Let's digest what we have seen; in the first install(...) command, we're telling CMake to install the chapter4\_greeter\_content file in the current CMakeLists. txt directory (chapter4/ex03\_file) in the default BIN directory of the system. In the second install(…) command, we're telling CMake to install chapter4\_greeter.py in the default BIN directory with the name chapter4\_greeter.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+The RENAME parameter is only valid for single-file install(...) calls.
+\end{tcolorbox}
+
+With these install(...) instructions, CMake should install the chapter4\_greeter.py and chapter4\_greeter\_content files in the \$\{CMAKE\_INSTALL\_PREFIX\}/bin directory. Let's build and install the project via the CLI:
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build
+cmake --build ./build
+cmake --install ./build --prefix /tmp/install-test
+\end{tcblisting}
+
+Let's look at what the cmake -{}-install command did:
+
+\begin{tcblisting}{commandshell={}}
+/* … */
+-- Installing: /tmp/install-test/bin/chapter4_greeter_content
+-- Installing: /tmp/install-test/bin/chapter4_greeter
+\end{tcblisting}
+
+The preceding output confirms that CMake generated the required installation code for the chapter4\_greeter\_content and chapter4\_greeter.py files. Lastly, let's check if the chapter4\_greeter file can be executed since we used the PROGRAMS parameter to install it:
+
+\begin{tcblisting}{commandshell={}}
+15:01 $ /tmp/install-test/bin/chapter4_greeter
+['Hello from installed file!']
+\end{tcblisting}
+
+With that, we have concluded the install(FILES|PROGRAMS...) section. Let's continue with installing directories.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Installing directories}
+
+The install(DIRECTORY...) command is useful for installing directories. The directory's structure will be copied as-is to the destination. Directories can either be installed as a whole or selectively. Let's begin with the most basic directory installation example:
+
+\begin{lstlisting}[style=styleCMake]
+install(DIRECTORY dir1 dir2 dir3 TYPE LOCALSTATE)
+\end{lstlisting}
+
+The preceding example will install the dir1 and dir2 directories in the \$\{CMAKE\_	INSTALL\_PREFIX\}/var directory, along with all of their subfolders and files as-is.Sometimes, installing the folder's entire content is not desirable. Luckily, CMake allows the install command to include or exclude directory content based on globbing patterns and regular expressions. Let's install dir1, dir2, and dir3 selectively this time:
+
+\begin{lstlisting}[style=styleCMake]
+include(GNUInstallDirs)
+install(DIRECTORY dir1 DESTINATION ${CMAKE_INSTALL_
+	LOCALSTATEDIR} FILES_MATCHING PATTERN "*.x")
+install(DIRECTORY dir2 DESTINATION ${CMAKE_INSTALL_
+	LOCALSTATEDIR} FILES_MATCHING PATTERN "*.hpp"
+EXCLUDE PATTERN "*")
+install(DIRECTORY dir3 DESTINATION ${CMAKE_INSTALL_
+	LOCALSTATEDIR} PATTERN "bin" EXCLUDE)
+\end{lstlisting}
+
+In the preceding example, we used the FILES\_MATCHING parameter to define criteria for file selection. FILES\_MATCHING can be followed by either the PATTERN or REGEX argument. PATTERN allows you to define a globbing pattern, whereas REGEX allows you to define a regular expression. By default, these expressions are used for including files. If you want to exclude files that match the criteria, you can append the EXCLUDE argument to the pattern. Note that these filters are not applied to subdirectory names because of the FILES\_MATCHING parameter. We also used PATTERN in the last install(...) command without FILES\_MATCHING prepended, which allows us to filter subdirectories instead of files. This time, only the files with the .x extension in dir1, files that don't have the .hpp extension in dir2, and all the content except for the bin folder in dir3 will be installed. This example is available as Chapter 4, Example 4 in the chapter4/ex04\_directory folder. Let's compile and install it to see whether it does the right thing:
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build
+cmake –build ./build
+cmake –install ./build –prefix /tmp/install-test
+\end{tcblisting}
+
+The output of cmake -{}-install should look like this:
+
+\begin{tcblisting}{commandshell={}}
+-- Installing: /tmp/install-test/var/dir1
+-- Installing: /tmp/install-test/var/dir1/subdir
+-- Installing: /tmp/install-test/var/dir1/subdir/asset5.x
+-- Installing: /tmp/install-test/var/dir1/asset1.x
+-- Installing: /tmp/install-test/var/dir2
+-- Installing: /tmp/install-test/var/dir2/chapter4_hello.dat
+-- Installing: /tmp/install-test/var/dir3
+-- Installing: /tmp/install-test/var/dir3/asset4
+\end{tcblisting}
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+FILES\_MATCHING cannot be used after PATTERN or REGEX but it can be done vice versa.
+\end{tcolorbox}
+
+In the output, we can see that only the files with the .x extension are picked from dir1. This is because of the FILES\_MATCHING PATTERN "*.x" parameter in the first install(...) command, causing the asset2 file to not be installed. Also, note that the dir2/chapter4\_hello.dat file is installed and the dir2/chapter4\_hello.hpp file is skipped. This is due to the FILES\_MATCHING PATTERN "*.hpp" EXCLUDE PATTERN "*" parameters in the second install(…) command. Lastly, we can see that the dir3/asset4 file is installed and the dir3/bin directory is completely skipped since the PATTERN "bin" EXCLUDE parameter is specified in the last install(...) command.
+
+With install(DIRECTORY...), we have covered the basics of the install(...) command. Let's continue with the install(…) command's other common parameters.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{Other common parameters of the install() command}
+
+As we've seen, the install() command's first parameter indicates what to install. There are additional parameters that allow us to customize the installation. Let's inspect some of the common parameters together.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{The DESTINATION parameter}
+
+This parameter allows you to specify a target directory for the files specified in the install(...) command. The directory path can be relative or absolute. Relative paths will be relative to the CMAKE\_INSTALL\_PREFIX variable. It is recommended to use relative paths to make the installation relocatable. Also, it is important to use relative paths for packaging since cpack requires the install paths to be relative. It is good practice to use a path that begins with the relevant GNUInstallDirs variable so that package maintainers can override the install destination if needed. The DESTINATION parameter can be used together with the TARGETS, FILES, IMPORTED\_RUNTIME\_ARTIFACTS, EXPORT, and DIRECTORY installation types.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{The PERMISSIONS parameter}
+
+This parameter allows you to change the installed file permissions on supported platforms. The available permissions are OWNER\_READ, OWNER\_WRITE, OWNER\_EXECUTE, GROUP\_READ, GROUP\_WRITE, GROUP\_EXECUTE, WORLD\_READ, WORLD\_WRITE, WORLD\_EXECUTE, SETUID, and SETGID. The PERMISSIONS parameter can be used with the TARGETS, FILES, IMPORTED\_RUNTIME\_ARTIFACTS, EXPORT, and DIRECTORY installation types.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{The CONFIGURATIONS parameter}
+
+This allows you to limit a set of parameters to be applied when a specific build configuration has been specified.
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{The OPTIONAL parameter}
+
+This parameter makes the file to be installed optional so that installation does not fail when the file is not present. The OPTIONAL parameter can be used together with the TARGETS, FILES, IMPORTED\_RUNTIME\_ARTIFACTS, and DIRECTORY installation types.
+
+In this section, we learned how to make targets, files, and directories installable. In the next section, we will learn how to generate configuration information so that we can import CMake projects directly into another CMake project.
+
+
+
+
+
+
+
+
+
+
+
