@@ -175,6 +175,121 @@ In terms of modules, so far, we've only covered how to find existing modules. Bu
 
 \subsubsubsection{5.3.1\hspace{0.2cm}Writing your own find module}
 
+While CMake is almost an industry standard, there are still lots of libraries out there that are not managed with CMake or that are managed with CMake but do not export a CMake package. If they can be installed in the default location of a system, finding these libraries is usually not a problem, but this is not always possible or wanted. A common case is when using a proprietary third-party library that is only needed for a certain project or that uses a different version of a library to build from the one that is installed by the systems package manager.
 
+If you're developing multiple projects side by side, you might want to handle the dependencies locally for each project. Either way, it is good practice to set up your project in a way so that dependencies are managed locally and do not depend too much on what is installed on the system. Creating fully reproducible builds is described in Chapter 11, Automated Fuzzing with CMake; however, for now, let's focus on finding dependencies. 
 
+If no module and no configuration file exists for a dependency, often, writing your so-called find module is the solution. The goal is to provide enough information so that, later, we can use any package by using find\_package.
+
+Find modules are instructions for CMake on how to find the necessary header and binary files for a library and which create imported targets for CMake to use. As described earlier in this chapter, when invoking find\_package in module mode, CMake searches for files called Find<PackageName>.cmake in CMAKE\_MODULE\_PATH.
+
+Let's assume that we're building a project where the dependencies have already been downloaded or built and have been placed in a folder called dep before we use them. So, the project structure might look like this:
+
+\begin{tcblisting}{commandshell={}}
+├── dep <-- The folder where we locally keep dependencies
+├── cmake
+│       └── FindLibImagePipeline.cmake <-- This is what we need to write
+├── CMakeLists.txt <-- Main CmakeLists.txt
+├── src
+│       ├── *.cpp files
+\end{tcblisting}
+
+The first thing we have to do is to add the cmake folder to the CMAKE\_MODULE\_PATH, which is a list. So, first, we add the following line to the CMakeLists.txt file:
+
+\begin{lstlisting}[style=styleCMake]
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+\end{lstlisting}
+
+This tells CMake that it should look for find modules in the cmake folder. Typically, a find module does things in the following order:
+
+\begin{enumerate}
+\item 
+It looks for files belonging to the package.
+	
+\item 
+It sets up variables containing the include and library directories for the packages.
+
+\item 
+It sets up targets for the imported package.
+
+\item 
+It sets properties for the targets.
+\end{enumerate}
+
+A simple FindModules.cmake for a library called obscure might look like this:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+find_library(
+	OBSCURE_LIBRARY
+	NAMES obscure
+	HINTS ${PROJECT_SOURCE_DIR}/dep/
+	PATH_SUFFIXES lib bin build/Release build/Debug
+)
+
+find_path(
+	OBSCURE_INCLUDE_DIR
+	NAMES obscure/obscure.hpp
+	HINTS ${PROJECT_SOURCE_DIR}/dep/include/
+)
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(
+	Obscure
+	DEFAULT_MSG
+	OBSCURE_LIBRARY
+	OBSCURE_INCLUDE_DIR
+)
+
+mark_as_advanced(OBSCURE_LIBRARY OBSCURE_INCLUDE_DIR)
+
+if(NOT TARGET Obscure::Obscure)
+	add_library(Obscure::Obscure UNKNOWN IMPORTED )
+	set_target_properties(Obscure::Obscure PROPERTIES
+		IMPORTED_LOCATION "${OBSCURE_LIBRARY}"
+		INTERFACE_INCLUDE_DIRECTORIES
+			"${OBSCURE_INCLUDE_DIR}"
+		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
+	)
+endif()
+\end{lstlisting}
+
+When looking at the example, we can observe that the following things happen:
+
+\begin{enumerate}
+\item 
+First, the actual library file belonging to the dependency is searched for using the find\_library command. If found, the path to it, including the actual filename, is stored in the OBSCURE\_LIBRARY variable. It is a common practice to name the <PACKAGENAME>\_LIBRARY variable. The NAMES argument is a list of possible names for the library. The names are automatically extended with common prefixes and extensions. So, although, in the preceding example, we look for the name "obscure," a file named libobscure.so or obscure.dll will be found. More details about the search order, hints, and paths will be covered later in this section.
+
+\item 
+Next, the Find module attempts to locate the include path. This is done by finding a known path pattern of the library, usually one of the public header files. The result is stored in the OBSCURE\_INCLUDE\_DIR variable. Again, the common practice is to name this variable as <PACKAGENAME>\_INCLUDE\_DIR.
+
+\item 
+Since handling all the requirements for a find module can be tedious and is often very repetitive, CMake provides the FindPackageHandleStandardArgs module, which provides a handy function to handle all the common cases. It provides the find\_package\_handle\_standard\_args function, which handles REQUIRED, QUIET, and the version-related arguments of find\_package. find\_package\_handle\_standard\_args has a short signature and a long signature. In the example, the short signature is used:
+
+\begin{lstlisting}[style=styleCMake]
+find_package_handle_standard_args(<PackageName>
+	(DEFAULT_MSG|<custom-failure-message>)
+	<required-var>...
+	)
+\end{lstlisting}
+
+\item 
+For most cases, the short form of find\_package\_handle\_standard\_args is sufficient. In the short form, the find\_package\_handle\_standard\_args function takes the package name as the first argument and a list of variables that are required for the package. The DEFAULT\_MSG argument tells it to print default messages in the event of success or failure, depending on whether find\_package was invoked with REQUIRED or QUIET. The message can be customized, but we recommend that you stick to the default messages whenever possible. That way, the messages are consistent for all the find\_package commands. In the preceding example, find\_package\_handle\_standard\_args checks whether the OBSCURE\_LIBRARY and OBSCURE\_INCLUDE\_DIR variables that have been passed are valid. If that is the case, the <PACKAGENAME>\_FOUND variable is set.
+
+\item 
+If all goes well, the find module defines the target. Before we do this, it is helpful to check whether the target we are trying to create does not already exist (to avoid overwriting it in the case that we have multiple calls to find\_package for the same dependency). Creating the target is done with add\_library. Since we cannot be sure whether it is a static or dynamic library, the type is UNKNOWN and the IMPORTED flag is set.
+
+\item 
+Finally, the properties for the library are set. The minimum setting that we recommend is the MPORTED\_LOCATION property and the location of the include files in INTERFACE\_INCLUDE\_DIR.
+\end{enumerate}
+
+If everything works as expected, the library can then be used like this:
+
+\begin{lstlisting}[style=styleCMake]
+find_package(Obscure PRIVATE REQUIRED)
+...
+target_link_libraries(find_module_example Obscure::Obscure)
+\end{lstlisting}
+
+So, now we understand how other libraries are added to your projects if they are already available for use. But how do we get the libraries into our system in the first place? Let's find that out in the next section.
 
