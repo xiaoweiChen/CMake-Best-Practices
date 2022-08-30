@@ -1,0 +1,7 @@
+In this chapter, we covered a general approach for finding files, libraries, and programs, along with the more complex search for CMake packages. You learned how to create an imported package definition if it cannot be found automatically by providing your own find module. We looked over source code-based dependencies with ExternalProject and FetchContent and how even non-CMake projects can be built using CMake.
+
+Additionally, if you want to become even more sophisticated with your dependency management, we briefly introduced Conan and vcpkg as two package handlers that integrate very well with CMake.
+
+Dependency management is a tough topic to cover and can be tedious at times. Nevertheless, it pays off to take the time to set it up correctly with the techniques described in this chapter. The versatility of CMake and its various ways of finding dependencies are its greatest strengths but also its greatest weaknesses. By using the various find\_ commands, FetchContent, ExternalProject, or integrating any of the available package managers with CMake, almost any dependency can be integrated into a project. However, with so many methods to choose from, finding the best one can be tough. Nevertheless, we recommend using find\_package whenever possible. The more popular CMake becomes, the better the chances are that other projects can be seamlessly integrated.
+
+In the next chapter, you will learn how to automatically generate and package documentation for your code.

@@ -116,23 +116,48 @@ The full Conan documentation can be found at \url{https://docs.conan.io/en/lates
 
 \subsubsubsection{5.4.2\hspace{0.2cm}Using vcpkg for dependency management}
 
+Another popular open source package manager is vcpkg from Microsoft. It works similarly to Conan in the way that it is set up as a client/server architecture. It was originally built to work with the Visual Studio compiler environment, and CMake was added later. Packages can either be installed manually, by calling vcpkg in the so-called classic mode, or directly out of CMake in the so-called manifest mode. The command to install packages with vcpkg in classic mode is as follows:
 
+\begin{tcblisting}{commandshell={}}
+vcpkg install [packages]
+\end{tcblisting}
 
+When run in manifest mode, the dependencies of a project are defined in a vcpkg.json file in the root of the project. Manifest mode has a big advantage in that it integrates better with CMake, so, whenever possible, use manifest mode. A vcpkg manifest might look like this:
 
+\begin{lstlisting}[style=styleCMake]
+{
+	"name" : "vcpkg-example",
+	"version-semver" : "0.0.1",
+	"dependencies" :
+	[
+	"someLibrary",
+	"anotherLibrary",
+] 
+}
+\end{lstlisting}
 
+In order for CMake to find the packages, a vcpkg toolchain file has to be passed to CMake, so the call to CMake will be as follows:
 
+\begin{tcblisting}{commandshell={}}
+cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
+  FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake
+\end{tcblisting}
 
+If they are run in manifest mode, the packages specified in the vcpkg.json file will be automatically downloaded and installed locally. If they are run in classic mode, the packages have to be manually installed before running CMake. When passing the vcpkg toolchain file, the installed packages can be used, as usual, by using find\_package and target\_link\_libraries.
 
+Microsoft recommends that you install vcpkg as a submodule in the repository at the same level as the CMake root project, but it can be installed almost everywhere. Setting the toolchain file might cause problems when cross-compiling, as CMAKE\_TOOLCHAIN\_FILE might point to a different file already. In this case, a second toolchain file can be passed with the VCPKG\_CHAINLOAD\_TOOLCHAIN\_FILE variable. In this case, the call to CMake would look something like this:
 
+\begin{tcblisting}{commandshell={}}
+cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
+  FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake -DVCPKG
+  _CHAINLOAD_TOOLCHAIN_FILE=/path/to/other/toolchain.cmake
+\end{tcblisting}
 
+Conan and vcpkg are just two package managers for C++ and CMake that are popular. Of course, there are many more, but it would require a separate book to describe them all. Especially when projects get more complex, we highly advise that you use package managers.
 
+Which package manager you choose will depend on the context a project is being developed in and your personal preference. Conan has a slight advantage over vcpkg in that it is supported on more platforms as it runs everywhere Python runs. In terms of features and ability for cross-compiling, both are more or less equal. Overall, Conan offers more advanced configuration options and control over the packages, which comes at the price of more complex handling. Another way to work with local dependencies is to create fully isolated build environments by using containers, sysroots, and more. This will be covered in Chapter 12, Cross-Platform Compiling and Custom Toolchains. For the moment, let's assume we're running CMake with your standard system installation. 
 
-
-
-
-
-
-
+Using packages managers for dependency management is the recommended way when working with project-specific dependencies. However, sometimes, package managers are not an option. This might be because of mysterious company policies or some other reason. In these cases, CMake also supports downloading dependencies as the source and integrating them into the project as external targets.
 
 
 
