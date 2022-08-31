@@ -1,0 +1,213 @@
+Testing is the staple diet for any software engineer who takes pride in quality software. The number of frameworks for writing unit tests in the various languages is huge and, especially for C++, CMake includes modules to work with most of the more popular ones.
+
+At very abstract levels, all unit testing frameworks do the following:
+
+\begin{itemize}
+\item 
+Allow the formulating and grouping of test cases.
+
+\item 
+Contain some form of assertion to check for various test conditions.
+
+\item 
+Discover and run the test cases, either altogether or a selection of them.
+
+\item 
+Produce the test result in a variety of formats, such as plain text, JSON, XML, and possibly more.
+\end{itemize}
+
+With the CTest utility, CMake includes a built-in way to execute almost any test. Any CMake project that has set enable\_testing() and added at least one test with add\_test() has testing support enabled. Any call to enable\_testing() will enable test discovery in the current directory and any directory below, so it is often a good idea to set it in the top-level CMakeLists.txt, before any calls to add\_subdirectory. The CTest module of CMake automatically sets enable\_testing if used with include(CTest), unless the BUILD\_TESTING option was set to OFF.
+
+It is good practice to disable building and running the tests depending on the BUILD\_TESTING option. A common pattern here is to put all parts of a project that concern testing into its own subfolder and only include the subfolder if BUILD\_TESTING is set to ON.
+
+The CTest module should generally be included only in the top-level CMakeLists.txt of a project. Since CMake version 3.21, the PROJECT\_IS\_TOP\_LEVEL variable can be used to test if the current CMakeLists.txt is the top level. This variable will be true for the top-level directory of a project and top-level directories of projects added with ExternalProject. For directories added with add\_subdirectory or FetchContent, the value is false. As such, CTest should be included like this:
+
+\begin{lstlisting}[style=styleCMake]
+project(CMakeBestPractice)
+...
+if(PROJECT_IS_TOP_LEVEL)
+include(CTest)
+endif()
+\end{lstlisting}
+
+nit tests are, in essence, small programs that run a list of assertions inside, and if any of the assertions fail, they return a non-zero return value. There are many frameworks and libraries that help with organizing tests and writing assertions, but from the outside, checking assertions and returning a corresponding value is the core functionality.
+
+Tests can be added to any CMakeLists.txt with the add\_test function:
+
+\begin{lstlisting}[style=styleCMake]
+add_test(NAME <name> COMMAND <command> [<arg>...]
+	[CONFIGURATIONS <config>...]
+	[WORKING_DIRECTORY <dir>]
+	[COMMAND_EXPAND_LISTS])
+\end{lstlisting}
+
+COMMAND can be the name of an executable target defined in the project or a full path to an arbitrary executable. Any arguments needed for the test are also included. Using target names is the preferred way, as CMake will then substitute the path to the executable automatically. The CONFIGURATION option is used to tell CMake for which build configurations the test is valid. For most test cases, this is irrelevant, but for microbenchmarking, for instance, this can be quite useful. WORKING\_DIRECTORY should be an absolute path. By default, tests are executed in CMAKE\_CURRENT\_BINARY\_DIR. COMMAND\_EXPAND\_LISTS ensures that any lists passed as part of the COMMAND option are expanded.
+
+A simple project including a test might look like this:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+project("simple_test" VERSION 1.0)
+enable_testing()
+add_executable(simple_test)
+target_sources(simple_test PRIVATE src/main.cpp)
+add_test(NAME example_test COMMAND simple_test)
+\end{lstlisting}
+
+In the example, an executable target called simple\_test is used as a test called example\_test.
+
+CTest will consume the information about the tests and execute them. The tests are executed by running the ctest command standalone or as a special target as part of the build step of CMake. Either of the two following commands will execute the tests:
+
+\begin{tcblisting}{commandshell={}}
+ctest --test-dir <build_dir>
+cmake --build <build_dir> --target test
+\end{tcblisting}
+
+Invoking CTest as a target of the build has the advantage that CMake will check first whether all the needed targets are built and on the newest version, but CTest can do that as well, like this:
+
+\begin{tcblisting}{commandshell={}}
+ctest --build-and-test <source_dir> <build_dir>
+\end{tcblisting}
+
+The output of ctest might look something like this:
+
+\begin{tcblisting}{commandshell={}}
+Test project /workspaces/CMake-Best-Practices/build
+	Start 1: example_test
+1/3 Test #1: example_test .....................***Failed
+0.00 sec
+	Start 2: pass_fail_test
+2/3 Test #2: pass_fail_test ................... Passed
+0.00 sec
+	Start 3: timeout_test
+3/3 Test #3: timeout_test ..................... Passed
+0.50 sec
+
+67% tests passed, 1 tests failed out of 3
+
+Total Test time (real) = 0.51 sec
+
+The following tests FAILED:
+			1 - example_test (Failed)
+Errors while running CTest
+Output from these tests are in: 		
+	/workspaces/CMake-BestPractices/build/Testing/Temporary/LastTest.log
+Use "--rerun-failed --output-on-failure" to re-run the failed
+	cases verbosely.
+\end{tcblisting}
+
+Generally, the test suppresses all output to stdout. By passing the -V or -{}-verbose command-line argument, the output is always printed. However, usually, you're only interested in the output of the failed tests. So, the -{}-output-on-failure argument is often the better alternative. This way, only failed tests produce output. For very verbose tests, the output can be limited in size with the -{}-test-output-size-passed <size> and -{}-test-output-size-failed <size> options, where the size is the number of bytes.
+
+Having one or more calls to add\_test in the build tree will cause CMake to write out an input file for CTest in CMAKE\_CURRENT\_BINARY\_DIR. The input files for CTest are not necessarily located at the top level of the project, but where they are defined. To list all tests but not execute them, the -N option for CTest is used.
+
+A very useful feature of CTest is that it caches the states of the tests between runs. This allows you to only run tests that failed in the last run. For this, running ctest -{}-rerun-failed will just run the tests that failed in the last run.
+
+Sometimes, you do not want to execute the full test set, for instance, if a single failing test is to be fixed. The -E and -R command-line options take regular expressions (regexes) that are matched against test names. The -E option excludes tests matching the pattern, and the -R option selects tests to be included. The options can be combined. The following command would run all tests that begin with FeatureX but exclude the test called FeatureX\_Test\_1:
+
+\begin{tcblisting}{commandshell={}}
+ctest -R ^FeatureX -E FeatureX_Test_1
+\end{tcblisting}
+
+Another way to selectively execute tests is to label them using the LABELS properties for tests and then select the labels to run with the -L option of CTest. A test can have multiple labels assigned separated by a semicolon, as shown in the following example:
+
+\begin{lstlisting}[style=styleCMake]
+add_test(NAME labeled_test_1 COMMAND someTest)
+set_tests_properties(labeled_test PROPERTIES LABELS "example")
+
+add_test(NAME labeled_test_2 COMMAND anotherTest)
+set_tests_properties(labeled_test_2 PROPERTIES LABELS "will_
+	fail" )
+
+add_test(NAME labeled_test_3 COMMAND YetAnotherText)
+set_tests_properties(labeled_test_3 PROPERTIES LABELS
+	"example;will_fail")
+\end{lstlisting}
+
+The -L command line option takes a regex to filter for the labels:
+
+\begin{tcblisting}{commandshell={}}
+ctest -L example
+\end{tcblisting}
+
+This will only execute labeled\_test\_1 and labeled\_test\_3, as they both have the example label assigned, but not labeled\_test\_2 or any other tests that have no label assigned.
+
+By formulating the regex accordingly, multiple labels can be combined:
+
+\begin{tcblisting}{commandshell={}}
+ctest -L "example|will_fail"
+\end{tcblisting}
+
+This would execute all the tests from the example, but no other tests that have no label assigned.
+
+Using labels would be particularly useful to mark tests that are designed to fail or similar, or to mark tests that are only relevant in certain execution contexts.
+
+The last alternative to the regex or label-based test selection is to use the -I option, which takes the assigned test numbers. The argument for the -I option is somewhat complicated:
+
+\begin{tcblisting}{commandshell={}}
+ctest -I [Start,End,Stride,test#,test#,...|Test file]
+\end{tcblisting}
+
+With Start, End, and Stride, a range for the tests to be executed can be specified. The three numbers are for the range combined with explicit test numbers, test\#. Alternatively, a file containing the argument can be passed.
+
+The following call would execute all odd tests from 1 to 10:
+
+\begin{tcblisting}{commandshell={}}
+ctest -I 1,10,2
+\end{tcblisting}
+
+So, tests 1, 3, 5, 7, and 9 would be executed. The following command would execute only the tests and 8:
+
+\begin{tcblisting}{commandshell={}}
+ctest -I ,0,,6,7
+\end{tcblisting}
+
+Note that in this call, End is set to 0 so no test range is executed. To combine the range and explicit test numbers, the following command will execute all odd tests from 1 to 10, and additionally test 6 and 8:
+
+\begin{tcblisting}{commandshell={}}
+ctest -I 1,10,2,6,8
+\end{tcblisting}
+
+The cumbersome handling of the -I option and the fact that adding new tests might reassign the numbers are two reasons why it is rarely used in practice. Usually, filtering either by labels or test names is preferred.
+
+Another common pitfall when writing tests is that they are not independent enough. So, test 2 might accidentally depend on a previous execution of test 1. To harden against this accidental dependency, CTest has the ability to randomize test execution order with the -{}-schedule-random command-line argument. This will ensure that tests are executed in an arbitrary order.
+
+\subsubsubsection{7.2.1\hspace{0.2cm}Automatically discovering tests}
+
+\subsubsubsection{7.2.2\hspace{0.2cm}Advanced ways to determine test success or failure}
+
+\subsubsubsection{7.2.3\hspace{0.2cm}Handling timeouts and repeating tests}
+
+\subsubsubsection{7.2.4\hspace{0.2cm}Writing test fixtures}
+
+\subsubsubsection{7.2.5\hspace{0.2cm}Running tests in parallel and managing test resources}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

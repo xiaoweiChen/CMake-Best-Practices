@@ -1,0 +1,43 @@
+So far, we have focused on building and installing projects, as well as generating documentation and handling external dependencies. Another major task when writing quality software is testing and ensuring that the code quality is at the desired level by various other means. To achieve a high code quality, just writing unit tests and executing them once in a while is no longer enough. If you want to produce high-quality software, having proper test tools that integrate easily with your build system is not a luxury but a necessity. Only if building and testing work effortlessly together can the programmers focus on writing good tests instead of focusing on getting those tests to run. Methods
+such as test-driven development bring huge value to the software quality.
+
+But, it is not just writing plain tests that increase the quality. Writing good tests is one thing; checking the effectiveness of the tests with coverage reports and ensuring general code quality with static code analysis is another.
+
+While tests, coverage, and static code analysis help determine whether the code functions as intended, one problem is often that some of the tools only work with a specific compiler or require special compiler settings. In order to benefit from the tools, it might be necessary to compile the same source in different ways with different compilers. But, luckily, this is exactly what CMake is extremely good at, which is why CMake can help to boost the quality of the code by making these quality tools accessible.
+
+The good thing about a lot of the technology for ensuring high code quality is that it can often be automated. With today's easy availability of CI/CD systems, creating a high degree of automated checks for good quality software is quite easy, especially since, with CMake, these things can often be configured and executed right where you define how the software is built. In this chapter, you will learn how to define and orchestrate tests using CMake, as well as how to create code coverage reports to see which parts of the software are tested at all. We will go over how to integrate various code sanitizers and static code analyzers to check code quality already while compiling. We will show you various ways to include all the tools, and how to create a dedicated build type for running static code quality tools.
+
+This chapter covers the following main topics:
+
+\begin{itemize}
+\item 
+Defining, discovering, and running tests
+
+\item 
+Generating code coverage reports
+
+\item 
+Sanitizing your code
+
+\item 
+Static code analysis using CMake
+
+\item 
+Creating custom build types for quality tools
+\end{itemize}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

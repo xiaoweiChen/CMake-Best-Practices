@@ -1,0 +1,57 @@
+Packaging documentation is no different than packaging software and its artifacts—documentation is an artifact of a project, after all. Thus, we will use the techniques we learned in Chapter 4, Packaging, Deploying, and Installing a CMake Project, to packageour documentation.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+If you have not read Chapter 4, Packaging, Deploying, and Installing a CMake Project, yet, it is strongly recommended to do so before reading this section.
+\end{tcolorbox}
+
+For illustrating this section, we will return to Chapter 6 - Example 01. We will make the documentation we have generated in this example installable and packageable. Let's dive back into the CMakeLists.txt file located in the chapter\_6/ex01\_doxdocgen/folder. With the following code, we will make the HTML and MAN documentation installable:
+
+\begin{lstlisting}[style=styleCMake]
+include(GNUInstallDirs)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/html/"
+	DESTINATION "${CMAKE_INSTALL_DOCDIR}" COMPONENT
+		ch6_ex01_html)
+install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/man/"
+	DESTINATION "${CMAKE_INSTALL_MANDIR}" COMPONENT
+		ch6_ex01_man)
+\end{lstlisting}
+
+Remember how we used install(DIRECTORY...) to install any kind of folder while preserving its structure in Chapter 4, Packaging, Deploying, and Installing a CMake Project? This is exactly what is happening here. We are making the generated documentation installable by installing docs/html and docs/man to the default documentation and man page directories provided by the GNUInstallDirs module. Also, recall that if a thing is installable, it means it is also packageable since CMake is able to generate the required packaging code from install(...) calls. So, let's include the CPack module to enable packaging for this example too. The code is illustrated in the following snippet:
+
+\begin{lstlisting}[style=styleCMake]
+set(CPACK_PACKAGE_NAME cbp_chapter6_example01)
+set(CPACK_PACKAGE_VENDOR "CBP Authors")
+set(CPACK_GENERATOR "DEB;RPM;TBZ2")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "CBP Authors")
+include(CPack)
+\end{lstlisting}
+
+And there we have it! Simple as that. Let's try building and packaging the example project by invoking the following commands:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_6/
+cmake -S . -B build/
+cmake --build build/
+cpack --config build/CPackConfig.cmake -B build/pak
+\end{tcblisting}
+
+So, let's summarize what is happening here. We have configured and built the chapter\_6/ code and invoked CPack to package the project into the build/pak folder using the generated CPackConfig.cmake file. To check whether everything is in order, let's extract the contents of the generated package into the /tmp/ch6-ex01 path by invoking the following command:
+
+\begin{tcblisting}{commandshell={}}
+dpkg -x build/pak/cbp_chapter6_example01-1.0-Linux.deb
+  /tmp/ch6-ex01
+export MANPATH=/tmp/ch6-ex01/usr/share/man/
+\end{tcblisting}
+
+After the extraction completes, the documentation must become available under the /tmp/ch6-ex01/usr/share path. Since we have used a non-default path, we have used the MANPATH environment variable to let the man command know the path of our documentation. Let's start by checking whether we can access the man pages by invoking the man command, as follows:
+
+\begin{tcblisting}{commandshell={}}
+man chapter6_ex01_calculator
+\end{tcblisting}
+
+The chapter6\_ex01\_calculator name is automatically inferred by Doxygen from the chapter6::ex01::calculator class name. You should be able to see the man page output we covered in the previous section.
+
+Up to now, we have learned a great deal about generating and packaging documentation.Up next, we will be learning about generating dependency graphs of CMake targets.
+
+
+
