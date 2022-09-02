@@ -1,0 +1,32 @@
+Building and shipping software can be a complex task and no tool can ever do all the different tasks that are needed to do so. At some point, you may want to execute a task that is not covered by the compiler or CMake's functionality. Common tasks include archiving build artifacts, creating hashes to verify downloads, or generating or customizing input files for the build. There are also lots of other specialized tasks that depend on the environment a certain software is built inside.
+
+In this chapter, we will learn how to include such custom tasks in a CMake project and how to create custom build targets and custom commands. We will go over how to create and manage dependencies between targets and how to include or exclude them from the standard builds.
+
+Including such external programs in the build steps of a project can help ensure that the code is kept consistent, even when many people contribute to it. As a CMake build is very easy to automate, using CMake to invoke the necessary commands makes it easy to apply these tools to various machines or a CI environment.
+
+In this chapter, we will learn how custom tasks can be defined and how to control when they are executed. In particular, we will focus on managing the dependency between custom tasks and regular targets. As CMake is often used to provide build information across multiple platforms, you will also learn how to define common tasks in a way that they run everywhere where CMake runs.
+
+This chapter will cover the following main topics:
+
+\begin{itemize}
+\item 
+Using external programs with CMake
+
+\item 
+Executing custom tasks at build time
+
+\item 
+Executing custom tasks at configuration time
+
+\item 
+Copying and modifying files
+
+\item 
+Using CMake for platform-independent commands
+\end{itemize}
+
+So, let's begin!
+
+
+
+

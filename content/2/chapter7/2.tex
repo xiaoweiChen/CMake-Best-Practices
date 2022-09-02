@@ -173,26 +173,320 @@ Another common pitfall when writing tests is that they are not independent enoug
 
 \subsubsubsection{7.2.1\hspace{0.2cm}Automatically discovering tests}
 
+Defining tests with add\_test is one way to expose them to CTest. One drawback is that this will register the whole executable as a single test. In most cases, however, a single executable will contain many unit tests and not just one, so when one of the tests inside the executable fails, it might be hard to figure out which test exactly failed.
+
+Consider a C++ file containing the following test code, and let's assume that the Fibonacci function contains a bug, so Fibonacci(0) will not return 1 as it should, but returns something else:
+
+\begin{lstlisting}[style=styleCXX]
+TEST_CASE("Fibonacci(0) returns 1"){ REQUIRE(Fibonacci(0) ==
+	1);}
+TEST_CASE("Fibonacci(1) returns 1"){ REQUIRE(Fibonacci(1) ==
+	1); }
+TEST_CASE("Fibonacci(2) returns 2"){ REQUIRE(Fibonacci(2) ==
+	2); }
+TEST_CASE("Fibonacci(5) returns 8"){ REQUIRE(Fibonacci(5) ==
+	8); }
+\end{lstlisting}
+
+If all these tests are compiled into the same executable called Fibonacci, then adding them with add\_test will only indicate that the executable failed, but not which of the scenarios seen in the previous code block.
+
+The result of the test will look something like this:
+
+\begin{tcblisting}{commandshell={}}
+Test project /workspaces/CMake-Best-Practices/build
+    Start 5: Fibonacci
+1/1 Test #5: Fibonacci ........................***Failed
+0.00 sec
+0% tests passed, 1 tests failed out of 1
+Total Test time (real) = 0.01 sec
+The following tests FAILED:
+         5 - Fibonacci (Failed)
+\end{tcblisting}
+
+That is hardly helpful to figure out which of the test cases failed. Luckily, with Catch2 and GoogleTest, there is a way to expose the internal tests to CTest so they are executed as regular tests. For GoogleTest, the module to do so is provided by CMake itself; Catch2 provides this functionality in its own CMake integration. Discovering the tests with Catch2 is done with catch\_discover\_tests, while for GoogleTest, gtest\_discover\_tests is used. The following example will expose tests written in the Catch2 framework to CTest:
+
+\begin{lstlisting}[style=styleCMake]
+find_package(Catch2)
+include(Catch)
+add_executable(Fibonacci)
+catch_discover_tests(Fibonacci)
+\end{lstlisting}
+
+Note that, in order to have the function available, the Catch module has to be included. For GoogleTest it works very similarly:
+
+\begin{lstlisting}[style=styleCMake]
+include(GoogleTest)
+add_executable(Fibonacci)
+gtest_discover_tests(Fibonacci)
+\end{lstlisting}
+
+When using the discovery functions, each test case defined in a test executable will be treated as its own test by CTest. If tests are exposed like this, the result of a call to CTest might look as follows:
+
+\begin{tcblisting}{commandshell={}}
+    Start 5: Fibonacci(0) returns 1
+1/4 Test #5: Fibonacci(0) returns 1 .........***Failed 0.00 sec
+    Start 6: Fibonacci(1) returns 1
+2/4 Test #6: Fibonacci(1) returns 1 ......... Passed 0.00 sec
+    Start 7: Fibonacci(2) returns 2
+3/4 Test #7: Fibonacci(2) returns 2 ......... Passed 0.00 sec
+    Start 8: Fibonacci(5) returns 8
+4/4 Test #8: Fibonacci(5) returns 8 ......... Passed 0.00 sec
+
+75% tests passed, 1 tests failed out of 4
+Total Test time (real) = 0.02 sec
+The following tests FAILED:
+         5 - Fibonacci(0) returns 1 (Failed)
+\end{tcblisting}
+
+Now, we see exactly which of the defined test cases failed. In this case, the Fibonacci(0) returns 1 test case did not behave as expected. This comes in especially handy when using an editor or IDE with integrated testing functionality. The discovery functions both work by running the specified executable with an option to only print out the test names to register them internally with CTest, so there is a slight overhead added to each build step. Discovering tests more granularly also has the advantage that the execution of them can be better parallelized by CMake, as described in the Running tests in parallel and managing test resources section of this chapter.
+
+Both gtest\_discover\_tests and catch\_discover\_tests can take various options, such as adding a prefix or suffix to the test names or a list of properties to add to the generated tests. The full documentation for the functions can be found here:
+
+\begin{itemize}
+\item 
+Catch2: \url{https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integration.md}
+	
+\item 
+GoogleTest: \url{https://cmake.org/cmake/help/v3.21/module/GoogleTest.html}
+\end{itemize}
+
+Catch2 and GoogleTest are just two of the many testing frameworks out there; there might be more test suites that bring this functionality with them that might be unknown to the authors. Now, let's move on from finding tests and have a closer look at how to control test behavior.
+
 \subsubsubsection{7.2.2\hspace{0.2cm}Advanced ways to determine test success or failure}
+ 
+By default, CTest determines whether a test failed or passed based on the return value of the command. 0 means all tests were successful, anything other than 0 is interpreted as a failure.
+
+Sometimes, the return value is not enough to determine whether a test passes or fails. If you need to check program output for a certain string, the FAIL\_REGULAR\_EXPRESSION and PASS\_REGULAR\_EXPRESSION test properties can be used,  as shown in the following example:
+
+\begin{lstlisting}[style=styleCMake]
+set_tests_properties(some_test PROPERTIES
+					FAIL_REGULAR_EXPRESSION "[W|w]arning|[E|e]rror"
+					PASS_REGULAR_EXPRESSION "[S|s]uccess")
+\end{lstlisting}
+
+These properties would cause the some\_test test to fail if the output contains either "Warning" or "Error". If the "Success" string is found, the test is considered passed . If PASS\_REGULAR\_EXPRESSION is set, the test is considered passed only if thestring is present. In both cases, the return value will be ignored. If a certain return value of a test needs to be ignored, it can be passed with the SKIP\_RETURN\_CODE option.
+
+Sometimes, a test is expected to fail. In those, setting WILL\_FAIL to true will cause the test result to be inverted:
+
+\begin{lstlisting}[style=styleCMake]
+add_test(NAME SomeFailingTerst COMMAND SomeFailingTest)
+set_tests_properties(SomeFailingTest PROPERTIES WILL_FAIL True)
+\end{lstlisting}
+
+This is often better than disabling the test because the test will still be executed on each test run, and if the test unexpectedly starts to pass again, the developer is made aware of it. A special case of test failures is when tests fail to return or take too much time to complete. For this case, CTest provides the means of adding timeouts of tests and even retrying tests in the case of failure.
 
 \subsubsubsection{7.2.3\hspace{0.2cm}Handling timeouts and repeating tests}
 
+Sometimes, we're not just interested in the success or failure of a test, but also in how long it takes to complete. The TIMEOUT test property takes a number of seconds to determine a maximum runtime for a test. If the test exceeds the time, it is terminated and considered failed. The following command would limit the test execution of the test to 10 seconds:
+
+\begin{lstlisting}[style=styleCMake]
+set_tests_properties(timeout_test PROPERTIES TIMEOUT 10)
+\end{lstlisting}
+
+The TIMEOUT property often comes in handy for tests that run the risk of falling into infinite loops or hanging forever for whatever reason.
+
+Alternatively, CTest accepts the -{}-timeout argument to set a global timeout that is applied to all tests that have no TIMEOUT property specified. For those tests that have TIMEOUT defined, the timeout defined in CmakeLists.txt takes precedence over the timeout passed over the command line.
+
+To avoid long test execution, the CTest command line accepts the -{}-stop-time argument, which takes the real time of the day as a time limit for the complete set of tests. The following command would set a default timeout of 30 seconds for each test, and the tests would have to be completed before 23:59:
+
+\begin{tcblisting}{commandshell={}}
+ctest --timeout 30 --stop-time 23:59
+\end{tcblisting}
+
+ometimes, it can be expected for a test to experience occasional timeouts due to factors outside of our control. Very common cases are tests that need some form of network communication or a resource that has some kind of bandwidth limitation. Sometimes, the only way to get the test to run is to try it again. For this, the -{}-repeat aftertimeout:n command-line argument can be passed to CTest, where n is a number.
+
+The -{}-repeat argument actually has three options:
+
+\begin{itemize}
+\item 
+after-timeout: This retries the test a number of times if a timeout occurred. Generally, the -{}-timeout option should be passed to CTest whenever repeating after timeouts.
+
+\item 
+until-pass: This reruns a test until it passes or until the number of retries is reached. Setting this as a general rule in a CI environment is a bad idea, as tests should generally always pass.
+
+\item 
+until-fail: Tests are rerun a number of times or until they fail. This is often used if a test fails occasionally to find out how frequently this happens. The -{}-repeatuntil-fail argument works exactly like --repeat:until-fail:n. 
+\end{itemize}
+
+As mentioned, the reason for failing tests might be the unavailability of resources that the test depends on. One common case for external resources being unavailable is that they are flooded with requests from tests. The Running tests in parallel and managing test resources section describes a few options to avoid such complications. Another common cause for timeouts when accessing external resources is that the resource is not yet available when the tests run. In the next section, we will see how to write test fixtures that can be used to ensure that resources are started before a test run.
+
 \subsubsubsection{7.2.4\hspace{0.2cm}Writing test fixtures}
+
+Tests should, in general, be independent of each other. There are cases where tests might depend on a precondition that is not controlled by the test itself. For instance, a test might require a server to be running in order to test a client. These dependencies can be expressed in CMake by defining them as test fixtures using the FIXTURE\_SETUP, FIXTURE\_CLEANUP, and FIXTURE\_REQUIRED test properties. All three properties take a list of strings to identify the fixture. A test might indicate that it needs a particular fixture by defining the FIXTURE\_REQUIRED property. This will ensure that the test named as fixture completes successfully before it is executed. Similarly, a test might declare it in FIXTURE\_CLEANUP to indicate that it must be run after the completion of the test requiring the fixture. The fixtures defined in the cleanup part are always run, regardless of whether a test succeeded or failed. Consider the following example:
+
+\begin{lstlisting}[style=styleCMake]
+add_test(NAME start_server COMMAND echo_server --start)
+set_tests_properties(start_server PROPERTIES FIXTURES_SETUP
+	server)
+add_test(NAME stop_server COMMAND echo_server --stop)
+set_tests_properties(stop_server PROPERTIES FIXTURES_CLEANUP
+	server)
+
+add_test(NAME client_test COMMAND echo_client)
+set_tests_properties(client_test PROPERTIES FIXTURES_REQUIRED
+	server)
+\end{lstlisting}
+
+In this example, a program called echo\_server is used as a fixture so that another program called echo\_client can use it. The execution of echo\_server with the -{}-start and -{}-stop arguments is formulated as tests with the names start\_server and stop\_server. The start\_server test is marked as the setup of the fixture with the name server. The stop\_server test is set up likewise but is marked as the cleanup routine of the fixture. In the end, the actual test called client\_test is set up and it gets passed the server fixture as a required precondition.
+
+If, now, the client\_test test is run using CTest, the fixtures are automatically invoked with it. The fixture tests show up as regular tests in the output for CTest, as shown in the following example output:
+
+\begin{tcblisting}{commandshell={}}
+ctest -R client
+Test project CMake-Best-Practices:
+    Start 9: start_server
+1/3 Test #9: start_server .............. Passed 0.00 sec
+    Start 11: client_test
+2/3 Test #11: client_test................ Passed 0.00 sec
+    Start 10: stop_server
+3/3 Test #10: stop_server ............... Passed 0.00 sec
+\end{tcblisting}
+
+Note that CTest was invoked with a regex filter that only matches the client test, but that CTest starts the fixture anyway. To not overwhelm test fixtures when tests are executed in parallel, they can be defined as resources, as shown in the next section.
 
 \subsubsubsection{7.2.5\hspace{0.2cm}Running tests in parallel and managing test resources}
 
+If a project has many tests, executing them in parallel will speed up the tests. By default, CTest runs the tests serially; by passing the -j option to the call to CTest, the tests can be run in parallel. Alternatively, the number of parallel threads can be defined in the CTEST\_PARALLEL\_LEVEL environment variable. By default, CTest assumes that each test will run on a single CPU. If a test requires multiple processors to run successfully, setting the PROCESSORS property for the test can be set to define the number of processors required:
 
+\begin{lstlisting}[style=styleCMake]
+add_test(NAME concurrency_test COMMAND concurrency_tests)
+set_tests_properties(concurrency_test PROPERTIES PROCESSORS 2)
+\end{lstlisting}
 
+This will tell CTest that the concurrency\_test test requires two CPUs to run. When running tests parallel with -j 8, concurrency\_test will occupy two of the eight available "slots" for parallel execution. If, in this case, the PROCESSORS property is set to 8, this would mean that no other test can run parallel to concurrency\_test. When setting a value for PROCESSORS that is higher than the available number of parallel slots or CPUs that are available on the system, the test will be run as soon as the full pool is available. Sometimes, there are tests that do not just require a specific amount of processors, but that need to run exclusively without any other test running. To achieve this, the RUN\_SERIAL property can be set to true for a test. This might have a serious impact on the overall test performance, so use this with caution. A more granular way to control this is by using the RESOURCE\_LOCK property, which contains a list of strings. The strings have no particular meaning, except that CTest prevents two tests from running in parallel if they list the same strings. In this way, partial serialization can be achieved without halting the whole test execution. It also is a nice way to specify whether tests need a particular unique resource, such as a certain file, a database, or similar. Consider the following example:
 
+\begin{lstlisting}[style=styleCMake]
+set_tests_properties(database_test_1 database_test_2 database_
+	test_3 PROPERTIES RESOURCE_LOCK database)
+set_tests_properties(some_other_test PROPERTIES RESOURCE_LOCK
+	fileX)
+set_tests_properties(yet_another_test PROPERTIES RESOURCE_LOCK
+	"database;fileX ")
+\end{lstlisting}
 
+In this example, the database\_test\_1, database\_test\_2, and database\_test\_3 tests would be prevented from running in parallel. The some\_other\_test test will not be affected by the database tests, but yet\_another\_test will not run together with any of the database tests and some\_other\_test.
 
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Fixtures as Resources]
+While not technically required, if RESOURCE\_LOCK is used together with FIXTURE\_SETUP, FIXTURE\_CLEANUP, and FIXTURE\_REQUIRED, it is good practice to use the same identifiers for the same resources.
+\end{tcolorbox}
 
+Managing parallelism of tests with RESOURCE\_LOCK is very handy when tests need exclusive access to some resource. In most cases, it is entirely sufficient to manage the parallelism. Since CMake 3.16, this can be controlled on an even more granular level with the RESOURCE\_GROUPS property. Resource groups allow not just the specification of what resources are used, but how much of a resource is used. Common scenarios are defining the amount of memory a particular greedy operation might need or avoiding overrunning the connection limit of a certain service. Resource groups often come into play when working on projects that use the GPU for general-purpose computing, to define how many slots of a GPU each test needs.
 
+Resource groups are quite a step up in complexity compared to simple resource locks. To use them, CTest has to do the following things:
 
+\begin{itemize}
+\item 
+Know which resources a test needs to run. This is defined by setting the test properties in the project.
 
+\item 
+Know which resources a system has available. This is done from outside the project when running the tests.
 
+\item 
+Pass the information on which resources to use for the test. This is done by using environment variables.
+\end{itemize}
 
+Like resource locks, resource groups are arbitrary strings used to identify resources. The definition of the actual resource tied to the label is left to the user. The resource groups are defined as name:value pairs, which are separated by commas if there are multiple groups. A test can define what resources to use with the RESOURCE\_GROUPS property, like this:
 
+\begin{lstlisting}[style=styleCMake]
+set_property(TEST SomeTest PROPERTY RESOURCE_GROUPS
+	cpus:2,mem_mb:500
+	servers:1,clients:1
+	servers:1,clients:2
+	4,servers:1,clients:1
+)
+\end{lstlisting}
+
+In the preceding example, SomeTest states that it uses two CPUs and 500 MB of memory. It uses a total of six instances of a client-server pair, each pair having a number of servers and clients assigned. The first pair consists of one server instance and one client instance, the second pair requires one server but two client instances.
+
+The last line, 4, servers:1,clients:1, is shorthand to tell CTest to use four instances of the same pair, consisting of one servers resource and one clients resource. This means this test will not run unless a total of six servers and seven clients are available, in addition to the required CPUs and memory.
+
+The available system resources are specified in a JSON file that is passed to CTest, either by the ctest -{}-resource-spec-file command-line parameter or by setting the CTEST\_RESOURCE\_SPEC\_FILE variable when calling CMake. Setting the variable should be done by using cmake -D and not in CMakeLists.txt, as specifying the system resources should be done from outside the project.
+
+A sample resource specification file for the preceding example could look like this:
+
+\begin{lstlisting}[style=styleCMake]
+{
+	"version": {
+		"major": 1,
+		"minor": 0
+	},
+	"local": [
+	{
+		"mem_mb": [
+			{
+				"id": "memory_pool_0",
+				"slots": 4096
+			}
+		],
+		"cpus" :
+		[
+			{
+				"id": "cpu_0",
+				"slots": 8
+			}
+		],	
+		"servers": [
+			{
+				"id": "0",
+				"slots": 4
+			},
+			{
+				"id": "1",
+				"slots": 4
+			}
+		],
+		"clients": [
+		{
+			"id": "0",
+			"slots": 8
+		},
+		{
+			"id": "1",
+			"slots": 8
+		}
+		]
+	}
+	]
+}
+\end{lstlisting}
+
+This file specifies a system with 4,096 MB of memory, eight CPUs, 2x4 server instances, and 2x8 client instances for a total of eight servers and 16 clients. If a resource request of a test cannot be satisfied with the available system resources, it fails to run with an error like this:
+
+\begin{tcblisting}{commandshell={}}
+ctest –j $(nproc) --resource-spec-file ../resources.json
+
+Test project /workspaces/CMake-Best-Practices/chapter_7
+  /resource_group_example/build
+     Start 2: resource_test_2
+                  Start 3: resource_test_3
+Insufficient resources for test resource_test_3:
+
+    Test requested resources of type 'mem_mb' in the following
+        amounts:
+        8096 slots
+    but only the following units were available:
+        'memory_pool_0': 4096 slots
+
+Resource spec file:
+
+  ../resources.json
+\end{tcblisting}
+
+The current example would be able to run with this specification, as it needs a total of six servers and seven clients. CTest has no way of ensuring that the specified resources are actually available or not; this is the task of the user or the CI system. For instance, a resource file might specify that there are eight CPUs available, while the hardware actually only contains four cores.
+
+The information about the assigned resource groups is passed to the test over environment variables. The CTEST\_RESOURCE\_GROUP\_COUNT environment variable specifies the total number of resource groups assigned to a test. If it is not set, this means that CTest was invoked without an environment file. Tests should check this and act accordingly. If a test cannot run without the resources, it should either fail or indicate that it did not run by returning the respective return code or string defined in the SKIP\_RETURN\_CODE or SKIP\_REGULAR\_EXPRESSION property. The resource groups assigned to the test are passed with pairs of environment variables:
+
+\begin{itemize}
+\item 
+CTEST\_RESOURCE\_GROUP\_<ID>, which will contain the type of the resource groups. In the example from earlier, this will be either "mem\_mb", "cpus", "clients", or "servers".
+
+\item 
+CTEST\_RESOURCE\_GROUP\_<ID>\_<TYPE>, which will contain a pair of id:slots for the types.
+\end{itemize}
+
+It is up to the implementation of the test on how the resource groups are used and internally distributed.
+
+Writing and running tests is obviously one of the major boosters of code quality. However, another interesting metric is often how much of your code is actually covered by the tests. Surveying and reporting code coverage can give interesting hints, not just about how widely software is tested, but also about where the gaps lie.
 
 
 

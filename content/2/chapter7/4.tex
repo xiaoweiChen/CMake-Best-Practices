@@ -1,0 +1,82 @@
+Today's compilers are often more than just programs to convert text to binary. They are complex software suites that have built-in functionality to ensure code quality. The focus on how much compilers are aware of code quality issues has drastically increased, especially with the advent of LLVM and Clang. These quality tools are commonly called sanitizers and are enabled by passing certain flags to the compiler and linker.
+
+Code sanitizers are a way to bring additional quality checks into the code by using the compiler to decorate the binary code with annotations and hooks to detect various runtime issues. When the code is executed, the annotations are checked and confirmed if any violations are reported. Sanitizers are relatively fast, but they obviously have an impact on the runtime behavior of any program. If the sanitizers are catching anything, programs are terminated with abort() and return with non-zero. This is particularly useful with testing because this means any test violating a sanitizer will be marked as failed.
+
+The following are the most common types of sanitizers:
+
+\begin{itemize}
+\item 
+The address sanitizer (ASan) detects memory access errors such as out-of-bounds and use-after-free bugs.
+
+\item 
+The leak sanitizer (LSan), which is part of the ASan, can be used for detecting memory leaks.
+
+\item 
+In GCC and Clang, there are a few specialized versions of the general ASan, such as the kernel address sanitizer (KASAN) for detecting memory errors in the Linux kernel.
+
+\item 
+On some platforms, the ASans can even be run with hardware assistance.
+
+\item 
+The memory sanitizer (MSan) detects uninitialized memory reads.
+
+\item 
+The thread sanitizer (TSan) will report data races. Because of the way the TSan works, it cannot be run together with the ASan and LSan.
+
+\item 
+The undefined behavior sanitizer (UBSan) detects and reports cases where the code results in undefined behavior. Using variables before initialization or ambiguity regarding operator precedence are common examples.
+\end{itemize}
+
+The Clang suite leads the field with the availability of sanitizers, with GCC being a close second. Microsoft is a bit slower in adapting the features but they have started to include sanitizers in their compiler. At the time of writing this book, MSVC version 16.9, which comes with Visual Studio 19, was the first version that contained support for the ASan. For details on what the respective sanitizers do and how to configure them in detail, the documentation of the various compilers is of great help. 
+
+The sanitizers are enabled by passing various compiler flags that cause the compiler to add extra debugging information to the binaries. When the binaries are executed, the sanitizer code will perform its check and print out any errors to stderr. As the code needs to be executed for the sanitizers to find any potential bugs, having a high code coverage is essential to improve the reliability of the sanitizers.
+
+To enable the ASan in GCC or Clang, the -fsanitize=<sanitizer> compiler flag has to be passed. For MSVC, the corresponding option is /fsanitize=<sanitizer>.
+
+The compiler flags are passed into CMake with the CMAKE\_CXX\_FLAGS cache variable. So, calling CMake from the command line with a sanitizer enabled would look like this:
+
+\begin{tcblisting}{commandshell={}}
+cmake -S <sourceDir> -B <BuildDir> -DCMAKE_CXX_FLAGS=-
+	fsanitize=<sanitizer>
+\end{tcblisting}
+
+When using CMake presets, the cache variables to contain the compiler flags can also be defined there. Presets are covered in depth in Chapter 9, Creating Reproducible Build Environments. Setting the sanitizer option globally will also affect any projects included using FetchContent or ExternalProject after the flags are set, so act with caution there. For the ASan, use -fsanitizer=address on GCC and Clang, and /fsanitizer=address on MSVC. The MSan is enabled with -fsanitize=memory, the LSan with -fsanitize=leak, the TSan with -fsanitize=thread, and the UBSan is enabled with -fsanitize=undefined for GCC and Clang at the time of writing this book only. To get a more concise output for ASan, LSan, and MSan, tell the compiler to explicitly keep the frame pointer. This is done by setting -fno-omit-framepointer in GCC and Clang. MSVC only supports this for x86 builds with the /Oy- option.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+Setting the CMAKE\_CXX\_FLAGS variable to enable sanitizers in CMakeLists.txt itself is discouraged because the sanitizers are neither built nor have any usage requirements to use any of the targets defined by a project. Additionally, setting the CMAKE\_CXX\_FLAGS variable in CMakeLists.txt might conflict with what the user might be passing from the command line.
+\end{tcolorbox}
+
+Sanitizers are a very powerful tool to increase code quality. Together with unit tests and the coverage report, they provide three of the four major concepts to ensure code quality. The fourth option for automatically ensuring code quality is using static code analyzers.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
