@@ -1,0 +1,75 @@
+Containerization brings the benefit that developers can control the build environment to some extent. Containerized build environments are also a tremendous help for setting up CI environments. There are quite a few container runtimes out there, with Docker being the most popular. It would exceed the scope of this book to look in depth at containerization, so we will use Docker for the examples in this book.
+
+A build container contains a fully defined build system including CMake and any tools and libraries needed to build a certain software. By providing the container definition, for example, the Dockerfile, along with the project, or over a publicly accessible container registry, anyone can use the container to build the software. The huge advantage is that developers do not need to install and possibly pollute their host machine by installing additional libraries or tools except the software needed to run the containers. The downside is that building might take longer and not all IDEs and tools support working with containers in a convenient way. Notably, Visual Studio Code has very good support for working in containers. You can visit \url{https://code.visualstudio.com/docs/remote/containers for more details}.
+
+At a very high level, the workflow for using a build container is the following:
+
+\begin{enumerate}
+\item 
+Define the container and build it.
+
+\item 
+Mount a local copy of the source code into the build container.
+
+\item 
+Run any commands for building inside the container.
+\end{enumerate}
+
+A very simple Docker definition for building a simple C++ application could look like this:
+
+\begin{lstlisting}[style=styleCMake]
+FROM alpine:3.15
+RUN apk add --no-cache cmake ninja g++ bash make git
+RUN <any command to install additional libraries etc.>
+\end{lstlisting}
+
+This will define a small container based on the Alpine Linux 3.15 and install cmake, ninja, bash, make, and git. Any real-life container will probably have additional tools and libraries installed inside to work conveniently; however, just to illustrate how building software with a container works, having such a minimal container is enough. The following Docker command builds the container image and tags it with the name builder\_minimal:
+
+\begin{tcblisting}{commandshell={}}
+docker build . -t builder_minimal
+\end{tcblisting}
+
+Once the container is a clone of the local, the source is mounted inside the container and all CMake commands are executed inside the container. Assuming the user is executing the Docker command from the source directory, the commands to configure a CMake build project might look like this:
+
+\begin{tcblisting}{commandshell={}}
+docker run --user 1000:1000 --rm -v $(pwd):/workspace
+  builder_minimal cmake -S /workspace -B /workspace/build
+docker run --user 1000:1000 --rm -v $(pwd):/workspace
+  builder_minimal cmake --build /workspace/build
+\end{tcblisting}
+
+This will start up the container we created and execute the CMake commands within. The local directory is mounted inside the container as /workspace with the -v option. Since our Docker containers use root as the default user, the user ID and group to use are passed with the -{}-user option. On Unix-like operating systems, this should match the user ID of the host, so any files created can also be edited from outside the container. The -{}-rm flag tells Docker to remove the image once it is done with it.
+
+An alternative way to work with the container is to run it in interactive mode by passing the -ti flag to the docker run command:
+
+\begin{tcblisting}{commandshell={}}
+docker run --user 1000:1000 --rm -ti -v $(pwd):/workspace
+  builder_minimal
+\end{tcblisting}
+
+This will start a shell inside the container where the build command can be invoked without the need to restart the container every time.
+
+There are several strategies on how editors or IDEs and build containers can work together. The most convenient way is, of course, if the IDE supports it natively or through a convenient extension like Visual Studio Code does. If this is not the case, packing a suitable editor inside the container and executing it from within can be a strategy to develop software conveniently. Another way is to run the editor on the host system and reconfigure it so it invokes CMake not directly but starts the container and executes CMake within.
+
+What we have shown here is the bare minimum for working with containers as build environments but we hope it serves as a very first stepping stone to working with containers. As more and more IDEs start to support working with containerized build environments, using them will become much easier. Containers make build environments very portable between various machines and can help to ensure that all developers of a project are using the same build environment. It is also a good idea to put container definition files under version control so that necessary changes to the build environment are tracked together with the code.
+
+Containers are a good and portable way of creating isolated build environments. But if this is not an option for any reason, another way to create an isolated and portable build environment is using sysroots.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

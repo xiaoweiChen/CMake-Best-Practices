@@ -1,0 +1,55 @@
+Building software can be complex, especially when dependencies or special tools are involved. What compiles on one machine might not work on another because a crucial piece of software is missing. Relying on the correctness of the documentation of a software project to figure out all the build requirements is often not enough, and as a consequence,  programmers spend a significant amount of time combing through various error messages to figure out why a build fails.
+
+There are countless stories out there of people avoiding upgrading anything in a build or continuous integration (CI) environment because they fear that every change might break the ability to build the software. This goes as far as companies refusing to upgrade the compiler toolchains they are using for fear of no longer being able to ship products. Creating robust and portable information about build environments is an absolute gamechanger. With presets, CMake provides the possibility to define common ways to configure a project. When combined with toolchain files, Docker containers, and sysroots, creating a build environment that can be recreated on different machines becomes much easier.
+
+In this chapter, you will learn how to define CMake presets for configuring, building, and testing a CMake project and how to define and use a toolchain file. We will briefly go over using a container to build your software and learn how to use a system root toolchain file to create an isolated build environment. The main topics of this chapter will be as follows:
+
+\begin{itemize}
+\item 
+Using CMake presets
+
+\item 
+Using build containers with CMake
+
+\item 
+Using sysroots to isolate build environments
+\end{itemize}
+
+So, let's buckle down and get started!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

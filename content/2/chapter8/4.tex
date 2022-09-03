@@ -1,0 +1,96 @@
+To execute custom tasks at configuration time, you can use the execute\_process function. Common needs for this are if the build requires additional information before a build, or if files need to be updated for any rerun of CMake. Another common case is when either the CMakeLists.txt file or other input files are generated during the configuration step, although this can also be achieved with the specialized configure\_file command, as shown later in this chapter.
+
+The execute\_process function works very similarly to the add\_custom\_target and add\_custom\_command functions we saw earlier. However, one distinction is that execute\_process can capture output to stdout and stderr in a variable or files. The signature of execute\_process is as follows:
+
+\begin{lstlisting}[style=styleCMake]
+execute_process(COMMAND <cmd1> [<arguments>]
+				[COMMAND <cmd2> [<arguments>]]...
+				[WORKING_DIRECTORY <directory>]
+				[TIMEOUT <seconds>]
+				[RESULT_VARIABLE <variable>]
+				[RESULTS_VARIABLE <variable>]
+				[OUTPUT_VARIABLE <variable>]
+				[ERROR_VARIABLE <variable>]
+				[INPUT_FILE <file>]
+				[OUTPUT_FILE <file>]
+				[ERROR_FILE <file>]
+				[OUTPUT_QUIET]
+				[ERROR_QUIET]
+				[COMMAND_ECHO <where>]
+				[OUTPUT_STRIP_TRAILING_WHITESPACE]
+				[ERROR_STRIP_TRAILING_WHITESPACE]
+				[ENCODING <name>]
+				[ECHO_OUTPUT_VARIABLE]
+				[ECHO_ERROR_VARIABLE]
+				[COMMAND_ERROR_IS_FATAL <ANY|LAST>])
+\end{lstlisting}
+
+The execute\_process function takes a list of COMMAND properties to be executed in WORKING\_DIRECTORY. The return codes of the last command to be executed can be stored in the variable defined with RESULT\_VARIABLE. Alternatively, a semicolonseparated list of variables can be passed to RESULTS\_VARIABLE. If you're using the list version, the commands will store the return codes of the commands in the same order as the variables that have been defined. If fewer variables have been defined than commands, any surplus return codes will be ignored. If a TIMEOUT value was defined and any of the child processes failed to return, the result variables will contain timeout. Since CMake version 3.19, the convenient COMMAND\_ERROR\_IS\_FATAL option is available, which tells CMake to abort execution if any (or just the last) of the processes fails. This is much more convenient than retrieving all the return codes and then checking them individually after their execution. In the following example, if any of the commands return a non-zero value, the configuration step of CMake will fail with an error:
+
+\begin{lstlisting}[style=styleCMake]
+execute_process(
+	COMMAND SomeExecutable
+	COMMAND AnotherExecutable
+	COMMAND_ERROR_IS_FATAL_ANY
+)
+\end{lstlisting}
+
+Any output to stdout or stderr can be captured using the OUTPUT\_VARIABLE or ERROR\_VARIABLE variable, respectively. As an alternative, they can be redirected to files by using OUTPUT\_FILE or ERROR\_FILE or can be completely ignored by passing OUTPUT\_QUIET or ERROR\_QUIET. Capturing the output in both a variable and a file is not possible and will result in either of the two being empty. Which one is kept and which is discarded depends on the platform. If not, the OUTPUT\_* option specifies that the output is sent to the CMake process itself.
+
+If the output is captured in a variable but can still be displayed, ECHO\_<STREAM>\_VARIABLE can be added. CMake can also be told to output the command itself by passing STDOUT, STDERR, or NONE to the COMMAND\_ECHO option. However, if the output is captured in files, this will have no effect. If the same variable or file is specified for both stdout and stderr, then the results will be merged. If necessary, the input stream of the first command can be controlled by passing a file to the INPUT\_FILE option.
+
+The output to variables can be controlled in a limited way by using the <STREAM>\_STRIP\_TRAILING\_WHITESPACE option, which will trim any white spaces at the end of the output. When you're redirecting output to files, this has no effect. On Windows, the ENCODING option can be used to control the output. It takes the following values:
+
+\begin{itemize}
+\item 
+NONE: Performs no reencoding. This will keep CMake's internal encoding, which is UTF-8.
+
+\item 
+AUTO: Uses the current console's encoding. If this is not available, it uses ANSI.
+
+\item 
+ANSI: Uses the ANSI code page for encoding.
+
+\item 
+OEM: Uses the code page defined by the platform.
+
+\item 
+UTF8 or UTF-8: Forced to use the UTF-8 encoding.
+\end{itemize}
+
+A common reason for using execute\_process is gathering information that is needed for a build and then passing it to the project. Consider an example where we would like to compile the Git revision into an executable by passing it as a preprocessor definition. The downside of this approach is that for the custom tasks to be executed, CMake has to be invoked, not just the build system. So, using add\_custom\_command with an OUTPUT parameter would probably be the more realistic solution here, but for illustrative purposes, this example should serve well enough. The following is an example where the Git hash is read out at configuration time and passed as a compile definition to a target:
+
+\begin{lstlisting}[style=styleCMake]
+find_package(Git REQUIRED)
+execute_process(COMMAND ${GIT_EXECUTABLE} "rev-parse" "--short"
+	"HEAD"
+OUTPUT_VARIABLE GIT_REVISION
+OUTPUT_STRIP_TRAILING_WHITESPACE
+COMMAND_ERROR_IS_FATAL ANY
+WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(SomeExe src/main.cpp)
+target_compile_definitions(SomeExe PRIVATE VERSION=
+	\"${GIT_REVISION}\")
+\end{lstlisting}
+
+In this example, the git command that's passed to execute\_process is executed in the directory containing the CMakeLists.txt file, which is currently being executed. The resulting hash is stored in the GIT\_REVISION variable and if the command fails for any reason, the configuration process is halted with an error.
+
+Passing the information from execute\_process into the compiler by using a preprocessor definition is far from optimal. A much nicer solution would be if we could generate a header file to be included that contains this information. CMake has another feature called configure\_file that can be used for this purpose, as we will see in the next section.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

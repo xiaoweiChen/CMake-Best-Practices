@@ -1,0 +1,110 @@
+A relatively common task when building software is that some files must be copied to a specific location or modified before the build. In the Executing custom tasks at configuration time section, we saw an example where the Git revision was retrieved and passed to the compiler as a preprocessor definition. A much nicer way to do this would be to generate a header file containing the necessary information. While just echoing the code snippet and writing it into a file would be possible, it is dangerous as it may lead to platform-specific code. CMake's solution to this is the configure\_file command, which can copy files from one location to another and modify their content while doing so. The signature of configure\_file is as follows:
+
+\begin{lstlisting}[style=styleCMake]
+configure_file(<input> <output>
+				NO_SOURCE_PERMISSIONS | USE_SOURCE_PERMISSIONS |
+					FILE_PERMISSIONS <permissions>...]
+				[COPYONLY] [ESCAPE_QUOTES] [@ONLY]
+				[NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
+\end{lstlisting}
+
+The configure\_file function will copy the <input> file to the <output> file. If necessary, the path to the output file will be created, and paths can be relative or absolute. If you're using relative paths, the input file will be searched from the current source directory but the path of the output file will be relative to the current build directory. If the output file cannot be written, the command will fail and the configuration will be halted. By default, the output file has the same permissions as the target file, although ownership may change if the current user is a different one than the one that the input file belongs to. If NO\_SOURCE\_PERMISSION is added, the permissions are not transferred and the output file gets the default rw-r-{}-r-{}- value. Alternatively, the permissions can be manually specified with the FILE\_PERMISSIONS option, which takes a three-digit number as an argument. USE\_SOURCE\_PERMISSION is already the default and the option is only there to state the intent more explicitly.
+
+As we mentioned earlier, configure\_file will also replace parts of the input file when you're copying to the output path unless COPYONLY is passed. By default, configure\_file will replace all the variables referenced as \$\{SOME\_VARIABLE\} or @SOME\_VARIABLE@ with the value of any variable of the same name. If a variable is defined in CMakeLists.txt, when configure\_file is called, the respective value is written into the output file. If a variable is not specified, the output file will contain an empty string in the respective place. Consider a hello.txt.in file that contains the following information:
+
+\begin{lstlisting}[style=styleCMake]
+Hello ${GUEST} from @GREETER@
+\end{lstlisting}
+
+In a CMakeLists.txt file, the configure\_file function is used to configure the hello.txt.in file:
+
+\begin{lstlisting}[style=styleCMake]
+set(GUEST "World")
+set(GREETER "The Universe")
+configure_file(hello.txt.in hello.txt)
+\end{lstlisting}
+
+In this example, the resulting hello.txt file will contain Hello World from The Universe. If the @ONLY option is passed to configure\_file, only @GREETER@ would be replaced and the resulting content would be Hello \$\{GUEST\} from The Universe. Using @ONLY is useful when you're transforming CMake files that may contain brace-enclosed variables that should not be replaced. ESCAPE\_QUOTES will escape any quotes in the target file with a backslash. By default, configure\_file will transform the newline character so that the target file matches the current platform. The default behavior can be changed by setting NEWLINE\_STYLE. UNIX or LF will use \verb|\|n for newlines, while DOS, WIN32, and CRLF will use \verb|\|r\verb|\|n. Setting the NEWLINE\_STYLE and COPYONLY options together will cause an error. Note that setting COPYONLY will not affect the newline style.
+
+Let's go back to the example where we want to compile the Git revision into an executable. Here, we would write a header file as input. It may contain a line that looks like this:
+
+\begin{lstlisting}[style=styleCMake]
+#define CMAKE_BEST_PRACTICES_VERSION "@GIT_REVISION@"
+The CMakeLists.txt could look something like this:
+execute_process(
+	COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+	OUTPUT_VARIABLE GIT_REVISION
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	COMMAND_ERROR_IS_FATAL ANY
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+
+configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src
+	/version.h @ONLY)
+\end{lstlisting}
+
+As shown in the example in the previous section, where the version information was passed as a compile definition, the Git revision is first retrieved with execute\_process. Later, the file is copied using configure\_file, and @GIT\_REVISION@ is replaced with the short hash of the current commit.
+
+When you're working with preprocessor definitions, configure\_file will replace any lines in the form of \#cmakedefine VAR ... with either \#define VAR or /* undef VAR */, depending on whether VAR contains a value that CMake interprets as true or false.
+
+Consider a file called version.in.h that contains the following two lines:
+
+\begin{lstlisting}[style=styleCMake]
+#cmakedefine GIT_VERSION_ENABLE
+#cmakedefine GIT_VERSION "@GIT_REVISION@"
+\end{lstlisting}
+
+The accompanying CMakeLists.txt file may look like this:
+
+\begin{lstlisting}[style=styleCMake]
+option(GIT_VERSION_ENABLE "Define revision in a header file"
+	ON)
+if(GIT_VERSION_ENABLE)
+	execute_process(
+		COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+		OUTPUT_VARIABLE GIT_REVISION
+		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+	)
+endif()
+
+configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/
+	version.h @ONLY)
+\end{lstlisting}
+
+Once the configuration has been run, if GIT\_REVISION\_ENABLE is on, the resulting file will contain the following output:
+
+\begin{lstlisting}[style=styleCXX]
+#define GIT_VERSION_ENABLE
+#define CMAKE_BEST_PRACTICES_VERSION "c030d83"
+\end{lstlisting}
+
+If GIT\_REVISION\_ENABLE is off, the resulting file will contain the following output:
+
+\begin{lstlisting}[style=styleCXX]
+/* #undef GIT_VERSION_ENABLE */
+/* #undef GIT_REVISION */
+\end{lstlisting}
+
+All in all, the configure\_file command is quite useful for preparing input for a build. Apart from generating source files, it is often used to generate CMake files that are then included in a CMakeLists.txt file. One of the strengths of this is that it allows for the platform-independent copying and modification of files, which is a major advantage when you're working cross-platform. Since configure\_file and execute\_process often go hand in hand, ensure that the commands that are executed are also platformindependent. In the next section, you will learn how CMake can be used to define platform-agnostic commands and scripts.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

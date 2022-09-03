@@ -1,0 +1,89 @@
+
+Software projects, either directly or indirectly, span multiple code repositories. Dealing with local project code is the easiest, but software projects are rarely standalone. Things may get complicated really fast without a proper dependency management strategy. The first recommendation of this chapter is to use a package manager if you can. Package managers greatly reduce the effort spent on dependency management. If you are not able to use a package manager, you may need to roll your very own mini project-specific package manager, which is called a super-build.
+
+Super-builds are mostly used for making a project self-sufficient dependency-wise, which means the project is able to satisfy its very own dependencies without the intervention of the user. Having such an ability is very convenient for all consumers. To demonstrate this technique, we will start with an example of such a scenario. Let's begin.
+
+
+\subsubsubsection{10.3.1\hspace{0.2cm}The recommended way – FetchContent}
+
+We will be following Chapter 10, Example 01 for this part. Let's start by inspecting Chapter 10, Example 01's CMakeLists.txt file, as usual. The first seven lines are left out for simplicity:
+
+\begin{lstlisting}[style=styleCMake]
+if(CH10_EX01_USE_SUPERBUILD)
+	include(superbuild.cmake)
+else()
+	find_package(GTest 1.10.0 REQUIRED)
+	find_package(benchmark 1.6.1 REQUIRED)
+endif()
+
+add_executable(ch10_ex01_tests)
+target_sources(ch10_ex01_tests PRIVATE src/tests.cpp)
+target_link_libraries(ch10_ex01_tests PRIVATE GTest::Main)
+
+add_executable(ch10_ex01_benchmarks)
+target_sources(ch10_ex01_benchmarks PRIVATE src
+	/benchmarks.cpp)
+target_link_libraries(ch10_ex01_benchmarks PRIVATE
+	benchmark::benchmark)
+\end{lstlisting}
+
+As we can see, it is a simple CMakeLists.txt file that defines two targets, named ch10\_ex01\_tests and ch10\_ex01\_benchmarks. These targets depend on Google Test and Google Benchmark libraries, respectively. These libraries are found and defined by either the super-build or the find\_package(…) calls, depending on the CH10\_EX01\_USE\_SUPERBUILD variable. The find\_package(…) path is the way we have followed until now. Let's inspect the super-build file, superbuild.cmake, together:
+
+\begin{lstlisting}[style=styleCMake]
+include(FetchContent)
+FetchContent_Declare(benchmark
+	GIT_REPOSITORY https://github.com/google/benchmark.git
+	GIT_TAG v1.6.1
+)
+FetchContent_Declare(GTest
+	GIT_REPOSITORY https://github.com/google/googletest.git
+	GIT_TAG release-1.10.0
+)
+FetchContent_MakeAvailable(GTest benchmark)
+add_library(GTest::Main ALIAS gtest_main)
+\end{lstlisting}
+
+In the first line, the FetchContent CMake module is included, since we are going to utilize it for the dependencies. In the following six lines, the FetchContent\_Declare function is used to declare two external targets, benchmark and GTest, which are instructed to be fetched via Git. Consequently, the FetchContent\_MakeAvailable(…) function is called to make the declared targets available. Lastly, an add\_library(…) call is made for defining an alias target named GTest::Main for the gtest\_main target. This is done to keep the compatibility between find\_package(…) and super-build target names. There is no alias target defined for benchmark, since its find\_package(…) and super-build target names are already compatible.
+
+Let's configure and build the example by invoking the following commands:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_10/ex01_external_deps
+cmake -S ./ -B build -DCH10_EX01_USE_SUPERBUILD:BOOL=ON
+cmake --build build/ --parallel $(nproc)
+\end{tcblisting}
+
+In the first two lines, we are going into the example\_10/ folder and configuring the project. Note that we are setting the CH10\_EX01\_USE\_SUPERBUILD variable to ON in order to enable the super-build code. In the last line, we are building the project with N parallel jobs, where N is the result of the nproc command.
+ 
+Thanks to the alternate find\_package(...) path, the build will also work fine without enabling the super-build, given that google test >= 1.10.0 and google benchmark >= 1.6.1 are available in the environment. This will allow package maintainers to change dependency versions without patching the project. Small customization points such as this are important for portability and reproducibility.
+
+Up next, we'll be taking a look at a super-build example that uses the ExternalProject module instead of the FetchContent module.
+
+\subsubsubsection{10.3.2\hspace{0.2cm}The legacy way – ExternalProject\_Add}
+
+
+
+
+
+
+
+
+
+\subsubsubsection{10.3.3\hspace{0.2cm}Bonus – using the Qt 6 framework with a super-build}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

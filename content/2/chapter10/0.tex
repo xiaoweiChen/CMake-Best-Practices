@@ -1,0 +1,35 @@
+As we should have learned by now, every big project comes with its own set of dependencies. The easiest way of dealing with these dependencies is by using a package manager, such as Conan or vcpkg. But using a package manager might not always be possible or feasible, due to company policies, project requirements, or lack of resources. Thus, the project authors might consult the traditional, old-style ways to deal with the dependencies. The usual way of dealing with these dependencies may include shipping all dependencies embedded into the repository's build code. Alternatively, project authors may decide to let the end user deal with the dependencies from scratch. Neither of these ways is clean and has its own drawbacks. What if I told you there is a middle ground? Welcome to the super-build approach.
+
+A super-build is a method that can be used for decoupling the logic required for satisfying dependencies from project code, similar to how package managers work. In fact, we can call this method the poor man's package manager. Separating the dependency logic from the project code allows us to have a more flexible and maintainable project structure. In this chapter, we will learn how to achieve this in detail.
+
+To understand the skills shared in this chapter, we'll cover the following main topics:
+
+\begin{itemize}
+\item 
+The requirements and prerequisites for a super-build
+
+\item 
+Building across multiple code repositories
+
+\item 
+Ensuring version consistency in a super-build
+\end{itemize}
+
+Let's begin with the technical requirements.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

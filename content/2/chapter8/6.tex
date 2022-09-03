@@ -1,3 +1,99 @@
 
+One of the keystones for the success of CMake is that it allows you to build the same software on a multitude of platforms. On the other hand, this means that CMakeLists. txt must be written in a way that does not assume a certain platform or compiler must be used. This can be challenging, especially when you're working with custom tasks. A big help here is that the cmake command-line utility supports the -E flag, which can be used to perform common tasks such as file operations and creating hashes. Most of the cmake -E commands are for file-related operations such as creating, copying, renaming, and deleting files, as well as creating directories. On systems that support filesystem links, CMake can also create symbolic links or hard links between files. Additionally, CMake can create file archives using the tar command and concatenate text files with the cat command. It can also be used to create various hashes for files.
+
+There are also a few operations that provide information about the current system. The capabilities operation will print out CMake's capabilities, such as knowing which generators are supported and the version that CMake is currently running. The environment command will print a list of environment variables that have been set.
+
+You can get a full reference to the command-line options by running cmake -E without any other arguments. The online documentation for CMake can be found at \url{https://cmake.org/cmake/help/v3.21/manual/cmake.1.html#run-a-commandline-tool}.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Platform-Agnostic File Operations]
+Whenever file operations must be performed by a custom task, use cmake –E .
+\end{tcolorbox}
+
+With cmake -E, you can get pretty far in most cases. Sometimes, however, more complex operations need to be done. For this, CMake can run in script mode, which executes CMake files.
 
 \subsubsubsection{8.6.1\hspace{0.2cm}Executing CMake files as scripts}
+
+CMake's script mode is a very powerful feature when it comes to creating cross-platform scripts. It's powerful because it allows you to create scripts that are completely platformagnostic. By invoking cmake -P <script>.cmake, the specified CMake file is executed. The script files may not contain any commands that define a build target. Arguments may be passed as variables with the -D flag, but this must be done before the -P option. Alternatively, the arguments may just be appended after the script name so that they can be retrieved with the CMAKE\_ARGV[n] variables. The number of arguments is stored in the CMAKE\_ARGC variable. The following script, which generates the hash of a file and stores it in another, demonstrates how to use positional arguments: 
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+if(CMAKE_ARGC LESS 5)
+	message(FATAL_ERROR "Usage: cmake -P CreateSha256.cmake
+		file_to_hash target_file")
+endif()
+set(FILE_TO_HASH ${CMAKE_ARGV3})
+set(TARGET_FILE ${CMAKE_ARGV4})
+# Read the source file and generate the hash for it
+file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
+# write the hash to a new file
+file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
+\end{lstlisting}
+
+This script can be invoked with cmake -P CreateSha256.cmake <input\_file> <output\_file>. Note that the first three arguments are occupied with cmake, -P, and the name of the script (CreateSha256.cmake). Although not strictly required, script files should always contain a cmake\_minimum\_required statement at the beginning. An alternative way to define the script without positional arguments would be as follows:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+if(NOT FILE_TO_HASH OR NOT TARGET_FILE)
+	message(FATAL_ERROR "Usage: cmake –DFILE_TO_HASH=<intput_file> 
+		-DTARGET_FILE=<target file> -P CreateSha256.cmake")
+endif()
+# Read the source file and generate the hash for it
+file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
+# write the hash to a new file
+file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
+\end{lstlisting}
+
+In this case, the script would have to be invoked with the variables passed explicitly, like so:
+
+\begin{tcblisting}{commandshell={}}
+cmake –DFILE_TO_HASH=<input>
+      -DTARGET_FILE=<target> -P CreateSha256.cmake
+\end{tcblisting}
+
+These two approaches can also be combined. A common pattern is to expect all simple mandatory arguments as positional arguments and any optional or more complex arguments as defined variables. Combining the script mode with add\_custom\_command, add\_custom\_target, or execute\_process is a good way to create platform-independent build instructions. An example of generating hashes from the earlier sections could look like this:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_target(Create_hash_target ALL
+COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/
+	CreateSha256.cmake $<TARGET_FILE:SomeTarget>
+		${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
+)
+
+add_custom_command(TARGET SomeTarget
+POST_BUILD
+COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
+	/CreateSha256.cmake $<TARGET_FILE:SomeTarget>
+		${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
+)
+\end{lstlisting}
+
+Combining the script mode of CMake with the various ways to execute custom commands during the configuration or build phase of a project provides a lot of freedom when you're defining build processes, even for different platforms. However, one word of warning is that adding too much logic to a build process may make it harder to maintain than it should be. Whenever you need to write a script or add a custom command to a CMakeLists.txt file, it pays to take a quick break and consider whether this step belongs to the build process or whether it is something better left to the user when they're setting up the development environment.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

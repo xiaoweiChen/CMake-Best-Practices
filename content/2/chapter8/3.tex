@@ -1,4 +1,193 @@
 
+
+
+The most generic way to add a custom task is by creating a custom target that executes an external task as a sequence of commands. Custom targets are handled like any other library or executable target, with the difference that they do not invoke the compiler and linker; instead, they do something defined by the user. Custom targets are defined using the add\_custom\_target command:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_target(Name [ALL] [command1 [args1...]]
+				[COMMAND command2 [args2...] ...]
+				[DEPENDS depend depend depend ... ]
+				[BYPRODUCTS [files...]]
+				[WORKING_DIRECTORY dir]
+				[COMMENT comment]
+				[JOB_POOL job_pool]
+				[VERBATIM] [USES_TERMINAL]
+				[COMMAND_EXPAND_LISTS]
+				[SOURCES src1 [src2...]])
+\end{lstlisting}
+
+The core of the add\_custom\_target command is the list of commands that are passed with the COMMAND option. Although the first command can be passed without this option, it is good practice to always add the COMMAND option to any add\_custom\_target call. By default, custom targets are only executed if they're explicitly requested unless the ALL option is specified. Custom targets are always considered to be out of date, so the commands that are specified internally are always run, regardless of whether they produce the same result over and over again. With the DEPENDS keyword, custom targets can be made to depend on the files and outputs of custom commands that have been defined with the add\_custom\_command function or by other targets. To make the custom target depend on another target, use the add\_dependencies function. The same works the other way round – any target may depend on a custom target. If the custom target creates files, these can be listed under the BYPRODUCTS option. Any file that's listed there will be marked with the GENERATED property, which is used by CMake to determine whether a build is out of date and to find out which files to clean. However, tasks that create files using add\_custom\_command might be better suited, as described later in this section.
+
+By default, these commands are executed in the current binary directory, which is stored in the CMAKE\_CURRENT\_BINARY\_DIRECTORY cache variable. If needed, this can be changed with the WORKIN\_DIRECTORY option. This option can either be an absolute path or a relative path if it is a relative path to the current binary directory.
+
+The COMMENT option is used to specify a message that is printed right before the command runs, which can come in handy if a command runs silently. Unfortunately, not all generators show these messages, so using this to display critical information is somewhat unreliable.
+
+The VERBATIM flag causes all the commands to be passed directly to the platform without further escaping or variable substitution by the underlying shell. CMake itself will still replace variables that are passed to the commands or the arguments. Whenever escaping might be an issue, passing the VERBATIM flag is recommended. It is also good practice to write custom tasks so that they are independent of the underlying platform. You can find more hints about how to create platform-independent commands later in this chapter in the Using CMake for platform-independent commands section.
+
+The USES\_TERMINAL option instructs CMake to give the command access to the terminal if possible. If the Ninja generator is used, this means that it runs in the terminal job pool. All the commands in this pool are executed serially.
+
+The JOB\_POOL option can be used when you're generating with Ninja to control the concurrency of the job. It is rarely used and cannot be used together with the USES\_TERMINAL flag. You will rarely need to interfere with Ninja's job pool and handling it is not trivial. If you wish to learn more, further information can be found in the official documentation for CMake's JOB\_POOLS property.
+
+The SOURCES properties take a list of source files that are associated with the custom target. The property does not affect the source files but can help make the files visible in some IDEs. If a command relies on files such as scripts that are delivered together with the project, these should be added here.
+
+The COMMAND\_EXPAND\_LISTS option tells CMake to expand lists before passing them to the command. This is sometimes necessary because, in CMake, lists are just strings separated by semicolons, which may lead to syntax errors. When you're passing the COMMAND\_EXPAND\_LISTS option, the semicolons are replaced with a suitable whitespace character, depending on the platform. The expansion includes lists that have been generated using the \$<JOIN: generator expression.
+
+The following is an example of a custom target that uses an external program called CreateHash to create a hash for the output of another target:
+
+\begin{lstlisting}[style=styleCMake]
+add_executable(SomeExe)
+add_custom_target(CreateHash ALL COMMAND Somehasher
+	$<TARGET_FILE:SomeExe>)
+\end{lstlisting}
+
+This example creates a custom target called CreateHash that invokes the external SomeHasher program with the binary file of the SomeExe target as an argument. Note that the binary file is retrieved using the \$<TARGET\_FILE:SomeExe> generator expression. This serves two purposes: it removes the need for the user to track the filename of the binary of the target and it adds an implicit dependency between the two targets. CMake will recognize these implicit dependencies and execute the targets in the correct order. If the target that produces the needed file hasn't been built yet, CMake will automatically build it. You can also use the \$<TARGET\_FILE: generator to directly execute an executable that's been created by another target. The following generator expressions cause implicit dependencies between targets:
+
+\begin{itemize}
+\item 
+\$<TARGET\_FILE:target>: This contains the full path to the main binary file of the target, such as.exe, .so, or .dll.
+
+\item 
+\$<TARGET\_LINKER\_FILE: target>: This contains the full path to the file that's used for linking against the target. This is usually the library file itself, except on Windows, where it will be the .lib file associated with the DLL.
+
+\item 
+\$<TARGET\_SONAME\_FILE: target>: This contains the library file and its full name, including any number that's been set by the SOVERSION property, such as.so.3.
+
+\item
+\$<TARGET\_PDB\_FILE: target>: This contains the full path to the generated program database file that's used for debugging. Creating custom targets is one way to execute external tasks during build time. Another way is to define custom commands. Custom commands can be used to add custom tasks to existing targets, including custom targets.
+\end{itemize}
+
 \subsubsubsection{8.3.1\hspace{0.2cm}Adding custom tasks to existing targets}
 
+Sometimes, you may need to perform an additional, external task when building a target. In CMake, you can achieve this with add\_custom\_command, which has two signatures. One is used to hook commands into existing targets, while the other is used to generate files. We will cover this later in this section. The signature for adding commands to an existing target looks like this:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_command(TARGET <target>
+					PRE_BUILD | PRE_LINK | POST_BUILD
+					COMMAND command1 [ARGS] [args1...]
+					[COMMAND command2 [ARGS] [args2...] ...]
+					[BYPRODUCTS [files...]]
+					[WORKING_DIRECTORY dir]
+					[COMMENT comment]
+					[VERBATIM] [USES_TERMINAL]
+					[COMMAND_EXPAND_LISTS])
+\end{lstlisting}
+
+Most of the options work similarly to those in add\_custom\_target, as described earlier. The TARGET property can be any target that is defined in the current directory, which is a limitation of the command, although it is rarely an issue. Commands can be hooked into the build at the following times:
+
+\begin{itemize}
+\item 
+PRE\_BUILD: In Visual Studio, this command is executed before any other build steps are executed. When you're using other generators, it will run just before the PRE\_LINK commands.
+
+\item 
+PRE\_LINK: This command will be run after the sources have been compiled, but before the executable or the archiver tool has been linked to static libraries.
+
+\item 
+POS\_BUILD: This runs the command after all the other build rules have been executed.
+\end{itemize}
+
+The most common way to execute custom steps is by using POST\_BUILD; the other two are rarely used either because of limited support or because they can neither influence the linking nor the build.
+
+Adding a custom command to an existing target is relatively straightforward. The following code adds a command that generates and stores the hash of a built file after each compilation:
+
+\begin{lstlisting}[style=styleCMake]
+add_executable(MyExecutable)
+
+add_custom_command(TARGET MyExecutable
+	POST_BUILD
+	COMMAND hasher $<TARGET_FILE:ch8_custom_command_example>
+		${CMAKE_CURRENT_BINARY_DIR}/MyExecutable.sha256
+	COMMENT "Creating hash for MyExecutable"
+)
+\end{lstlisting}
+
+In this example, a custom executable called hasher is being used to generate the hash of the output file of the MyExectuable target.
+
+Often, the reason you may need to execute something before a build is to change files or to generate additional information. For this, the second signature is often the better choice. Let's take a closer look.
+
 \subsubsubsection{8.3.2\hspace{0.2cm}Generating files with custom tasks}
+
+Typically, we want custom tasks to produce a specific output file. This can be done by defining custom targets and setting the necessary dependencies between the targets, or by hooking into the build steps, as described earlier. Unfortunately, the PRE\_BUILD hook is unreliable because only the Visual Studio generator supports it properly. So, a better way to do this is to create a custom command that creates the file by using the second signature of the add\_custom\_command function:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_command(OUTPUT output1 [output2 ...]
+					COMMAND command1 [ARGS] [args1...]
+					[COMMAND command2 [ARGS] [args2...] ...]
+					[MAIN_DEPENDENCY depend]
+					[DEPENDS [depends...]]
+					[BYPRODUCTS [files...]]
+					[IMPLICIT_DEPENDS <lang1> depend1
+									 [<lang2> depend2] ...]
+					[WORKING_DIRECTORY dir]
+					[COMMENT comment]
+					[DEPFILE depfile]
+					[JOB_POOL job_pool]
+					[VERBATIM] [APPEND] [USES_TERMINAL]
+					[COMMAND_EXPAND_LISTS])
+\end{lstlisting}
+
+This signature of add\_custom\_command defines a command that generates a file specified in OUTPUT. Most of the options of the command are very similar to add\_custom\_target and the signature for hooking custom tasks into build steps. The DEPENDS option can be used to manually specify a dependency to either files or targets. Note that in comparison, the DEPENDS option of custom targets can only point to files. If any of the dependencies are updated by a build or by CMake, the custom command is run again. The MAIN\_DEPENDENCY option is closely related, which specifies the primary input file for the command. It works like the DEPENDS option does, except that it only takes one file. MAIN\_DEPENDENCY is mainly used to tell Visual Studio where to add the custom command.
+
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
+If a source file is listed as MAIN\_DEPENDENCY, then the custom command replaces the normal compilation of the file listed, which can lead to linker errors.
+\end{tcolorbox}
+
+The other two dependency-related options, IMPLICIT\_DEPENDS and DEPFILE, are rarely used because their support is limited to the Makefile generator. IMPLICT\_DEPENDS tells CMake to use a C or C++ scanner to detect any compile-time dependencies of the files listed and create the dependencies from that. The other option, DEPFILE, can be used to point to a .d dependency file, which is generated by the Makefile project. The .d files originally stem from the GNU make project and can be powerful to use but are also complex and should not be manually managed for most projects. The following example illustrates how a custom command can be used to generate a source file before a regular target is run, based on another file that is being used for input:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
+	COMMAND sourceFileGenerator ${CMAKE_CURRENT_SOURCE_DIR}/
+		message.txt
+	${CMAKE_CURRENT_BINARY_DIR}/main.cpp
+	COMMENT "Creating main.cpp frommessage.txt"
+	DEPENDS message.txt
+	VERBATIM
+)
+add_executable(
+	ch8_create_source_file_example
+	${CMAKE_CURRENT_BINARY_DIR}/main.cpp
+)
+\end{lstlisting}
+
+Several things are happening in this example. First, the custom command defines the main.cpp file in the current binary directive as an OUTPUT file. Then, the command that generates this file is defined – here, this is using an imaginary program called sourceFileGenerator – which converts a message file into a .cpp file. The DEPENDS part states that this command should be rerun every time the message.txt file changes.
+
+Later, the target for the executable is created. Since the executable is referencing the main.cpp file specified in the OUTPUT section of the custom command, CMake will implicitly add the necessary dependency between the command and the target. Using custom commands in this way is much more reliable and portable than using the PRE\_BUILD directive as it works with all generators. Sometimes, to create the desired output, more than one command is needed. If a previous
+
+command that produces the same output exists, commands can be chained by using the APPEND option. Custom commands that use APPEND may only define additional COMMAND and DEPENDS options; the other options are ignored. If two commands produce the same output file, CMake will print an error unless APPEND is specified. This is mainly useful if a command is only optionally executed. Consider the following example:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_command(OUTPUT archive.tar.gz
+	COMMAND cmake -E tar czf ${CMAKE_CURRENT_BINARY_DIR}/archive.tar.gz
+	$<TARGET_FILE:MyTarget>
+	COMMENT "Creating Archive for MyTarget"
+	VERBATIM
+)
+
+add_custom_command(OUTPUT archive.tar.gz
+	COMMAND cmake -E tar czf ${CMAKE_CURRENT_BINARY_DIR}/archive.
+	tar.gz
+	${CMAKE_CURRENT_SOURCE_DIR}/SomeFile.txt
+	APPEND
+)
+\end{lstlisting}
+
+In this example, the output file of a target, MyTarget, has been added to a tar.gz archive; later, another file is added to the same archive. Note that the first command automatically depends on MyTarget because it uses the binary file that was created in the  command. However, it will not automatically be executed by a build. The second custom command lists the same output file as the first command but adds the compressed file as a second output. By specifying APPEND, the second command is automatically executed whenever the first command is executed. If the APPEND keyword is missing, CMake will print out an error, similar to the following:
+
+\begin{tcblisting}{commandshell={}}
+CMake Error at CMakeLists.txt:30 (add_custom_command):
+  Attempt to add a custom rule to output
+    /create_hash_example/build/hash_example.md5.rule
+  which already has a custom rule.
+\end{tcblisting}
+
+As we mentioned previously, the custom commands in this example implicitly depend on MyTarget but they will not be executed automatically. To execute them, the recommended practice is to create a custom target that depends on the output file, which can be generated like so:
+
+\begin{lstlisting}[style=styleCMake]
+add_custom_target(create_archive ALL DEPENDS
+	${CMAKE_CURRENT_BINARY_DIR}/archive.tar.gz
+)
+\end{lstlisting}
+
+Here, a custom target called create\_archive has been created that is executed as part of the All build. Since it depends on the output of the custom commands, building the target will invoke the custom commands. The custom commands, in turn, depend on MyTarget, so building create\_archive will also trigger a build of MyTarget if it is not already up to date.
+
+Both the add\_custom\_command and add\_custom\_target custom tasks are executed during the build step of CMake. It is possible to add tasks at configuration time if necessary. We'll look at this in the next section.
+
