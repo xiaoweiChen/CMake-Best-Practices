@@ -1,0 +1,38 @@
+Before further ado, let's learn a bit about fuzzing itself. Fuzzing, or fuzz testing, is a testing method that feeds random, unexpected data to a software system to see how a system behaves with certain input. The fuzzer reports the unexpected behaviors that it encounters. This allows us to discover critical bugs that are otherwise missed by other testing strategies and code reviews. Finding whether input causes a security issue or failure has proven to be hard. Surprisingly, fuzzing is pretty effective against this. It is known that the vast majority of critical security bugs such as remote code execution or privilege escalation can be discovered with ease when fuzzing is employed correctly. Therefore, it is important to understand the fuzzing technique to harness the power that comes with it.
+
+Fuzzing can be done either manually by hand or automatically with the help of software. The second approach is more favorable, since it allows us to harness computing power for fuzzing. A corpus-based, coverage-guided fuzzing tool is a must-have in many software projects. Luckily for us, quite decent tooling is available for fuzzing C and C++ projects. Fuzzing can be basically divided into two sub-categories – guided and black-box fuzzing. Black-box fuzzing is the brute-force way that only relies on System-Under-Test (SUT)'s reactions to the fuzzing input, whereas guided fuzzing is guided automatically by either coverage analysis or the user itself. Guided fuzzing can be considered as white-box testing or gray-box testing, since guiding relies on feedback from the implementation. Guided fuzzing is a good way to discover the unknown edge-cases of software.
+
+The generated input should not be random to make the fuzzing process effective. The input should be valid enough to pass from the fuzzed target's initial basic checks so that the fuzzer can delve into the delicate parts of the system. Therefore, a user may need to kick-start a fuzzer by providing a set of inputs that provides the most coverage to the SUT. That set of inputs is known as the corpus. The fuzzer mutates the initial corpus data to generate input variations similar to the original input but triggers different behavior. The input data that triggers an unexpected behavior or covers previously uncovered paths can be saved into the corpus by the fuzzing tool to extend the corpus data for later usage. A fuzzer may also not require any initial corpus data, meaning fuzzing will generate its input data from scratch. We will consider the corpus-based, guided approaches for this chapter.
+
+Before diving any further into the topic, let's state the obvious thing first – fuzzing is not a replacement for other testing strategies or types, such as unit testing or system testing. Fuzzing aims to heuristically discover bugs and unwanted behaviors, so you should use fuzzing to only enhance your existing testing strategy. Note that fuzzing requires your system or unit to be testable. Hence, if you do not have any testing in place yet, it is recommended to invest and learn about the traditional testing strategies first.
+
+Okay, we have learned quite a bit about what fuzzing is. Up next, we will learn how we
+can use the two prominent fuzzing software, AFL++ and libFuzzer, in C and C++ projects. Let's dive right in.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

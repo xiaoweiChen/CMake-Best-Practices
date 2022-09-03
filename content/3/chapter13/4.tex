@@ -1,0 +1,289 @@
+
+In the previous section, we learned about how to use functions and macros to provide useful utility in CMake projects, Now, we can learn about how we can move these functions and macros to a separate CMake module.
+
+Creating and using a simple CMake module file is extremely simple:
+
+\begin{enumerate}
+\item 
+Create a <module\_name>.cmake file under your project.
+
+\item 
+Define any macros/functions in the <module\_name>.cmake file.
+
+\item 
+Include <module\_name>.cmake in the desired file.
+\end{enumerate}
+
+Alright, let's follow these steps and create a module together. As a follow-up to our previous git branch name example, let's extend the scope and write a CMake module that provides the ability to retrieve the branch name, head commit hash, current author name, and current author email information by using the git command. For this part, we will follow the chapter\_13/ex01\_git\_utility example. The example folder contains a CMakeLists.txt file and a git.cmake file under the .cmake folder. Let's start by taking a look at the .cmake/git.cmake file first. The contents of the file are as follows:
+
+\begin{lstlisting}[style=styleCMake]
+# …
+include_guard(DIRECTORY)
+macro(git_get_branch_name result_var_name)
+	execute_process(
+		COMMAND git symbolic-ref -q --short HEAD
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+		OUTPUT_VARIABLE ${result_var_name}
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+		ERROR_QUIET
+	)
+endmacro()
+# … git_get_head_commit_hash(), git_get_config_value()
+\end{lstlisting}
+
+The git.cmake file is the CMake utility module file that contains three macros named git\_get\_branch\_name, git\_get\_head\_commit\_hash, and git\_get\_config\_value respectively. Additionally, there is an include\_guard(DIRECTORY) line at the top of the file. This is analogous to the \#pragma once preprocessor directive in C/C++ and prevents the file from being included more than once. The DIRECTORY parameter denotes that include\_guard is defined at the directory scope and this file can be included once at most within the current directory and below. Alternatively, the GLOBAL parameter can be specified instead of DIRECTORY to limit the inclusion of the file once, regardless of the scope.
+
+To see how we can use the git.cmake module file, let's investigate the CMakeLists. txt file of chapter\_13/ex01\_git\_utility together:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+project(
+	ch13_ex01_git_module
+	VERSION 1.0
+	DESCRIPTION "Chapter 13 Example 01, git utility module
+		example"
+	LANGUAGES CXX)
+# Include the git.cmake module.
+# Full relative path is given, since .cmake/ is not in the 
+# CMAKE_MODULE_PATH
+include(.cmake/git.cmake)
+git_get_branch_name(current_branch_name)
+git_get_head_commit_hash(current_head)
+git_get_config_value("user.name" current_user_name)
+git_get_config_value("user.email" current_user_email)
+
+message(STATUS "-----------------------------------------")
+message(STATUS "VCS (git) info:")
+message(STATUS "\tBranch: ${current_branch_name}")
+message(STATUS "\tCommit hash: ${current_head}")
+message(STATUS "\tAuthor name: ${current_user_name}")
+message(STATUS "\tAuthor e-mail: ${current_user_email}")
+message(STATUS "-----------------------------------------")
+\end{lstlisting}
+
+The CMakeLists.txt file includes the git.cmake file by specifying the full relative path to the module file. The git\_get\_branch\_name, git\_get\_head\_commit\_hash, and git\_get\_config\_value macros provided by the module are used to retrieve the branch name, commit hash, author name, and email to the current\_branch\_name, current\_head, current\_user\_name, and current\_user\_email variables respectively. Lastly, these variables are printed on the screen by the message(…) command. Let's configure the example project to see whether the git module we've just written works as expected:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_13/ex01_git_utility/
+cmake -S ./ -B ./build
+\end{tcblisting}
+
+The output of the command should look similar to this:
+
+\begin{tcblisting}{commandshell={}}
+-- The CXX compiler identification is GNU 9.4.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- -------------------------------------------
+-- VCS (git) info:
+-- Branch: chapter-development/chapter-13
+-- Commit hash: 1d5a32649e74e4132e7b66292ab23aaeed327fdc
+-- Author name: Mustafa Kemal GILOR
+-- Author e-mail: mustafagilor@gmail.com
+-- -------------------------------------------
+-- Configuring done
+-- Generating done
+-- Build files have been written to:
+/home/toor/workspace/CMake-Best-Practices/chapter_13
+/ex01_git_utility/build
+\end{tcblisting}
+
+As we can see, we have succeeded in retrieving the information from the git command. Our first CMake module works as expected.
+
+\subsubsubsection{13.4.1\hspace{0.2cm}Case study – dealing with project metadata files}
+
+Let's continue with another example. Assume that we have an environment file that contains key-value pairs per line. It is not unusual to have external files in the project that contain some metadata about the project (for example, project version and dependencies). The file may be in different formats, such as JSON or new-line separated key-value pairs, as we have in this example. The task at hand is to create a utility module that reads the environment variable file and defines a CMake variable per key-value pair in the file. The contents of the file will look similar to this:
+
+\begin{lstlisting}[style=styleCMake]
+KEY1="Value1"
+KEY2="Value2"
+\end{lstlisting}
+
+For this section, we will follow the chapter\_13/ex02\_envfile\_utility example. Let's begin by examining the contents of .cmake/envfile-utils.cmake first:
+
+\begin{lstlisting}[style=styleCMake]
+include_guard(DIRECTORY)
+function(read_environment_file ENVIRONMENT_FILE_NAME)
+	file(STRINGS ${ENVIRONMENT_FILE_NAME} KVP_LIST ENCODING
+		UTF-8)
+	foreach(ENV_VAR_DECL IN LISTS KVP_LIST)
+		string(STRIP ENV_VAR_DECL ${ENV_VAR_DECL})
+		string(LENGTH ENV_VAR_DECL ENV_VAR_DECL_LEN)
+		if(ENV_VAR_DECL_LEN EQUAL 0)
+			continue()
+		endif()
+		string(SUBSTRING ${ENV_VAR_DECL} 0 1
+			ENV_VAR_DECL_FC)
+		if(ENV_VAR_DECL_FC STREQUAL "#")
+			continue()
+		endif()
+		string(REPLACE "=" ";" ENV_VAR_SPLIT
+		${ENV_VAR_DECL})
+		list(GET ENV_VAR_SPLIT 0 ENV_VAR_NAME)
+		list(GET ENV_VAR_SPLIT 1 ENV_VAR_VALUE)
+		string(REPLACE "\"" "" ENV_VAR_VALUE
+			${ENV_VAR_VALUE})
+		set(${ENV_VAR_NAME} ${ENV_VAR_VALUE} PARENT_SCOPE)
+	endforeach()
+endfunction()
+\end{lstlisting}
+
+The envfile-utils.cmake utility module contains a single function, read\_environment\_file, that reads an environment file in the format of a list of key-value pairs. This function reads all the lines in the file to the KVP\_LIST variable, then iterates through all lines. Each individual line is split by the (=) equals token, then the left side of the equals token is used as the variable name, whereas the right side is used as the variable value to define each key-value pair as a CMake variable. Empty lines and comment lines are skipped. As for the usage of the module, let's have a look into the chapter\_13/ex02\_envfile\_utility/CMakeLists.txt file:
+
+\begin{lstlisting}[style=styleCMake]
+# Add .cmake folder to the module path, so subsequent 
+# include() calls
+# can directly include modules under .cmake/ folder by
+# specifying the name only.
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+	${PROJECT_SOURCE_DIR}/.cmake/)
+add_subdirectory(test-executable)
+\end{lstlisting}
+
+You may have noticed that the .cmake folder is added to the CMAKE\_MODULE\_PATH variable. The CMAKE\_MODULE\_PATH variable is the collection of paths that the include(…) directive will search in. By default, it is empty. This allows us to include the envfile-utils module directly by name in the current and children CMakeLists. txt files. Lastly, let's take a look at the chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt file:
+
+\begin{lstlisting}[style=styleCMake]
+# ....
+# Include the module by name
+include(envfile-utils)
+read_environment_file("${PROJECT_SOURCE_DIR}/
+	variables.env")
+add_executable(ch13_ex02_envfile_utility_test)
+target_sources(ch13_ex02_envfile_utility_test PRIVATE
+	test.cpp)
+target_compile_features(ch13_ex02_envfile_utility_test
+	PRIVATE cxx_std_11)
+target_compile_definitions(ch13_ex02_envfile_utility_test
+	PRIVATE PROJECT_VERSION="${TEST_PROJECT_VERSION}"
+		PROJECT_AUTHOR="${TEST_PROJECT_AUTHOR}")
+\end{lstlisting}
+
+As you can see, the envfile-utils environment file reader module is included by name. This is because the folder that contains the envfile-utils.cmake file is appended to the CMAKE\_MODULE\_PATH variable before. The read\_environment\_file() function is called to read the variables.env file in the same folder. The variables.env file contains the following key-value pairs:
+
+\begin{lstlisting}[style=styleCMake]
+# This file contains some metadata about the project
+TEST_PROJECT_VERSION="1.0.2"
+TEST_PROJECT_AUTHOR="CBP Authors"
+\end{lstlisting}
+
+So, after calling the read\_environment\_file() function, we expect the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR variables to get defined in the current CMake scope, with their respective values specified in the file. To verify that, an executable target named ch13\_ex02\_envfile\_utility\_test is defined, and the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR variables are passed into the target as macro definitions. Lastly, the target's source file, test.cpp, prints the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR macro definitions to the console:
+
+\begin{lstlisting}[style=styleCXX]
+#include <cstdio>
+int main(void) {
+	std::printf("Version '%s', author '%s'\n",
+		TEST_PROJECT_VERSION, TEST_PROJECT_AUTHOR);
+}
+\end{lstlisting}
+
+Alright, let's compile and run the application to see whether this works or not:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_13/ex02_envfile_utility
+cmake -S ./ -B ./build
+cmake --build build
+./build/test-executable/ch13_ex02_envfile_utility_test
+# Will output: Version '1.0.2', author 'CBP Authors'
+\end{tcblisting}
+
+As we can see, we have successfully read a key-value pair-formatted file from our source tree, defined each key-value pair as CMake variables, and then exposed these variables as macro definitions to our application.
+
+Although writing CMake modules is very straightforward, there are a few extra recommendations to consider:
+
+\begin{itemize}
+\item 
+Always use unique names for your functions/macros.
+
+\item 
+Use a common prefix for all module functions/macros.
+
+\item 
+Avoid using constant names for non-function scope variables.
+
+\item 
+Use include\_guard() for your module.
+
+\item 
+If your module prints messages, provide a quiet mode for your module.
+
+\item 
+Do not expose your module's internals.
+
+\item 
+Use macros for simple command wrappers, and functions for everything else.
+\end{itemize}
+
+With that said, we conclude this part of the chapter. Next, we will take a look into ways of sharing CMake modules between projects.
+
+\subsubsubsection{13.4.2\hspace{0.2cm}Recommendations for sharing CMake modules 	between projects}
+
+The recommended way of sharing CMake modules is by maintaining a separate project for CMake modules and then incorporating the project as an external resource, either directly by Git submodules/subtree or CMake's FetchContent/ExternalProject. This way, all reusable CMake utilities can be maintained under a single project and can be propagated to all downstream projects. Putting CMake modules into a repository in an online Git hosting platform (such as GitHub or GitLab) will make using the module convenient for most people. Since CMake supports fetching content directly from Git, it will be straightforward to use the shared libraries.
+
+To demonstrate how we can use an external CMake modules project, we will use an open source CMake utility module project named Hadouken. This project is accessible from \url{https://github.com/mustafakemalgilor/hadouken}. This project contains CMake utility modules for tool integrations, target creation, and feature checks.
+
+For this part, we will follow the chapter\_13/ex03\_hadouken example. This example will fetch Hadouken, and then use the Hadouken project's target creation helper utility. Let's have a look at the CMakeLists.txt file as usual:
+
+\begin{lstlisting}[style=styleCMake]
+cmake_minimum_required(VERSION 3.21)
+project(
+	ch13_ex03_hadouken
+	VERSION 1.0
+	DESCRIPTION "Chapter 13 Example 03, external CMake
+		modules (hadouken) example"
+	LANGUAGES CXX)
+include(FetchContent)
+# Declare hadouken dependency details.
+FetchContent_Declare(hadouken
+	GIT_REPOSITORY https://github.com/mustafakemalgilor
+		/hadouken.git
+	GIT_TAG 7d0447fcadf8e93d25f242b9bb251ecbcf67f8cb
+	SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.hadouken"
+)
+FetchContent_MakeAvailable(hadouken)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
+	${PROJECT_SOURCE_DIR}/.hadouken/cmake/modules/)
+include(misc/Log)
+include(misc/Utility)
+include(core/MakeCompilationUnit)
+include(core/MakeTarget)
+# Create an executable target by using Hadouken's
+# make_target() utility function
+make_target(TYPE EXECUTABLE)
+\end{lstlisting}
+
+In the preceding example, we have used FetchContent\_Declare and FetchContent\_MakeAvailable to retrieve Hadouken into our project. Then, the Hadouken project's module directory is appended into CMAKE\_MODULE\_PATH to use the Hadouken project's CMake utility modules via the include(…) directive. Consequently, the Log, Utility, MakeCompilationUnit, and MakeTarget modules are included. Lastly, the make\_target() function is called to ensure that we can use an external CMake module project's functions.
+
+The make\_target(…) function is provided by the Hadouken project's core/MakeTarget module and is a wrapper function around the add\_executable and add\_library CMake commands. The make\_target(TYPE EXECUTABLE) call is supposed to discover all source files under the src/ folder and create an executable target by calling the add\_executable(…) CMake command. Let's configure and build the project to see whether that is the case or not:
+
+\begin{tcblisting}{commandshell={}}
+cd chapter_13/ex03_hadouken
+cmake -S ./ -B build/
+cmake --build build
+\end{tcblisting}
+
+The output should look similar to this:
+
+\begin{tcblisting}{commandshell={}}
+[ 50%] Building CXX object
+  CMakeFiles/ch13_ex03_hadouken.dir/src/main.cpp.o
+[100%] Linking CXX executable ch13_ex03_hadouken
+[100%] Built target ch13_ex03_hadouken
+\end{tcblisting}
+
+The target, ch13\_ex03\_hadouken, is defined and the source file, main.cpp, is included as a source file in the target. This confirms that we can use an external CMake modules project in our CMake code.
+
+We have reached another chapter's end together. Up next, we'll summarize what we have learned in this chapter and what we will learn in the upcoming chapter.
+
+
+
+
+
+
+
+
+
+
+

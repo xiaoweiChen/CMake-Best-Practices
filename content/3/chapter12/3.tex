@@ -1,0 +1,248 @@
+
+
+Toolchain files might seem intimidating at first, but on a closer look, they are often relatively trivial. The misconception that defining cross-compilation toolchains is hard stems from the fact that there are many overly complicated examples of toolchain files found on the internet. Many of them were written for early versions of CMake and thus implemented many additional tests and checks that are now part of CMake itself. CMake toolchain files basically do the following things:
+
+\begin{itemize}
+\item 
+Define the target system and architecture.
+
+\item 
+Provide paths to any tools needed to build the software for the defined platform. Often, these are just compilers.
+
+\item 
+Set default flags for the compiler and linkers.
+
+\item 
+Point to the sysroot and possibly any staging directory if cross-compiling.
+
+\item 
+Set hints for the search order for any find\_ commands of CMake. Changing the search order is something the project might define, and it is debatable whether this belongs in the toolchain file or should be handled by the project. See Chapter 5, Integrating Third-Party Libraries and Dependency Management, for details on find\_ commands.
+\end{itemize}
+
+A sample toolchain doing all these things might look like this:
+
+\begin{lstlisting}[style=styleCMake]
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_C_COMPILER /usr/bin/arm-linux-gnueabi-gcc-9)
+set(CMAKE_CXX_COMPILER /usr/bin/arm-linux-gnueabihf-g++-9)
+
+set(CMAKE_C_FLAGS_INIT -pedantic)
+set(CMAKE_CXX_FLAGS_INIT -pedantic)
+
+set(CMAKE_SYSROOT /home/builder/raspi-sysroot/)
+set(CMAKE_STAGING_PREFIX /home/builder/raspi-sysroot-staging/)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
+\end{lstlisting}
+
+This example would define a toolchain targeting a build for a Linux operating system
+running on an Advanced RISC Machine (ARM) processor. The C and C++ compilers to use are a version of GCC and are installed in the /usr/bin/ folders on the host system. Then, the compiler flags to print all warnings demanded by strict International Standards Organization (ISO) C and ISO C++ standardization with the -pedantic flag. Next, the sysroot for finding any needed libraries is set to /home/builder/raspi-sysroot/, and the staging directory for installing things when cross-compiling is set to /home/builder/raspi-sysroot-staging/. Finally, the search behavior for CMake is changed so that programs are searched only on the host system but libraries, include files, and packages are only searched in the sysroot. It is a controversial debate whether a toolchain file should influence the search behavior or not. Typically, only the project knows what it is trying to find, so making assumptions in the toolchain file might break that. However, only the toolchain knows which system root to use and what kinds of files are present inside it, so having the toolchain define this might be convenient. A good middle way is to use a CMake preset to define the toolchain and the search behavior instead of putting it either into the project or the toolchain file.
+
+\subsubsubsection{12.3.1\hspace{0.2cm}Defining the target system}
+
+The target system for cross-compiling is defined by the following three variables: CMAKE\_SYSTEM\_NAME, CMAKE\_SYSTEM\_PROCESSOR, and CMAKE\_SYSTEM\_VERSION. Corresponding to them are the CMAKE\_HOST\_SYSTEM\_NAME, CMAKE\_HOST\_SYSTEM\_PROCESSOR, and CMAKE\_HOST\_SYSTEM\_VERSION variables, which describe the platform on which the build is performed.
+ 
+The CMAKE\_SYSTEM\_NAME variable describes the target operating system for which the software is to be built. Setting this variable is important as this will cause CMake to set the CMAKE\_CROSSCOMPILING variable to true. Typical values are Linux, Windows, Darwin, Android, or QNX, although you could use more specific platform names such as WindowsPhone, WindowsCE, WindowsStore, and more. For bare-metal embedded devices, the CMAKE\_SYSTEM\_NAME variable is set to Generic. Unfortunately, at the time of writing this book, there exists no official list of supported systems in the CMake documentation. However, if really needed, the files in the /Modules/Platform folder in the local CMake installation can be inspected.
+
+The CMAKE\_SYSTEM\_PROCESSOR variable is used to describe the hardware architecture of the platform. If not specified, the value of the CMAKE\_HOST\_SYSTEM\_PROCESSOR variable will be assumed. The target processor architecture should also be set when cross-compiling for a 32-bit platform from a 64-bit platform, even if the processors are of the same type. For Android and Apple platforms, the processor is often not specified. When cross-compiling for Apple targets, the actual device is defined by the SDK that is used, which is specified by the CMAKE\_OSX\_SYSROOT variable. When cross-compiling for Android, specialized variables such as CMAKE\_ANDROID\_ARCH\_ABI, CMAKE\_ANDROID\_ARM\_MODE, and—optionally—CMAKE\_ANDROID\_ARM\_NEON are used to control the target architecture. Building for Android will be covered in more depth in the Cross-compiling for Android section.
+
+The last variable for defining a target system is CMAKE\_SYSTEM\_VERSION. The content of it depends on the system being built. For WindowsCE, WindowsStore, and WindowsPhone, it will be used to define which version of the Windows SDK to use. On Linux, it is often omitted or might contain the kernel revision of the target system if this is relevant.
+
+With the CMAKE\_SYSTEM\_NAME, CMAKE\_SYSTEM\_PROCESSOR, and CMAKE\_SYSTEM\_VERSION variables, target platforms are usually fully specified. However, some generators such as Visual Studio support their native platforms directly. For these, the architecture can be set with the -A command-line option of CMake, like this:
+
+\begin{tcblisting}{commandshell={}}
+cmake -G "Visual Studio 2019" -A Win32 -T host=x64
+\end{tcblisting}
+
+When using a preset, the architecture setting may be used in a configure preset for the same effect. Once the target system is defined, the tools to actually build the software are defined.
+
+Some compilers such as Clang and QNX is Not Unix GCC (QNX GCC) are inherently cross-compilers and take the platform as arguments. To pass the argument to those compilers, the CMAKE\_<LANG>\_COMPILER\_TARGET variable is used. For Clang, the value is a target triple such as arm-linux-gnueabihf, and for QNX GCC, the compiler name and target have a value such as gcc\_ntoarmv7le. The supported triples for Clang are described in its official documentation at \url{https://clang.llvm.org/docs/CrossCompilation.html}.
+
+For available options for QNX, the QNX documentation found at \url{https://www.qnx.com/developers/docs/} should be consulted.
+
+So, a toolchain file that uses Clang might look something like this:
+
+\begin{lstlisting}[style=styleCMake]
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
+
+set(CMAKE_C_COMPILER /usr/bin/clang)
+set(CMAKE_C_COMPILER_TARGET arm-linux-gnueabihf)
+
+set(CMAKE_CXX_COMPILER /usr/bin/clang++)
+set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
+\end{lstlisting}
+
+In this example, Clang is used to compile C and C++ code for a Linux system running on an ARM processor with hardware floating-point support. Defining the target system often has a direct influence on the build tools that are to be used. In the next section, we will look into how the compiler and the related tools are selected for cross-compilation.
+
+\subsubsubsection{12.3.2\hspace{0.2cm}Selecting the build tools}
+
+When building software, the compiler is the tool that comes to mind, and in most cases, it is sufficient to set the compiler in a toolchain file. The path to the compiler is set by the CMAKE\_<LANG>\_COMPILER cache variable, which may be set in the toolchain file or passed manually to CMake. If the path is absolute it will be used directly; else, the same search order as when using find\_program() will be used, which is one of the reasons why changing the search behavior in a toolchain file has to be treated with care. If neither the toolchain file nor the user does not specify the compiler, CMake will try to choose one automatically based on the target platform and generator specified. Additionally, the compiler can be set over an environment variable that is named after <LANG>. So, C will set the C compiler, CXX the C++ compiler, ASM the assembler, and so on.
+
+Some generators such as Visual Studio may support their own toolset definition that
+works differently. They can be set with the -T command-line option. The following
+command would tell CMake to generate code for Visual Studio to produce binaries
+for a 32-bit system but to use 64-bit compilers to do so:
+
+\begin{tcblisting}{commandshell={}}
+cmake -G "Visual Studio 2019" -A Win32 -T host=x64
+\end{tcblisting}
+
+The values might also be set with the CMAKE\_GENERATOR\_TOOLSET variable from a toolchain file. This should not be set inside a project as it obviously breaks the idea of CMake project files being agnostic to the generator and platform used.
+
+For Visual Studio users, it is possible to have multiple competing instances of the same Visual Studio version installed by having the preview and the official release of the same version installed. If this is the case, the CMAKE\_GENERATOR\_INSTANCE variable may be set to the absolute installation path of Visual Studio in the toolchain file.
+
+By specifying the compiler to use, CMake will choose the default flags for the compiler and linker and make them available in the project by setting CMAKE\_<LANG>\_FLAGS and CMAKE\_<LANG>\_FLAGS\_<CONFIG>, where <LANG> stands for the respective programming language and <CONFIG> for the build configuration such as debug or release, and so on. The default linker flags are set by the CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS and CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS\_<CONFIG> variables, where <TARGETTYPE> is either EXE, STATIC, SHARED, or MODULE.
+
+To add custom flags to the default flags, there exists a variable with \_INIT appended for each of the variables—for example, CMAKE\_<LANG>\_FLAGS\_INIT. When working with toolchain files, \_INIT variables are used to set any necessary flags. A toolchain file compiling with GCC for a 32-bit target from a 64-bit host would look like this:
+
+\begin{lstlisting}[style=styleCMake]
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR i686)
+
+set(CMAKE_C_COMPILER gcc)
+set(CMAKE_CXX_COMPILER g++)
+
+set(CMAKE_C_FLAGS_INIT -m32)
+set(CMAKE_CXX_FLAGS_INIT -m32)
+
+set(CMAKE_EXE_LINKER_FLAGS_INIT -m32)
+set(CMAKE_SHARED_LINKER_FLAGS_INIT -m32)
+set(CMAKE_STATIC_LINKER_FLAGS_INIT -m32)
+set(CMAKE_MODULE_LINKER_FLAGS_INIT -m32)
+\end{lstlisting}
+
+For simple projects, setting up the target system and the toolchain might already be enough to start creating binaries, but for more complex projects, they might need access to libraries and headers of the target system. For such cases, sysroots can be specified in the toolchain files.
+
+\subsubsubsection{12.3.3\hspace{0.2cm}Setting the sysroot}
+
+When cross-compiling, all linked dependencies obviously have to match the target platform as well, and a common way of dealing with this is to create a sysroot, which is the root filesystem of the target system in a folder. While sysroots may contain full systems, they are often stripped down to just provide what is needed. Sysroots are described in detail in Chapter 9, Creating Reproducible Build Environments.
+
+Setting the sysroot is done by setting CMAKE\_SYSROOT to the path of the sysroot. If this is set, CMake will by default look in the sysroot first for libraries and header files unless specified differently, as described in Chapter 5, Integrating Third-Party Libraries and Dependency Management. In most cases, CMake will also automatically set the necessary compiler and linker flags to make the tools work with the sysroot.
+
+In cases where the build artifacts should not be installed directly in the sysroot, the CMAKE\_STAGING\_PREFIX variable can be set to provide an alternative installation path. This is often the case when the sysroot should be kept clean or when it is mounted as read-only. Note that the CMAKE\_STAGING\_PREFIX setting will not add this directory to CMAKE\_SYSTEM PREFIX\_PATH, so things installed in the staging directory will only be found with find\_package() if the CMAKE\_FIND\_ROOT\_PATH\_MODE\_PACKAGE variable in the toolchain is set to BOTH or NEVER.
+
+Defining the target system and setting the toolchain configuration, the sysroot, and staging directory are often all that are needed for cross-compiling. Two exceptions are cross-compiling for Android and Apple's iOS, tvOS, or watchOS.
+
+\subsubsubsection{12.3.4\hspace{0.2cm}Cross-compiling for Android}
+
+In the past, the compatibility between Android's NDK and various CMake versions was sometimes a bit of an unhappy relationship, as new versions of the NDK suddenly no longer worked the same way with CMake as previous releases did. However, this condition has now been vastly improved, as the r23 version of the Android NDK will now use CMake's internal support for handling the Android NDK if CMake is version 3.21 or higher, so using these versions is recommended. The official documentation of the Android NDK's integration with CMake can be found here: \url{https://developer.android.com/ndk/guides/cmake}.
+
+As of r23, the NDK provides its own CMake toolchain file located at <NDK\_ROOT>/build/cmake/android.toolchain.cmake, which may be used like any regular toolchain file. The NDK also includes all the necessary tools for a Clang-based toolchain, so usually, no further tools have to be defined. To control the target platform, the following CMake variables should be passed over the command line or by a CMake preset:
+
+\begin{itemize}
+\item 
+ANDROID\_ABI: Specifies the target Application Binary Interface (ABI) to be used. Valid values are armeabi-v7a, arm64-v8a, x86, and x86\_64. This should always be set when cross-compiling for Android.
+
+\item 
+ANDROID\_ARM\_NEON: Enables NEON support for armeabi-v7a. This variable has no effect on other ABI versions. When using an NDK above version r21, NEON support is enabled by default, and it is rare that this needs to be disabled.
+
+\item 
+ANDROID\_ARM\_MODE: Specifies whether to generate ARM or Thumb instructions for armeabi-v7a. Valid values are either thumb or arm. This variable has no effect on other ABI versions.
+
+\item 
+ANDROID\_LD: Selects whether the default linker or the experimental lld from llvm should be used. Valid values are default or lld, but this variable is usually omitted for production builds because of the experimental state of lld.
+
+\item 
+ANDROID\_PLATFORM: Specifies the minimum Application Programming Interface (API) level supported by the application in the format \$API\_LEVEL, android-\$API\_LEVEL, or android-\$API\_LETTER, where \$API\_LEVEL is a number and \$API\_LETTER is the version code of the platform. ANDROID\_NATIVE\_API\_LEVEL is a variable alias for this. While it is not strictly necessary to set the API level, this is usually done.
+
+\item 
+ANDROID\_STL: Specifies which Standard Template Library (STL) to use for this application. This can either be c++\_static (which is the default), c++\_shared,
+none, or system. Either c++\_shared or c++\_static is needed for modern C++ support. The system library only provides new and delete and C++ wrappers for the C library headers, while none provides no STL support at all.
+\end{itemize}
+
+A call to CMake to configure an Android build could look like this:
+
+\begin{tcblisting}{commandshell={}}
+cmake -S . -B build --toolchain <NDK_DIR>/build/cmake/android
+  .toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_
+    PLATFORM=23
+\end{tcblisting}
+
+This call would specify a build that requires API level 23 or higher, which corresponds to Android 6.0 or higher for a 32-bit ARM Central Processing Unit (CPU).
+
+An alternative to using the toolchain provided by the NDK is to point CMake to the location of the Android NDK, which is the recommended way with NDKs newer than version r23. The configuration of the target platform then happens with the respective CMake variables. By setting the CMAKE\_SYSTEM\_NAME variable to android and the CMAKE\_ANDROID\_NDK variable to the location of the Android NDK, CMake is told to use the NDK. This can either happen over the command line or in a toolchain file. Alternatively, if the ANDROID\_NDK\_ROOT or ANDROID\_NDK environment variables are set, they will be used as the value for CMAKE\_ANDROID\_NDK.
+
+When using the NDK in this way, the configuration is defined over the CMAKE\_ equivalent of the variables used when invoking the toolchain file of the NDK directly, as follows:
+
+\begin{itemize}
+\item 
+CMAKE\_ANDROID\_API or CMAKE\_SYSTEM\_VERSION is used to specify the minimum API level to build for.
+
+\item 
+CMAKE\_ANDROID\_ARCH\_ABI is used to specify which ABI mode to use.
+
+\item
+CMAKE\_ANDROID\_STL\_TYPE specifies which STL to be used.
+\end{itemize}
+
+A sample toolchain file to configure CMake with the Android NDK might look like this:
+
+\begin{lstlisting}[style=styleCMake]
+set(CMAKE_SYSTEM_NAME Android)
+set(CMAKE_SYSTEM_VERSION 21)
+set(CMAKE_ANDROID_ARCH_ABI arm64-v8a)
+set(CMAKE_ANDROID_NDK /path/to/the/android-ndk-r23b)
+set(CMAKE_ANDROID_STL_TYPE c++_static)
+\end{lstlisting}
+
+When cross-compiling for Android using Visual Studio generators, CMake requires either NVIDIA Nsight Tegra Visual Studio Edition or Visual Studio tools for Android, which uses the Android NDK. When using Visual Studio to build Android binaries, the built-in support for CMake's Android NDK may be used by setting the CMAKE\_ANDROID\_NDK variable to the location of the NDK.
+
+Cross-compiling native code for Android has become much easier with the recent versions of the NDK and the CMake versions from 3.20 on. Another special case for cross-compiling is when targeting Apple's iOS, tvOS, or watchOS.
+
+\subsubsubsection{12.3.5\hspace{0.2cm}Cross-compiling for iOS, tvOS, or watchOS}
+
+The recommended way to cross-compile for Apple's iPhone, Apple TV, or Apple Watches is to use the Xcode generator. Apple is quite restrictive in what to use for building apps for these devices, so using macOS or a Virtual Machine (VM) running macOS is needed. While using Makefiles or Ninja files is possible, they require much more in-depth knowledge of the Apple ecosystem to be configured correctly.
+
+To cross-compile for any of these devices, the Apple device SDK is needed, and the CMAKE\_SYSTEM\_NAME variable is set to iOS, tvOS, or watchOS, as in the following example:
+
+\begin{tcblisting}{commandshell={}}
+cmake -S <SourceDir> -B <BuildDir> -G Xcode -DCMAKE_SYSTEM_
+  NAME=iOS
+\end{tcblisting}
+
+For relatively modern SDKs and a CMake version of 3.14 or higher, this is usually all that is needed. By default, the latest device SDK available on the system is used, but different SDKs can be selected by setting the CMAKE\_OSX\_SYSROOT variable to the path of the SDK if really needed. The minimum target platform version can be specified with the CMAKE\_OSX\_DEPLOYMENT\_TARGET variable.
+
+When cross-compiling for iPhone, Apple TV, or Apple Watches, the target can either be the real devices or the device simulator that comes with different SDKs. However, Xcode has built-in support to switch this during the build part, so CMake does not have to be run twice. CMake uses the xcodebuild command-line tool internally if the Xcode generator is selected, which supports the -sdk option to select the desired SDK. When building through CMake, this option can be passed like so:
+
+\begin{tcblisting}{commandshell={}}
+cmake -build <BuildDir> -- -sdk <sdk>
+\end{tcblisting}
+
+This will pass the -sdk option with the specified value to xcodebuild. The allowed values are iphoneos or iphonesimulator for iOS, appletvos or appletvsimulator for Apple TV devices, and watchos or watchsimulator for Apple Watches. Apple-embedded platforms require the mandatory signing of certain build artifacts.
+
+For the Xcode generator, the development team Identifier (ID), which is usually a short string of around 10 characters, can be specified with the CMAKE\_XCODE\_ATTRIBUTE\_DEVELOPMENT\_TEAM cache variable.
+
+When building for Apple-embedded devices, the simulators come in handy for testing the code without the need to deploy to the devices each time. In this case, the testing is best done through Xcode or xcodebuild itself, but for other platforms, cross-compiled code may be tested through CMake and CTest directly.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

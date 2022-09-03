@@ -1,0 +1,81 @@
+When building software for multiple platforms, the most straightforward way to do this is to compile software on the target system itself. The downside of that is that each developer has to have a running version of the target system to build the software. If these are desktop systems, that might work reasonably well, although moving between different installations for developing the software also makes the developer workflow quite tedious. Less powerful devices such as embedded systems might be very uncomfortable because of the lack of proper development tools or because compiling the software takes very long.
+
+So, a much more convenient way from the developer's perspective is to use crosscompiling. This means the software engineer writes code and builds the software on their own machine, but the resulting binaries are for a different platform. The machine and platform on which the software is built are usually called the host machine and host platform, whereas the platform on which the software should run is called the target platform. For instance, the developer writes code on their x64 desktop machine running Linux, but the resulting binaries are for embedded Linux on an arm64 processor. So the host platform is x64 Linux and the target platform is arm64 Linux. To cross-compile software, the following two things are needed:
+
+\begin{itemize}
+\item 
+A toolchain capable of producing binaries in the correct format
+
+\item 
+Any dependencies of the project compiled for the target system
+\end{itemize}
+
+The toolchain is a set of tools such as a compiler, linker, and archiver to produce binaries that run on the host system but produce output for the target system. The dependencies are usually collected in a sysroot directory. Sysroots are directories containing a reduced version of a root filesystem where the needed libraries are stored. For cross-compilation, these directories serve as the root for searching any dependencies.
+
+Some tools, such as the Yocto Project (YP) for building embedded Linux distributions, can build sysroots and toolchains for cross-compiling out of the box. This automation is often convenient, but when this is not available, creating a sysroot manually can be as simple as copying or mounting the filesystem from the target platform into a directory on the host machine. Sometimes, the combination of a toolchain and a sysroot is also referenced as SDKs. These SDKs might also contain further tools for debugging or definitions for running an emulator for the cross-platform build. CMake uses so-called toolchain files to configure the build tools and sysroots for cross-compiling. Toolchain files are ordinary CMake scripts that mostly set some cache variables to describe the target platform and the location of various components of the toolchain. Toolchain files can be passed to CMake by setting the CMAKE\_TOOLCHAIN\_FILE variable or, since CMake 3.21, with the -{}-toolchain option, like this:
+
+\begin{tcblisting}{commandshell={}}
+cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -S <SourceDir> -B
+	<BuildDir>
+cmake --toolchain toolchain.cmake -S <SourceDir> -B <BuildDir>
+\end{tcblisting}
+
+These calls are equivalent. If CMAKE\_TOOLCHAIN\_FILE is set as an environment variable, CMake will interpret this as well. If using CMake presets, the configure presets may configure a toolchain file with the toolchainFile option, like this:
+
+\begin{lstlisting}[style=styleCMake]
+{
+	"name": "arm64-build-debug",
+	"generator" : "ninja",
+	"displayName": "Arm 64 Debug",
+	"toolchainFile": "/path/to/toolchain.cmake",
+	"cacheVariables": {
+		"CMAKE_BUILD_TYPE": "Debug"
+	}
+},
+\end{lstlisting}
+
+The toolchainFile option supports macro expansion, as described in Chapter 9, Creating Reproducible Build Environments. If the path to the toolchain file is a relative path, CMake will first look relative to the build directory, and if the file is not found there, it will then search from the source directory. As CMAKE\_TOOLCHAIN\_FILE is a cache variable, it only needs to be specified for the first run of CMake; subsequent runs will use the cached value.
+
+On the first run, CMake will perform some internal queries to establish which features a toolchain supports. This happens regardless of whether the toolchain is specified with a toolchain file or whether the default system toolchain is used. A more in-depth look at how these tests happen is done in the Testing a toolchain for supported features section. CMake will output the results of the tests for the various features and properties on the first run, like this:
+
+{\footnotesize
+\begin{tcblisting}{commandshell={}}
+-- The CXX compiler identification is GNU 9.3.0
+-- The C compiler identification is GNU 9.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/arm-linuxgnueabihf-g++- 9 - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/arm-linux-gnueabigcc-9 - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+\end{tcblisting}
+}
+
+The detection of the features mostly happens on the first call to project() in a CMakeLists.txt file. However, for any later call to project() that enables a previously disabled language, further detection will be triggered. The same happens if enable\_language() is used to enable an additional programming language in a CMakeLists.txt file.
+
+As the features and test results of the toolchains are cached, changing the toolchain of a configured build directory cannot be done. CMake might detect that the toolchain has changed, but usually, the replacement of the cache variables is incomplete. Because of this, the build directory should be fully deleted before changing the toolchain.
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Switching Toolchains After Configuring]
+Always clear the build directory completely before switching toolchains. Deleting only the CMakeCache.txt file will not be enough, as toolchainrelated things might be cached in various locations.
+\end{tcolorbox}
+
+CMake works under the paradigm that a project should use the same toolchain for everything. Because of this, using multiple toolchains is not directly supported. If this is really needed, the parts of a project that need a different toolchain have to be configured as sub-builds, as described in Chapter 10, Handling Big Projects and Distributed Repositories in a Superbuild.
+
+Toolchains should be kept as small as possible and be completely decoupled from any
+project. Ideally, they are reusable for different projects. Often, toolchain files come bundled together with any SDK or sysroot used for cross-compiling. However, sometimes they need to be written manually.
+
+
+
+
+
+
+
+
+
+
+
+

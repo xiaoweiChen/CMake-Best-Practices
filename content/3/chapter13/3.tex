@@ -1,0 +1,70 @@
+
+It is clear that we need some basic building blocks to create utility modules. The most fundamental building blocks for utility modules are functions and macros, so it is essential to learn their working principles well. Let's start by learning about functions.
+
+\subsubsubsection{13.3.1\hspace{0.2cm}Functions}
+
+Let's remember what we have learned in Chapter 1, Kickstarting CMake, about functions. A function is the CMake language feature to define a logical code block that can be invoked to execute CMake commands. A function starts with function(…), has a body that contains CMake commands, and ends with the endfunction() CMake command. The function() command needs a name as the first argument, and optional function argument names, shown as follows:
+
+\begin{lstlisting}[style=styleCMake]
+function(<name> [<arg1> ...])
+	<commands>
+endfunction()
+\end{lstlisting}
+
+A function defines a new variable scope, so the changes made on CMake variables are only visible in the function's body. Separate scoping is the most crucial property of the function. Having a new scope means we can't accidentally leak variables to the caller or modify the caller's variables unless we want to. Most of the time, we will want to contain the changes in the function's scope and only reflect the function's result to the caller. As CMake has no notion of return values, we will take the defining a variable in the caller's scope approach to return function results to the caller.
+
+To illustrate this approach, let's define a simple function that retrieves the current Git branch name together:
+
+\begin{lstlisting}[style=styleCMake]
+function(git_get_branch_name result_var_name)
+	execute_process(
+		COMMAND git symbolic-ref -q --short HEAD
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+		OUTPUT_VARIABLE git_current_branch_name
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+		ERROR_QUIET
+	)
+	set(${result_var_name} ${git_current_branch_name}
+		PARENT_SCOPE)
+endfunction()
+\end{lstlisting}
+
+The git\_get\_branch\_name function takes a single argument named result\_var\_name. This argument is the name of the variable that will be defined in the caller's scope to return the Git branch name to the caller. Alternatively, we can use a constant variable name, such as GIT\_CURRENT\_BRANCH\_NAME, and get rid of the result\_var\_name argument, but this may cause issues if the project already uses the GIT\_CURRENT\_BRANCH\_NAME name.
+
+The rule of thumb here is to leave the naming to the caller since it allows maximum flexibility and portability. To retrieve the current Git branch name, we have invoked the git symbolic-ref -q -{}-short HEAD command with execute\_process(). The result of the command is stored in the git\_current\_branch\_name variable in the function's scope. The variable being in the function's scope means the caller cannot see the git\_current\_branch\_name variable. Thus, we have used set(\$\{result\_var\_name\} \$\{git\_current\_branch\_name\} PARENT\_SCOPE) to define a variable using the value of result\_var\_name in the caller's scope with the value of the local git\_current\_branch\_name variable.
+\
+The PARENT\_SCOPE argument alters the scoping of the set(…) command, so it defines the variable in the caller's scope instead of the function's scope. The usage of the git\_get\_branch\_name function is as follows:
+
+\begin{lstlisting}[style=styleCMake]
+git_get_branch_name(branch_n)
+message(STATUS "Current git branch name is: ${branch_n}")
+\end{lstlisting}
+
+Let's look at macros next.
+
+\subsubsubsection{13.3.2\hspace{0.2cm}Macros}
+
+If the function's scoping is a deal-breaker for your use case, you might consider using macro(…) instead. Macros start with macro(…) and end with endmacro(). Functions and macros behave similarly in every aspect but one: macros do not define a new variable scope. Returning to our git branch example, considering execute\_process(…) already has the OUTPUT\_VARIABLE parameter, it is more convenient to define git\_get\_branch\_name as a macro instead of a function to get rid of set(… PARENTSCOPE) at the end:
+
+\begin{lstlisting}[style=styleCMake]
+macro(git_get_branch_name_m result_var_name)
+	execute_process(
+		COMMAND git symbolic-ref -q --short HEAD
+		WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+		OUTPUT_VARIABLE ${result_var_name}
+		OUTPUT_STRIP_TRAILING_WHITESPACE
+		ERROR_QUIET
+	)
+endmacro()
+\end{lstlisting}
+
+The usage of the git\_get\_branch\_name\_m macro is exactly the same as the git\_get\_branch\_name() function:
+
+\begin{lstlisting}[style=styleCMake]
+git_get_branch_name_m(branch_nn)
+message(STATUS "Current git branch name is: ${branch_nn}")
+\end{lstlisting}
+
+We have learned how we can define a function or macro when needed. Up next, we will define our first CMake module together.
+
+

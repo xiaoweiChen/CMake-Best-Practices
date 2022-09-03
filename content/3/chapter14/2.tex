@@ -1,0 +1,49 @@
+When maintaining a CMake project over a long time, there are often a few tasks that regularly come up. There are the usual things, such as new files being added to the project or versions of dependencies increasing, which are usually relatively trivial to handle with CMake. Then, there are things such as adding new toolchains or platforms for cross-compiling, and lastly, there are updates to CMake itself, when new features such as presets are available.
+
+Regularly updating CMake and making use of new features can help keep projects maintainable. While it is often not practical to update every single new version, checking for new big features of CMake and using them when they are released may make projects easier to maintain. For example, the introduction of CMake presets in version 3.19 of CMake is such a feature that has the potential to make many complicated CMakeLists. txt files much simpler.
+
+Keeping dependencies up to date and under control is often a task that keeps maintainers busy. Here, using a consistent concept for handling dependencies will make maintaining a project easier. In that regard, we recommend using package managers, as described in Chapter 5, Integrating Third-Party Libraries and Dependency Management, for any but the smallest project. As package managers are designed to shift the complexity of managing dependencies to the package manager instead of exposing it to the maintainer, they often have great potential to make the maintainers' lives much easier.
+
+At the root of making a project maintainable is choosing an effective project structure, so things are found easily and can be improved independently from each other. The exact structure to choose depends heavily on the context and size of the project, so what works for one project might not work for another.
+
+The biggest gain to keeping large projects maintainable is to use a project structure that fits the need. While the details of project organization depend on the actual situation a project is developed in, there are a few good practices that will help keep an overview of the project. Keeping a project maintainable starts with the CMakeLists.txt root of a project. For large projects, the CMakeLists.txt root should handle the following things:
+
+\begin{itemize}
+\item 
+The basic setup of the whole project, such as handling the project() call, fetching toolchains, supporting programs, and helper repositories. This also includes setting language standards, search behavior, and project-wide setting of compiler flags and search paths.
+
+\item 
+Handling cross-cutting dependencies, especially large frameworks such as Boost and Qt, should be included at the top level. Depending on the complexity of the  dependencies, creating and including a subdirectory with it its own CMakeLists. txt to handle acquiring the dependencies might help with keeping the project maintainable. Using add\_subdirectory is recommended over using include for including the dependencies because, this way, any temporary variables used for searching the dependencies are scoped to the subdirectory unless they are explicitly marked as cache variables.
+
+\item 
+If there are more than just a few build targets, moving them to their own subdirectories and including them with add\_subdirectory() will help to keep the individual files small and self-contained. Aiming for a design principle of loose coupling and high internal cohesion will make the libraries and executables easier to maintain independently. The file and project structure should reflect that, which might mean that each library and executable in a project gets its own CMakeLists.txt.
+
+\item 
+Whether the unit tests are kept close to the units that they test against or as a subfolder of a tests folder on the root level is a matter of personal preference. Keeping the tests in their own subdirectory with their own CMakeLists.txt makes it easier to handle test-specific dependencies and compiler settings.
+
+\item 
+Packaging and installation instructions for the project should be centralized and included at the top level of the project. If the installation instructions and packaging instructions are too large, they can be put in their own CMakeLists.txt and included from the CMakeLists.txt root.
+\end{itemize}
+
+Structuring a project in this way will simplify the navigation inside the project and will help to avoid unnecessary code duplication in the CMake files, especially when projects get larger over time.
+
+A good project setup might make the difference between fighting daily with the build system and running smoothly. Using the techniques and practices from this book will help to make a CMake project maintainable. Having a clearly defined build environment by using CMake presets and build containers or sysroots, as described in Chapter 9, Creating Reproducible Build Environments, and Chapter 12, Cross-Platform and Cross-Toolchain Building, will help to make the build more portable between developers and the CI system. And last but not least, organizing your custom CMake code into macros and functions, as described in Chapter 13, Reusable CMake Code, will help to avoid redundancy and duplication.
+
+Apart from the complexity of the CMake files, longer configuration and build times are often another concern when projects grow bigger. To manage those growing build and configuration times, CMake offers a few features to optimize them.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

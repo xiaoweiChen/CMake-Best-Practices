@@ -1,0 +1,31 @@
+Writing build system code for a project is no easy task. Project maintainers and developers are spending a lot of effort on writing CMake code for configuring compiler flags, project build variants, third-party libraries, and tool integrations. Writing CMake code for project-agnostic details from scratch may start to incur a significant burden when dealing with multiple CMake projects. Most of the CMake code written for a project to configure the aforementioned details could be reused between the projects. With that in mind, it is for our benefit to develop a strategy to make our CMake code reuse-friendly. The straightforward way to approach this problem is to treat CMake code as regular code and apply some of the most basic coding principles: the Don't Repeat Yourself (DRY) principle and the Single Responsibility Principle (SRP).
+
+CMake code can be easily reused if structured with reusability in mind. Achieving essential reusability is pretty straightforward: separate CMake code into modules and functions. You may have realized that the way to make CMake code reusable is no different from making software code reusable. Remember, CMake itself is a scripting language, after all. So, it is natural to treat CMake code as regular code and apply software design principles while dealing with it. As with any functional scripting language, CMake has the following basic abilities for reusability:
+
+\begin{itemize}
+\item 
+Ability to include other CMake files
+
+\item 
+Functions/macros
+
+\item 
+Portability
+\end{itemize}
+
+In this chapter, we will learn the ways of writing CMake code for a project with reusability in mind and reusing CMake code in CMake projects. We will also discuss the ways of versioning and sharing common CMake code between projects.
+
+To understand the skills shared in this chapter, we'll cover the following main topics:
+
+\begin{itemize}
+\item 
+What is a CMake module?
+
+\item 
+Fundamental building blocks of modules – functions and macros
+
+\item 
+Writing your first very own CMake module
+\end{itemize}
+
+Let's begin with the technical requirements.

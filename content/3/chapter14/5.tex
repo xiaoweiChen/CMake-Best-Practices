@@ -1,0 +1,7 @@
+In this chapter, we discussed some general tips on structuring and maintaining CMake projects, especially larger projects. With increased project size, configuring and building times usually increase, which could be a hindrance in the developer workflow. We looked at how the CMake profiling feature may be a useful tool to find performance hogs in the configuration process, even though it cannot be used to profile the compilation itself.
+
+To help with long compilation times, we showed how to use unity build and precompiled headers from CMake to improve the compile times themselves. And if all this does not yet bring the desired effect, using a compiler cache such as ccache, or a distributed compiler such as distcc, may be used by prefixing the compiler command.
+
+Optimizing build performance is a very satisfying affair, even if finding the right combination of tools and methods to get the most out of CMake might be a bit tedious. The downside of heavily optimized builds is, however, that the builds might be more prone to failure and the added complexity in the build process might need a deeper understanding and more expert knowledge to maintain in the long run.
+
+In the next chapter, we will outline some high-level strategies for migrating from any build system to a CMake project.

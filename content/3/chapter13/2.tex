@@ -1,0 +1,73 @@
+A CMake module is a logical entity that contains CMake code, functions, and macros that are put together to serve a particular purpose. A module can provide functions and macros for other CMake code and execute CMake commands when included. CMake is shipped with many pre-made modules by default. These modules provide extra utility to consume CMake code and allow the discovery of third-party tools and dependencies (Find*.cmake modules). A list of the modules that CMake provides by default is available at \url{https://cmake.org/cmake/help/latest/manual/cmakemodules.7.html}. The official CMake documentation categorizes modules in the following two main categories:
+
+\begin{itemize}
+\item 
+Utility modules
+
+\item 
+Find modules
+\end{itemize}
+
+As their name suggests, the utility modules provide utility, whereas the find modules are designed to search for third-party software in a system. As you can recall, we have covered the find modules thoroughly in Chapter 4, Packaging, Deploying, and Installing a CMake Project, and Chapter 5, Integrating Third-Party Libraries and Dependency Management. Therefore, we will exclusively focus on utility modules in this chapter. As you can recall, we have been using some CMake-provided utility modules in previous chapters. Some of these modules we used were the GNUInstallDirs, CPack, FetchContent, and ExternalProject modules. These modules are located under the CMake installation folder.
+
+To better understand the concept of a utility module, let's start by investigating a simple utility module that CMake provides. For this purpose, we will look into the ProcessorCount utility module. You can find the source file for this module at \url{https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake}. The ProcessorCount module is a module that allows retrieving the CPU core count of a system in CMake code. The ProcessorCount. cmake file defines a CMake function named ProcessorCount, which takes a single parameter named var. The implementation of the function is roughly as follows:
+
+\begin{lstlisting}[style=styleCMake]
+function(ProcessorCount var)
+	# Unknown:
+	set(count 0)
+	if(WIN32)
+		set(count "$ENV{NUMBER_OF_PROCESSORS}")
+	endif()
+	if(NOT count)
+		# Mac, FreeBSD, OpenBSD (systems with sysctl):
+		# … mac-specific approach … #
+	endif()
+	if(NOT count)
+		# Linux (systems with nproc):
+		# … linux-specific approach … #
+	endif()
+# … Other platforms, alternative fallback methods … #
+# Lastly:
+set(${var} ${count} PARENT_SCOPE)
+endfunction()
+\end{lstlisting}
+
+The ProcessorCount function attempts several different approaches to retrieve the CPU core count of the host machine. The usage of the ProcessorCount module is simple, as follows:
+
+\begin{lstlisting}[style=styleCMake]
+include(ProcessorCount)
+ProcessorCount(CORE_COUNT)
+message(STATUS "Core count: ${CORE_COUNT}")
+\end{lstlisting}
+
+As you can see in the preceding example, using a CMake module is as easy as including the module in the required CMake file. The include() function is transitive, so the code after the include line can consume all CMake definitions contained in the module.
+
+We now have a rough idea of what a utility module looks like. Let's continue by learning more about the fundamental building blocks of a utility module: functions and macros.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

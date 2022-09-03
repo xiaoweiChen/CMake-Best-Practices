@@ -1,0 +1,20 @@
+Software projects tend to live for a long time and for some, it's not unheard of to be under more or less active development for a decade or more. But even if projects do not live that long, they tend to grow over time and attract certain clutter and legacy artifacts. Often, maintaining a project does not just mean refactoring code or adding a feature once in a while, but also keeping the build information and dependencies up to date.
+
+As projects grow in complexity, build times often increase dramatically to the point that development might get tedious because of the long wait times. Long build times are not just inconvenient, they might also encourage developers to take shortcuts because they make trying things out hard. It is hard to try out something new if each build takes hours to complete and if each push to the CI/CD pipeline takes hours to return, which does not help either.
+
+Apart from choosing a good, modular project structure to increase the effectiveness of incremental builds, CMake has a few features to help with profiling and optimizing build times. And if CMake alone is not enough, using technologies such as compiler cache (ccache) for caching build results or precompiled headers can further help speed up incremental builds.
+
+Optimizing build times can yield good results, improve the daily life of developers considerably, and even be a cost-saving factor because a CI/CD pipeline might need fewer resources to build projects. However, there are pitfalls that heavily optimized systems may become brittle and break down more easily and that, at one point, optimizing for build time might be a tradeoff with easy project maintenance.
+
+In this chapter, we will cover a few general tips for maintaining projects and structuring them to keep the maintenance effort in check. Then, we will dive into analyzing build performance and see how the builds can be sped up. The following topics will be covered in this chapter:
+
+\begin{itemize}
+\item 
+Keeping a CMake project maintainable
+
+\item 
+Profiling a CMake build
+
+\item 
+Optimizing build performance
+\end{itemize}

@@ -1,0 +1,41 @@
+One of the powerful features of CMake is its support for the cross-platform building of software. Simply said, this means that with CMake, a project from any platform can be built for any other platform, as long as the necessary tools are available on the system running CMake. When building software, we typically talk about compilers and linkers, and they are of course essential tools for building software, but on a closer look, there are often some other tools, libraries, and files involved when building software. Collectively, these are commonly known as toolchains in CMake.
+
+So far in this book, all the examples were built for the same system CMake was running on. In these cases, CMake usually does a pretty good job of finding the correct toolchain to use. However, if the software is to be built for another platform, the toolchain usually has to be specified by the developer. Toolchain definitions might be relatively straightforward and just specify the target platform, or they might be as complex as specifying paths to individual tools needed to build the software or specific compiler flags to create binaries for a specific chipset.
+
+In the context of cross-compiling, toolchains are often accompanied by system roots (sysroots), which were introduced in Chapter 9, Creating Reproducible Build Environments. Sysroots are directories that contain a stripped-down filesystem for the target platform to build. When building software, they are considered the root folder for finding the necessary libraries and files to compile and link the software for the intended target platform.
+
+While cross-compiling might be intimidating at first, it is often not as hard as it seems when using CMake properly. In this chapter, we will look at how to use toolchain files and how to write them yourself. We will look in detail into which tools are involved at particular stages of building software. Finally, we will look at how to set up CMake so that it can run tests with an emulator.
+
+We'll cover the following main topics in this chapter:
+
+\begin{itemize}
+\item 
+Using existing cross-platform toolchain files
+
+\item 
+Creating toolchain files
+
+\item 
+Testing cross-compiled binaries
+
+\item 
+Testing a toolchain for supported features
+\end{itemize}
+
+By the end of the chapter, you will be proficient in handling existing toolchains and in how to build and test software for different platforms using CMake. We will have a deeper look into how to test a compiler for a certain feature to determine whether it suits our purposes.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

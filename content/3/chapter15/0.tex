@@ -1,0 +1,24 @@
+While CMake is evolving into a de facto industry standard for C++ and C projects, there are still projects—sometimes large ones—that use different build systems. Of course, there is nothing wrong with that as long as it fits your needs. However, at some point, and for whatever reason, you might wish to switch to CMake. For instance, maybe the software should be buildable by different IDEs or on different platforms, or the dependency management has become cumbersome. Another common situation is when the repository structure changes from a big mono-repo, where all libraries are checked in, to distributed repositories for each library project. Whatever the reason, migrating to CMake can be a challenge, especially for large projects, but the results could be worth it.
+
+While converting a project in one go would be the preferred way, often, there are non-technical requirements that might not make this possible. For instance, development might still need to go on in some parts during the migration, or some parts of the project cannot be migrated right from the start because of various requirements that are outside a team's control.
+
+So, a step-by-step approach is often needed. Changing the build system will most likely influence any CI/CD process, so this should also be considered. In this chapter, we will take a look at a few high-level strategies regarding how projects could be migrated, step by step, to CMake. However, note that the concrete migration paths are very dependent on the individual situation. For example, migrating from a project based on Makefiles in a single repository will work differently from moving from a Gradle-based build that spans multiple repositories.
+
+Changing the build system and, possibly, the project structure too can be very disruptive for all those involved, as they will have become accustomed to working with the existing structure and build system. Therefore, the decision to switch to a build system should not be taken lightly and should only be done if the benefits are significant.
+
+While this chapter focuses on the CMake aspect of migrating projects, often, migrations are not done with the goal of switching the build system but have other primary goals instead, such as simplifying the project structure or reducing the coupling between parts of the project to make them easier to maintain independently. When talking about the benefits, remember that they do not necessarily have to be purely technical benefits, such as having faster build speeds as a result of being able to better parallelize the build. The benefits could also be more from a "social" side, for instance, having a standardized,well-known way to build software will reduce the ramp-up time for new developers.
+
+In this chapter, we will cover the following topics:
+
+\begin{itemize}
+\item 
+High-level migration strategies
+
+\item 
+Migrating small projects
+
+\item 
+Migrating large projects to CMake
+\end{itemize}
+
+In this chapter, we will introduce some higher-level concepts for migrating from any build system to CMake. As you will see, migrating small projects might be quite straightforward, whereas large, complex projects require more planning upfront. By the end of the chapter, you will have a good idea of the different strategies for migrating projects of various sizes to CMake. Additionally, we will provide a few hints regarding what to check for when migrating, along with a rough step-by-step guide for migrations and how to interact with legacy build systems.
