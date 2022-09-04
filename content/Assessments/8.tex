@@ -1,0 +1,21 @@
+
+
+\begin{enumerate}
+\item 
+Commands that are added with add\_custom\_command are executed at build time, while commands that are added with execute\_process are executed at configuration time.
+
+\item
+One signature is used to create custom build steps, while the other is used to generate files.
+
+\item 
+Only POST\_BUILD is reliably supported across all generators.
+
+\item 
+Variables can be defined either as \$\{VAR\} or as @VAR@.
+
+\item 
+Variable substitution can be controlled by either passing @ONLY, which only replaces variables defined as @VAR@, or by specifying the COPYONLY option, which does not perform any substitution at all.
+
+\item 
+With cmake -E, common tasks can be executed directly. With cmake -P, .cmake files can be executed as scripts.
+\end{enumerate}

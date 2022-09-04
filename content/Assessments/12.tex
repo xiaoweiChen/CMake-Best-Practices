@@ -1,0 +1,45 @@
+
+
+\begin{enumerate}
+\item 
+Toolchain files are passed either by the --toolchain command-line flag, the CMAKE\_TOOLCHAIN\_FILE variable, or with the toolchainFile option in a CMake preset.
+
+\item
+Usually, the following things are done in a toolchain file for cross-compiling:
+
+\begin{enumerate}[label=\Alph*]
+\item
+Defining the target system and architecture
+ 
+\item 
+Providing paths to any tools needed to build the software
+
+\item 
+Setting default flags for the compiler and linkers
+
+\item 
+Pointing to the sysroot and possibly any staging directory if cross-compiling
+
+\item 
+Setting hints for the search order for any find\_ commands of CMake
+\end{enumerate}
+
+\item 
+The staging directory is set with the CMAKE\_STAGING\_PREFIX variable and is used as a place to install any built artifacts if the sysroot should not be modified.
+
+\item 
+The emulator command is passed as a semicolon-separated list in the CMAKE\_CROSSCOMPILING\_EMULATOR variable.
+
+\item 
+Any call to project() or enable\_language() in a project will trigger
+detection of the features.
+
+\item 
+The configuration context for compiler checks can be stored with cmake\_push\_check\_state() and restored to a previous state with cmake\_pop\_check\_state().
+
+\item 
+If CMAKE\_CROSSCOMPILING is set, any call to try\_run() will only compile the test but not run it unless an emulator command is set.
+
+\item 
+Build directories should be fully cleared because the temporary artifacts for compiler checks might not be rebuilt properly when just deleting the cache.
+\end{enumerate}

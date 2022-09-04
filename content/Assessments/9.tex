@@ -1,0 +1,24 @@
+
+
+\begin{enumerate}
+\item 
+CMakePresets.json is usually maintained and delivered together with the project, while CMakeUserPresets.json is maintained by the user. Regarding the syntax and the contents, there is no difference.
+
+\item
+By calling cmake -{}-preset=presetName, cmake -{}-build -{}-preset=presetName, or ctest -{}-preset=presetName.
+
+\item 
+There are configure, build, and test presets. Build and test presets depend on a configure preset to determine the build directory.
+
+\item 
+A configure preset should define a name, the generator, and the build directory to be used.
+
+\item 
+The first preset to set a value takes precedence.
+
+\item 
+Either using the native support of an editor for build containers, running the editor from within the container, or starting the container each time for invoking single commands inside.
+
+\item 
+The system name, the location of sysroot, the compilers to use, and how the find\_ commands behave.
+\end{enumerate}

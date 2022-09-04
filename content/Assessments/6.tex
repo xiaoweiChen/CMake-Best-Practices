@@ -1,0 +1,21 @@
+
+
+\begin{enumerate}
+\item 
+Doxygen is the de facto standard of documentation generation tools for C and C++ projects.
+
+\item
+Since CMake already provides a find module for Doxygen, this can be done by using the find\_package(...) CMake command.
+
+\item 
+Yes – Doxygen can draw graphs, given that graphing software such as DOT, Graphviz, and PlantUML are available in the environment. To enable DOT graphing, setting HAVE\_DOT to TRUE is sufficient. For PlantUML, PLANTUML\_JAR\_PATH needs to be set to the path that contains the plantuml.jar file.
+
+\item 
+@startuml and @enduml.
+
+\item 
+PLANTUML\_JAR\_PATH needs to be set to the path that contains the plantuml. jar file.
+
+\item 
+With the help of the install(DIRECTORY) command.
+\end{enumerate}

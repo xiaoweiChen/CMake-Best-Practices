@@ -1,0 +1,18 @@
+
+
+\begin{enumerate}
+\item 
+It can be achieved via the install(TARGETS <target\_name>) command.
+
+\item
+The output artifacts of the specified targets.
+
+\item 
+No, because header files are not classified as output artifacts of a target. They must be installed separately via the install(DIRECTORY) command.
+
+\item 
+The GNUInstallDirs CMake module provides system-specific default paths for installation, such as bin, lib, and include.
+
+\item 
+With the help of the PATTERN and FILES\_MATCHING parameters of the install(DIRECTORY) command.
+\end{enumerate}

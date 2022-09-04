@@ -1,0 +1,18 @@
+
+
+\begin{enumerate}
+\item 
+Large projects can be migrated from the top down or the bottom up.
+
+\item
+When working with a bottom-up approach, those projects or targets with the most incoming dependencies should be migrated first.
+
+\item 
+When choosing a top-down approach, the projects with the least incoming dependencies should be migrated first.
+
+\item 
+Top-down approaches quickly allow you to build the whole project using CMake as an entry point. Additionally, for each migrated project, the old build system can be discarded when the project is done. The downside is that a top-down approach will require some intermediate code.
+
+\item 
+A bottom-up approach will require less intermediate code than a top-down approach and allow for clean CMake code right from the start. The downside is that the full project can only be built when all of the subprojects have been migrated.
+\end{enumerate}

@@ -1,0 +1,79 @@
+We define small projects as any project that contains only a few targets and which are usually all deployed together. Small projects are self-contained inside a single repository, and usually, you can get a relatively quick overview of them. These might be projects that build a single library or an executable with a few external dependencies. In these cases, migrating to CMake is often relatively trivial. For small projects, in the first iteration, putting everything inside a single file will probably be the easiest way to go for a relatively quick and early result. Rearranging the files and splitting up the CMakeLists.txt file into multiple parts to be used with add\_subdirectory() is much easier if the project has already been built correctly.
+
+A general approach for migrating to CMake could be the following:
+
+\begin{enumerate}
+\item 
+Create an empty CMakeLists.txt file inside the root of the projects.
+
+\item 
+Identify the targets and associated files in the project, and create the appropriate targets inside the CMakeLists.txt file.
+
+\item 
+Find all of the external dependencies and include paths, and add them to the CMake targets where necessary.
+
+\item 
+Identify the necessary compiler features, flags, and compiler definitions if any, and make them available to CMake.
+
+\item 
+Migrate any tests to CTest by creating the necessary targets and calling add\_test().
+
+\item 
+Identify any installation or packaging instructions to CMake, including the need to install any resource files and more.
+
+\item 
+Clean up and make the project nice. Create presets, rearrange files and folders if necessary, and split up the CMakeLists.txt file if needed.
+\end{enumerate}
+
+Naturally, what exactly has to be done for each step depends very much on how the original project is organized and which technology is being used. Often, a migration will require several iterations of the CMakeLists.txt file until everything works, and if the first implementation of a CMake project does not yet look particularly nice, that is often quite normal.
+
+For small projects, handling dependencies is one of the more difficult tasks to do, as there are some implicit assumptions about where to find the dependencies and how they are internally structured or hidden inside the project. Using a package manager, as described in Chapter 5, Integrating Third-Party Libraries and Dependency Management, might reduce the complexity of handling dependencies significantly.
+
+Usually, the process of migrating small, mostly self-contained projects is relatively straightforward, although depending on how messy the original setup was, it might be quite a bit of work to get everything organized and working again. In larger organizations, several such smaller projects might be used together in a software portfolio, which, again, might be described as a project. Their migration needs a bit more planning to go forward.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

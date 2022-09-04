@@ -1,0 +1,24 @@
+
+
+\begin{enumerate}
+\item 
+Tests are defined by using the add\_test function.
+
+\item
+Either by using a regular expression on the test's name with ctest -R or by using the test number using ctest -I.
+
+\item 
+Yes – Doxygen can draw graphs, given that graphing software such as DOT, Graphviz, and By calling ctest -{}-repeat:until-pass:n or ctest -{}-repeat:untilfail:n.
+
+\item 
+By running ctest -j <num\_of\_jobs> -{}-schedule-random.
+
+\item 
+By setting the RESOURCE\_LOCK or RESOURCE\_GROUP property for the respective tests.
+
+\item 
+Static code analyzers are enabled by passing the command line including any arguments to the respective target properties.
+
+\item 
+By either adding them to the CMAKE\_CONFIGURATION\_TYPES property for multi-configuration type generators or by adding them to the CMAKE\_BUILD\_TYPE property.
+\end{enumerate}

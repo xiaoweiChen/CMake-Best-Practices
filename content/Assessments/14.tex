@@ -1,0 +1,18 @@
+
+
+\begin{enumerate}
+\item 
+The -{}-profiling-output <filename> -{}-profilingformat=google-trace flags are used.
+
+\item
+By grouping together various compilation units into a single one, the need for relinking happens less often.
+
+\item 
+In BATCH mode, CMake automatically groups the sources together; in GROUP mode, the grouping has to be specified by the user. By default, BATCH mode groups all sources for a unity build, while GROUP only adds the explicitly marked files to the unity build.
+
+\item 
+By using the target\_precompile\_headers function. Precompiled headers are automatically included, without the need for a \#include directive in the files.
+
+\item 
+By prefixing the compiler command with the command specified in CMAKE\_<LANG>\_COMPILER\_LAUNCHER.
+\end{enumerate}

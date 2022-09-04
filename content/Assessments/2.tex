@@ -1,0 +1,64 @@
+
+
+\begin{enumerate}
+\item 
+Here are the answers:
+\begin{enumerate}[label=\Alph*]
+\item 
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build -DCMAKE_CXX_COMPILER:STRING=
+"/usr/bin/clang++ "
+\end{tcblisting}
+
+\item
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build -G "Ninja"
+\end{tcblisting}
+
+\item 
+
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build 
+-DCMAKE_BUILD_FLAGS_DEBUG:STRING="-Wall"
+\end{tcblisting}
+\end{enumerate}
+
+\item 
+The project previously configured in question 1 can be built using CMake via the
+command line, as follows:
+
+\begin{enumerate}[label=\Alph*]
+\item 
+\begin{tcblisting}{commandshell={}}
+cmake –S . -B ./build 
+-DCMAKE_CXX_COMPILER:STRING= "/usr/bin/clang++ "
+\end{tcblisting}
+
+\item
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build --parallel 8
+\end{tcblisting}
+
+\item 
+
+\begin{tcblisting}{commandshell={}}
+cmake --build ./build -- VERBOSE=1
+\end{tcblisting}
+\end{enumerate}
+
+\item 
+\begin{tcblisting}{commandshell={}}
+cmake --install ./build --prefix=/opt/project
+\end{tcblisting}
+
+\item 
+\begin{tcblisting}{commandshell={}}
+cmake --install ./build --component ch2.libraries
+\end{tcblisting}
+
+\item 
+It is a CMake cache variable that is marked as advanced to hide it in GUIs via the mark\_as\_advanced() function.
+\end{enumerate}

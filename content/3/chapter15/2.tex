@@ -1,0 +1,52 @@
+Before migrating a software project to CMake, first, it pays to answer a few questions about the existing project and define what the endpoint should look like. At a very high level of abstraction, usually, software projects define how the following things are handled:
+
+\begin{itemize}
+\item 
+How the individual parts of the software, that is, the libraries and executables, are compiled and how they are linked together
+
+\item 
+Which external dependencies are used, how they are found, and how they are used in the project
+
+\item 
+Which tests to build and how to run them
+
+\item 
+How the software is to be installed or packaged
+
+\item 
+Providing additional information such as license information, documentation, changelogs, and more
+\end{itemize}
+
+Some projects might only define a subset of the preceding points. But typically, these are the tasks that we, as developers, want to be handled in a project setup. Often, these tasks are defined in a structured way such as with Makefiles or IDE-specific project definitions. There are countless ways regarding how projects are organized and structured, and what works for one setting might not work for another. So, in any case, an individual assessment of the situation is necessary.
+
+A few tools exist that can automatically convert some build systems, such as qmake, Autotools, or Visual Studio, into CMake, but the quality of the resulting CMake files is doubtful at best, and they tend to assume certain conventions. Because of this, using them is not recommended.
+
+Additionally, a project might define how it is built, tested, and deployed in a CI/CD pipeline, and while this is closely related, the definition of the CI/CD pipeline is not often seen as part of the project description, but rather as something that uses the project definition. Changing from one build system to another will invariably affect the CI/CD pipeline, and often, the desire to modernize or change the CI/CD infrastructure might be the trigger to change the build system.
+
+It is important to realize that migrating is only complete when the old way of building is no longer used. So, we recommend removing any old build instructions once the projects are migrated to CMake, to eliminate the need to maintain backward compatibility with the old way of building.
+
+In an ideal world, all parts of the project will be migrated to CMake. However, there are situations where this is not possible, or it is economically questionable if a part of a project actually should be migrated. For instance, a project could rely on a library that is no longer actively maintained and is destined to be phased out soon. The best case is that the migration effort can be used as a trigger to actually remove the dependency; however, more often than not, this is not feasible. In the cases where the legacy dependency cannot be completely removed, it might be a good idea to remove it from the project. This is so that it is no longer considered an internal dependency but an external dependency with its own release cycle. Also, if this is not possible or the effort is too big, making an exception for this particular library and using the legacy build system with ExternalProject might be the solution for a limited time. For the migration strategies discussed in this chapter, we differentiate between internal and external dependencies. Internal dependencies are those that are actively developed by the same organization or person of the project that is to be migrated, so the developers can potentially change the build process. External dependencies are those where developers have limited or no control over the build process or the code.
+
+One thing to consider when migrating projects is how many people will be blocked from working on the project during its migration and how long the old way of building software and CMake have to be maintained side by side. Changing the build system is very intrusive for the developer's workflow. There will likely be times when some part of a project cannot be worked on until it has been fully migrated. The easiest way to work around this is to stop feature development for the moment and get everybody to help with the migration. However, if this is not possible, good communication and good partitioning of the work are often what is needed. Having said that, avoid the trap of stopping the migration halfway through: having some parts of a large project migrated while some are still using the old way to build is very likely to bring in the disadvantages of both ways to build the software while bringing the benefit of neither.
+
+So, how do you go forward when migrating a project from one build system to another? For small projects that mainly have external dependencies, this might be quite straightforward.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
