@@ -2,7 +2,7 @@
 
 *Discover proven techniques for creating and maintaining programming projects with CMake *
 
-*(用CMake创建和维护项目)*
+*(使用CMake创建和维护项目)*
 
 <a><img src="cover.jpg" alt="CMake Best Practices " height="256px" align="right"></a>
 
@@ -24,13 +24,13 @@ CMake是一个强大的工具，用于执行各种各样的任务，所以很难
 
 #### 关键特性
 
-- 理解CMake是什么，如何工作的，如何与其交互
+- 理解CMake是什么，如何工作，如何与其交互
 - 了解如何正确地创建和维护结构良好的CMake项目
 - 探索工具和技术，以最大程度的使用CMake管理项目
 
 #### 将会学到
 
-- 着手构建一个结构良好的CMake项目
+- 构建结构良好的CMake项目
 
 - 跨项目模块化和重用CMake代码
 

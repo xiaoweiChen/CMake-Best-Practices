@@ -2,18 +2,18 @@
 	\zihao{1} 前言
 \end{flushright}
 
-The software world and the tooling we use to create software are evolving every single day. CMake is no exception here, as after over 20 years of constantly evolving, it can now be considered something of an industry standard when it comes to building C++ applications. But while CMake is very feature-rich and its documentation is very comprehensive, real-world examples and guidelines on how to use the features together are rare. This is where CMake Best Practices jumps in.
+软件世界每天都在发展，CMake也不例外。经过20多年的不断发展，现在是构建C++应用程序的行业标准。虽然CMake具有非常丰富的功能，但其文档中的例子和指南实在是太少了。而这，恰恰就是CMake实践的最佳切入点。
 
-Instead of explaining every last detail and feature of CMake, this book contains examples to illustrate how CMake is best for various tasks when building software without covering every single edge case. There are other books for that. The aim of this book is to keep things as simple as possible while covering the recommended best practices for getting things done. The rationale behind this approach is that you don't need to know about all of CMake's capabilities to achieve your everyday tasks.
+本书不会去解释CMake的细节和特性，而会通过一些例子来说明在构建软件时，如何使用CMake完成各种任务(而不是覆盖每种边缘情况)。本书的目的是让事情尽可能简单，同时涵盖完成事情的推荐的最佳实践，从而读者只需要知道自己需要的CMake功能即可。
 
-We will try to explain a concept first and then illustrate it with concrete examples. This way, you will learn by practice and be able to apply that knowledge to your daily work with CMake. Since the audience of this book will be mostly engineers, we have tailored the book's content accordingly. While writing this book, we are software engineers first and then authors. As a result, the content of the book is more practical than theoretical. It is a compendium of carefully selected, proven techniques that you can use in your everyday CMake workflow.
+我们将尝试先解释概念，然后用例子来说明。通过这种方式，通过实践进行学习，并且可将这些知识应用到日常工作中。估计本书的读者大多是工程师，所以我们对书的内容进行了相应的调整。写这本书的时候，我们首先扮演的角色是软件工程师，然后才是作者。因此，本书的内容会更实用，而不仅停留在理论层面，从而证明了相应的技术可以在日常工作中使用。
 
-From engineers to engineers, we hope that you enjoy this book.
+从工程师中来，再回到工程师中去。我们希望你享受这本书。
 
 \hspace*{\fill} \\ %插入空行
 \textbf{适宜读者}
 
-This book is for software engineers and build-system maintainers working with C or C++ on a regular basis and trying to use CMake to improve their everyday tasks. Basic C++ and general programming knowledge will help you to better understand the examples covered in the book.
+这本书针对软件工程师和构建系统维护人员，他们经常使用C或C++，从而可以使用CMake来减轻日常任务的重担。基本的C++和编程知识有助于读者更好地理解书中的例子。
 
 \hspace*{\fill} \\ %插入空行
 \textbf{本书内容}
@@ -53,7 +53,7 @@ Chapter 16, Contributing to CMake and Further Reading Material, suggests where t
 \hspace*{\fill} \\ %插入空行
 \textbf{编译环境}
 
-You will need CMake version 3.21 or newer and a modern C++ compiler that understands at least C++14 installed on your computer to run the examples. Some examples may require additional software to run, which will be mentioned in the relevant chapters. All software used for the examples are open source and available for free.
+将CMake 3.21或更新版本，以及安装的至少支持C++14的现代C++编译器。一些例子可能需要额外的软件来运行，在相关章节中会提到。示例中使用的所有软件都是开源的，可以免费获得。
 
 \begin{table}[H]
 	\centering
@@ -66,19 +66,19 @@ You will need CMake version 3.21 or newer and a modern C++ compiler that underst
 	\end{tabular}
 \end{table}
 
-\textbf{If you are using the digital version of this book, we advise you to type the code yourself or access the code from the book's GitHub repository (a link is available in the next section). Doing so will help you avoid any potential errors related to the copying and pasting of code.}
+\textbf{如果您正在使用这本书的数字版本，建议您自己输入代码或从本书的GitHub存储库访问代码(下一节有链接)。这样做将帮助您避免与复制和粘贴代码相关的错误。}
 
 \hspace*{\fill} \\ %插入空行
 \textbf{下载示例}
 
-ou can download the example code files for this book from GitHub at \url{https://github.com/PacktPublishing/CMake-Best-Practices}. If there's an update to the code, it will be updated in the GitHub repository.
+可以从GitHub上下载这本书的示例代码文件\url{https://github.com/PacktPublishing/CMake-Best-Practices}。若代码有更新，会在GitHub存储库中更新。
 
-We also have other code bundles from our rich catalog of books and videos available at \url{https://github.com/PacktPublishing/}. Check them out!
+还可以从丰富的书籍和视频目录中获得其他代码包\url{https://github.com/PacktPublishing/}。
 
 \hspace*{\fill} \\ %插入空行
 \textbf{下载彩图}
 
-We also provide a PDF file that has color images of the screenshots and diagrams used in this book. You can download it here: \url{https://static.packt-cdn.com/downloads/9781803239729_ColorImages.pdf}
+我们还提供了一个PDF文件，其中有本书中使用的屏幕截图和图表的彩图。可在此下载: \url{https://static.packt-cdn.com/downloads/9781803239729_ColorImages.pdf}
 
 \hspace*{\fill} \\ %插入空行
 \textbf{联系方式}
@@ -96,9 +96,9 @@ We also provide a PDF file that has color images of the screenshots and diagrams
 \hspace*{\fill} \\ %插入空行
 \textbf{分享你的想法}
 
-Once you've read CMake Best Practices, we'd love to hear your thoughts! Please click here to go straight to the Amazon review page for this book and share your feedback.
+阅读完本书后，我们很想听听你的想法!请点击这里直接进入这本书的亚马逊评论页面并分享你的反馈。
 
-Your review is important to us and the tech community and will help us make sure we're delivering excellent quality content.
+您的评论对我们和科技界都很重要，将帮助我们确保提供的内容是高质量的。
 
 \newpage
 
