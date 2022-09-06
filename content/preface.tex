@@ -18,37 +18,37 @@
 \hspace*{\fill} \\ %插入空行
 \textbf{本书内容}
 
-Chapter 1, Kickstarting CMake, explains what CMake is in a nutshell and then jumps right into installing CMake and building something with CMake. You will learn how to install the latest stable version manually, even if it's not provided by your package manager. You'll also learn about the basic concepts behind CMake and why it is a build system generator and not a build system itself. You will learn how it fits into modern software development with C++ (and C).
+\textit{第1章，启动CMake}，说明了CMake是什么，并安装CMake和使用CMake尝试进行构建,从而可以了解如何手动安装CMake最新的稳定版本(即使包管理器没有提供)。还将了解CMake的基本概念，以及为什么CMake是构建系统生成器，而不是构建系统，还能了解CMake如何与现代C++(和C)相适应。
 
-Chapter 2, Accessing CMake in the Best Ways, shows how to best use CMake from the command line with a GUI and how CMake integrates with some common IDEs and editors.
+\textit{第2章，CMake的最佳使用方式}了解如何在GUI和命令行中使用CMake，以及CMake如何与一些常见的IDE和编辑器集成。
 
-Chapter 3, Creating a CMake Project, takes you through setting up a project to build an executable and a library and linking the two together.
+\textit{第3章，创建CMake项目}，通过项目来构建可执行文件和库，并将两者连接在一起。
 
-Chapter 4, Packaging, Deploying, and Installing a CMake Project, shows you how to create a distributable version of your software project. You will learn how to add installation instructions and package the project using CMake and CPack (CMake's packaging program).
+\textit{第4章，打包、部署和安装CMake项目}，了解如何创建软件项目的可分发版本。可以了解如何添加安装说明和使用CMake和CPack(CMake的打包程序)打包项目。
 
-Chapter 5, Integrating Third-Party Libraries and Dependency Management, explains how to integrate existing third-party libraries into your project. It also shows you how to add libraries already installed on your system, external CMake projects, and non-CMake projects.
+\textit{第5章，集成第三方库和依赖管理}，了解如何将现有的第三方库集成到项目中。还可以了解如何添加已经安装在系统上的库、外部CMake项目和非CMake项目。
 
-Chapter 6, Automatically Generating Documentation, explores how to generate documentation from your code with CMake as part of the build process with doxygen, dot (graphviz), and plantuml.
+\textit{第6章，自动生成文档}，探索如何从代码中生成文档，doxygen, dot(graphviz)和plantuml可以作为构建过程的一部分。
 
-Chapter 7, Seamlessly Integrating Code-Quality Tools with CMake, shows you how to integrate unit testing, code sanitizers, static code analysis, and code coverage tools into your project. It will show you how CMake can help to discover and execute tests.
+\textit{第7章，集成代码质量工具}，了解如何将单元测试、代码杀毒器、静态代码分析和代码覆盖工具集成到项目中，并展示CMake如何发现和执行测试。
 
-Chapter 8, Executing Custom Tasks with CMake, explains how you can integrate almost any tool into your build process. You will learn how to wrap external programs into custom targets or hook them into the build process to execute them. We will cover how custom tasks can be used to generate files and how they can consume files produced by other targets. You will also learn how to execute system commands during the configuration of the CMake build and how to create platform-agnostic commands using the CMake script mode.
+\textit{第8章，行自定义任务}，了解如何将工具集成到构建过程中，如何将外部程序包放置到自定义目标中，或将它们挂载到构建过程中进行执行。这里将介绍如何使用自定义任务生成文件，以及如何使用其他目标生成的文件。还将了解如何在CMake构建配置期间执行系统命令，以及如何使用CMake脚本模式创建与平台无关的命令。
 
-Chapter 9, Creating Reproducible Build Environments, shows how you can build an environment portable between various machines including CI/CD pipelines, and how to work with Docker, sysroots, and CMake presets to make your build work "out of the box" everywhere.
+\textit{第9章，创建可复制的构建环境}，了解在各种机器(包括CI/CD管道)之间如何构建可移植的环境，以及如何使用Docker、sysroot和CMake预置来让构建在任何地方都能“开箱即用”。
 
-Chapter 10, Handling Big Projects and Distributed Repositories in a Superbuild, simplifies managing projects that are distributed across multiple git repositories with CMake. You will learn how to create a super-build that allows you to build specific versions as well as the latest nightly builds. You will explore what prerequisites it needs and how to combine them.
+\textit{第10章，处理大项目和分布式存储库}，使用CMake简化了跨多个git存储库的项目管理。将了解如何创建一个超级构建，该超级构建允许构建特定版本，以及最新的夜间构建。我们将探索超级构建需要什么先决条件，以及如何使用。
 
-Chapter 11, Automated Fuzzing with CMake, shows how you can integrate and use fuzzing tools with CMake.
+\textit{第11章，自动化模糊处理}，了解如何在CMake中集成和使用模糊处理工具。
 
-Chapter 12, Cross-Platform Compiling and Custom Toolchains, demonstrates how you can use cross-platform toolchains. You will also learn how to write your own toolchain definitions and conveniently use different toolchains with CMake.
+\textit{第12章，跨平台编译和自定义工具链}，演示了如何使用跨平台工具链。还将了解如何编写自己的工具链定义，并在CMake中使用不同的工具链。
 
-Chapter 13, Reusing CMake Code, explains CMake modules and how you can generalize your CMake files. You will learn how to write broadly used modules, which you can ship individually from your project.
+\textit{第13章，重用CMake代码}，了解如何使用CMake模块，以及如何泛化你的CMake文件。还将了解如何编写可广泛使用的模块，这些模块可以单独提供。
 
-Chapter 14, Optimizing and Maintaining CMake Projects, suggests how to get faster build times and provides tips and tricks for keeping a CMake project neat and tidy over a long period of time. 
+\textit{第14章，优化和维护CMake项目}，建议如何获得更快的构建时间，并提供了一些技巧和技巧，以保持CMake项目长时间内的整洁。 
 
-Chapter 15, Migrating to CMake, explains a high-level strategy on how to migrate a large existing codebase to CMake without the need to completely stop your development.
+\textit{第15章，迁移到CMake}，了解如何在不停止开发的情况下，将现有的大型代码库迁移到CMake的高级策略。
 
-Chapter 16, Contributing to CMake and Further Reading Material, suggests where to go if you want to contribute, what is looked for, and basic contributing guidelines. It will also guide you on where to find additional in-depth information or more specific literature.
+\textit{第16章，为CMake和进一步阅读材料的贡献}，如果想进行贡献，去哪里，需要什么，以及基本的贡献指南。还将指导您在哪里找到更多相信的信息或更具体的文献。
 
 \hspace*{\fill} \\ %插入空行
 \textbf{编译环境}
