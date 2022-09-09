@@ -1,34 +1,34 @@
-CMake is freely available to download from \url{https://cmake.org/download/}. It is available as either a precompiled binary or as source code. For most use cases, the precompiled binary is fully sufficient, but since CMake itself has very few dependencies, building a version is also possible.
+CMake可以从\url{https://cmake.org/download/}免费下载。既可以下载预编译的二进制文件，也可以下载源代码。对于大多数用例，预编译的二进制文件就足够使用了，但由于CMake本身的依赖很少，构建一个版本也是可能的。
 
-Any major Linux distribution offers CMake over its package repositories. Although the pre-packaged versions of CMake are not usually the latest releases, these installations are often sufficient to use if the system is regularly updated.
+Linux的主要发行版都在其包存储库上提供CMake。虽然CMake的预打包版本通常不是最新版本，但如果系统定期更新，通常也够用。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The minimum version of CMake to use with the examples in this book is 3.21. We recommend that you download the appropriate version of CMake manually to ensure that you get the correct version.
+本书中示例使用的CMake的最低版本是3.21，我们建议您手动下载相应的CMake版本。
 \end{tcolorbox}
 
-\subsubsubsection{1.3.1\hspace{0.2cm}Building CMake from source}
+\subsubsubsection{1.3.1\hspace{0.2cm}使用源代码构建CMake}
 
-CMake is written in C++ and uses Make to build itself. Building CMake from scratch is possible, but for most use cases, using the binary downloads will do just fine.
+CMake使用C++编写的，并使用Make来构建自己。可以从源码构建CMake，但对于大多数用例来说，下载的二进制预编译文件就可以了。
 
-After downloading the source package from \url{https://cmake.org/download/}, extract it to a folder and run the following command:
+从\url{https://cmake.org/download/}下载源包后，解压到文件夹，并运行以下命令:
 
 \begin{tcblisting}{commandshell={}}
 ./configure make
 \end{tcblisting}
 
-If you want to build cmake-gui as well, configure it with the -{}-qt-gui option. This requires Qt to be installed. Configuring will take a while, but once it's succeeded, CMake can be installed using the following command:
+若想构建\texttt{cmake-gui}，请配置\texttt{-{}-qt-gui}选项，这需要安装Qt。配置需要一段时间，成功后可以使用以下命令安装CMake:
 
 \begin{tcblisting}{commandshell={}}
 make install
 \end{tcblisting}
 
-To test whether the installation was successful, you can execute the following command:
+使用命令测试安装是否成功。
 
 \begin{tcblisting}{commandshell={}}
 cmake --version
 \end{tcblisting}
 
-This will print out the version of CMake, like this:
+这将打印出CMake的版本:
 
 \begin{tcblisting}{commandshell={}}
 cmake version 3.21.2

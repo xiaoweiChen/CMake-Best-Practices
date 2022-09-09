@@ -2,7 +2,7 @@
 CMake's build process works in two steps, as shown in the following diagram. First, if it's invoked without any special flags, CMake scans the system for any usable toolchains during the configuration process and then decides what its output should be. The second step, which is when cmake -{}-build is invoked, is the actual compilation and building process:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter1/images/3.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter1/images/3.jpg}\\
 Figure 1.3 – CMake's two-stage build process
 \end{center}
 
@@ -14,7 +14,7 @@ To change the generator, you can pass the -G option to CMake, like this:
 cmake .. -G Ninja
 \end{tcblisting}
 
-This will generate files to be used with Ninja (h\url{ttps://ninja-build.org/}), an alternative build generator. Many generators are available for CMake. A list of the ones that are supported natively can be found on CMake's website: \url{https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html}.
+This will generate files to be used with Ninja (\url{https://ninja-build.org/}), an alternative build generator. Many generators are available for CMake. A list of the ones that are supported natively can be found on CMake's website: \url{https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html}.
 
 There are two main types of generators – the ones where there are many Makefile flavors and Ninja generators, which are generally used from the command line, and the ones that create build files for an IDE such as Visual Studio or Xcode.
 
@@ -25,7 +25,7 @@ CMake addition differentiates between single-configuration generators and multic
 	\begin{tabular}{|l|l|}
 		\hline
 		\textbf{生成器}                                                                                                                  &  \textbf{多配制}                                                            \\ \hline
-		Makefile(all flavors)                                                                                                                                  &                                                                           No       \\  \hline
+		Makefile(所有版本)                                                                                                                                  &                                                                           No       \\  \hline
 		Ninja              &                                                                                  No\\  \hline
 		Ninja Multi-Config  &  Yes                                                                                \\ \hline
     Xcode              &                                                                                  Yes\\  \hline
@@ -37,7 +37,7 @@ In addition, there are extra generators that use a normal generator but also pro
 
 After the call, CMake will create a lot of files in the build folder, with the most notable being the CMakeCache.txt file. This is where all the detected configurations are stored. Note that when you're using cmake-gui, the first step is split into configuring the project and generating the build file. However, when it's run from the command line, the steps are merged into one. Once configured, all the build commands are executed from the build folder.
 
-\subsubsubsection{1.5.1\hspace{0.2cm}Source folders and build folders}
+\subsubsubsection{1.5.1\hspace{0.2cm}源文件夹和构建文件夹}
 
 In CMake, two logical folders exist. One is the source folder, which contains a hierarchical set of projects, while the other is a build folder, which contains the build instructions, cache, and all the generated binaries and artifacts.
 

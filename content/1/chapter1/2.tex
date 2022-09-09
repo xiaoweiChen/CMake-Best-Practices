@@ -1,51 +1,51 @@
-CMake is open source and available on many platforms. It is also compiler-independent, making it a very strong tool when it comes to building and distributing cross-platform software. All these features make it a valuable tool for building software in a modern way – that is, by relying heavily on build automation and built-in quality gates.
+CMake开源，并且可以在许多平台上使用。其还与编译器无关，从而成为构建和分发跨平台软件的非常强大的工具。所有这些特性使它成为对软件极具价值的工具——可以自动化构建，以及内置的质量检验。
 
-CMake consists of three command-line tools:
-
-\begin{itemize}
-\item 
-cmake: CMake itself, which is used to generate build instructions
-
-\item 
-ctest: CMake's test utility, which is used to detect and run tests
-
-\item 
-cpack: CMake's packaging tool, which is used to pack software into convenient installers, such as deb, RPM, and self-extracting installers
-\end{itemize}
-
-There are also two interactive tools:
+CMake由三个命令行工具组成:
 
 \begin{itemize}
 \item 
-cmake-gui: A GUI frontend to help with configuring projects
+\texttt{cmake}: CMake本身，用于生成构建指令
 
 \item 
-ccmake: An interactive terminal UI for configuring CMake
+\texttt{ctest}: CMake的测试程序，用于检测和运行测试
+
+\item 
+\texttt{cpack}: CMake的打包工具，将软件打包成方便的安装程序，如deb、RPM和自解压缩的安装程序
 \end{itemize}
 
-cmake-gui can be used to conveniently configure a CMake build and select the compiler to be used:
+还有两种交互工具:
+
+\begin{itemize}
+\item 
+\texttt{cmake-gui}: 帮助配置项目的图形界面
+
+\item 
+\texttt{ccmake}: 用于配置CMake的交互式终端界面
+\end{itemize}
+
+\texttt{cmake-gui}可以方便地配置CMake构建，并选择要使用的编译器:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter1/images/1.jpg}\\
-Figure 1.1 – cmake-gui after configuring a project
+\includegraphics[width=0.8\textwidth]{content/1/chapter1/images/1.jpg}\\
+图1.1 —— 配置项目后的cmake-gui
 \end{center}
 
-If you're working on the console but still want to have an interactive configuration of CMake, then ccmake is the right tool. While not as convenient as cmake-gui, it offers the same functionality. This is especially useful when you must configure CMake remotely over an ssh shell or similar:
+如果使用控制终端工作，但希望可以交互式的进行CMake配置，那么\texttt{ccmake}是不错的选择。虽然不像\texttt{cmake-gui}那样方便，但它提供了相同的功能。这是特别有用的，可以通过ssh shell或类似的远程对CMake进行配置:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter1/images/2.jpg}\\
-Figure 1.2 – Configuring a project using ccmake
+\includegraphics[width=0.8\textwidth]{content/1/chapter1/images/2.jpg}\\
+图1.2 —— 使用ccmake配置项目
 \end{center}
 
-The advantage of CMake over a regular build system is manyfold. First, there is the cross-platform aspect. With CMake, it is much easier to create build instructions for a variety of compilers and platforms without the need to know the specifics of the respective build system in depth.
+与常规构建系统相比，CMake有很多优势。首先是跨平台方面，可以更容易地为各种编译器和平台创建构建指令，而不需要深入了解各自构建系统的细节。
 
-Then, there is CMake's ability to discover system libraries and dependencies, which lessens the pain of locating the correct libraries for building a piece of software considerably. An additional bonus is that CMake integrates nicely with package managers such as Conan and vcpkg.
+然后，CMake能够发现系统库和依赖关系，这大大减轻了查找正确库的烦恼。还有一点是CMake与包管理器(如Conan和vcpkg)集成得很好。
 
-It is not just the ability to build software for multiple platforms, but also its native support for testing, installing, and packaging software that makes CMake a much better candidate for building software than just a single build system. Being able to define everything from building and over-testing to packaging at a single point helps tremendously with maintaining projects in the long run.
+其不仅能够为多个平台构建软件，而且对测试、安装和打包软件的原生支持，使CMake成为构建软件的有力候选者。其能够完成从构建、测试到打包的一系列工作，对于长期维护项目有极大的帮助。
 
-The fact that CMake itself has very few dependencies on the system and can run on the command line without user interaction makes it very suitable for build system automatization in CI/CD pipelines.
+其实，CMake本身对系统的依赖很少，并且可以在命令行上运行，无需用户交互，这使得它非常适合成为CI/CD流水中的自动化构建系统。
 
-Now that we've covered briefly what CMake can do, let's learn how to install CMake.
+已经介绍了CMake可以做什么，接下来来安装CMake。
 
 
 

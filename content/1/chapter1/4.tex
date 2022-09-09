@@ -1,4 +1,4 @@
-Now, it's time to get your hands dirty and see whether your installation worked. We have provided an example of a simple hello world project that you can download and build right away. Open a console, type in the following, and you'll be ready to go:
+现在，动手试试安装的CMake是否有效。我们提供了一个\texttt{hello world}示例，可以立即下载，并进行构建。打开一个控制台，输入以下内容:
 
 \begin{tcblisting}{commandshell={}}
 git clone https://github.com/PacktPublishing/CMake-BestPractices.git
@@ -9,13 +9,13 @@ cmake ..
 cmake -–build .
 \end{tcblisting}
 
-This will result in an executable called Chapter\_1 that prints out Welcome to CMake Best Practices on the console.
+这将产生名为\texttt{Chapter\_1}的可执行文件，在控制台上输出\texttt{Welcome to CMake Best Practices}。
 
-Let's have a detailed look at what happened here:
+详细看看这里发生了什么:
 
 \begin{enumerate}
 \item 
-First, the example repository is checked out using Git and then the build folder is created. The file structure of the example CMake project will look like this before the build:
+首先，使用Git签出示例存储库，然后创建构建文件夹。示例CMake项目的文件结构在构建前是这样的:
 
 \begin{tcblisting}{commandshell={}}
 .
@@ -25,29 +25,29 @@ First, the example repository is checked out using Git and then the build folder
       └── main.cpp
 \end{tcblisting}
 
-Apart from the folder containing the source code, there is a file called CMakeLists.txt. This file contains the instructions for CMake on how to create build instructions for the project and how to build it. Every CMake project has a CMakeLists.txt file at the root of the project, but there might be many files with that name in various subfolders.
+除了包含源代码的文件夹外，还有一个名为CMakeLists.txt的文件。这个文件包含CMake关于如何创建项目的构建说明，以及如何构建的说明。每个CMake项目在项目的根目录下都有一个CMakeLists.txt文件，但是在不同的子文件夹中可能有许多同名的文件。
 
 \item 
-After cloning the repository, the build process is started with cmake. CMake's build process is a two-stage process. The first step, which is usually called configuration, reads the CMakeLists.txt file and generates an instruction for the native build toolchain of the system. In the second step, these build instructions are executed and the executables or libraries are built.
+下载存储库之后，使用\texttt{cmake}启动构建过程。CMake的构建过程分为两个阶段。第一步称为配置，读取CMakeLists.txt文件，并为系统的本地构建工具链生成指令。第二步，执行这些构建指令，并构建可执行文件或库。
 
-During the configuration step, the build requirements are checked, the dependencies are resolved, and the build instructions are generated.
+配置步骤中，将检查构建需求，解析依赖关系，并生成构建指令。
 
 \item 
-Configuring a project also creates a file called CMakeCache.txt that contains all the information that's needed to create the build instructions. The next call to cmake -{}-build . executes the build by internally calling CMake; if you are on Windows, it does so by invoking the Visual Studio compiler. This is the actual step for compiling the binaries. If everything went well, there should be an executable named Chapter1 in the build folder.
+项目还会创建一个名为CMakeCache.txt的文件，其中包含创建构建指令所需的信息。\texttt{cmake -{}-build}的下一个阶段，通过内部调用CMake来执行构建;若在Windows上，则通过调用Visual Studio编译器来实现，这是编译二进制文件的实际方式。若一切顺利，在构建文件夹中会有一个名为\texttt{Chapter1}的可执行文件。
 \end{enumerate}
 
-For brevity, we cd'd into the build directory in the previous examples and used relative paths to find the source folders. This is often convenient, but if you want to call CMake from somewhere else, you can use the -{}-S option to select the source file and the -{}-B option to select the build folder:
+简单起见，前面的示例中进入构建目录，并使用相对路径来查找源文件夹。这通常很方便，但若想从其他地方使用CMake，可以使用\texttt{-{}-S}选项来选择源文件，以及使用\texttt{-{}-B}选项来指定构建文件夹:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S /path/to/source -B /path/to/build
 cmake -build /path/to/build
 \end{tcblisting}
 
-Explicitly passing the build and source directories often comes in handy when using CMake in a continuous integration environment since being explicit helps with maintainability. It is also helpful if you want to create different build directories for different configurations, such as when you're building cross-platform software.
+在持续集成环境中使用CMake时，显式传递构建目录和源目录通常很方便，因为显式传递有助于提高可维护性。若想为不同的配置创建不同的构建目录，例如在构建跨平台软件时，这也会很有帮助。
 
-\subsubsubsection{1.4.1\hspace{0.2cm}A minimal CMakeLists.txt file}
+\subsubsubsection{1.4.1\hspace{0.2cm}简单的CMakeLists.txt文件示例}
 
-For a very simple hello world example, the CMakeLists.txt file only consists of a few lines of instructions:
+对于一个非常简单的\texttt{hello world}例子，CMakeLists.txt文件只包含几行指令:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -61,23 +61,23 @@ add_executable(Chapter1)
 target_sources(Chapter1 PRIVATE src/main.cpp)
 \end{lstlisting}
 
-Let's understand these instructions in a bit more detail:
+更详细地说明一下:
 
 \begin{itemize}
 \item 
-The first line defines the minimum version of CMake that's required to build this project. Every CMakeLists.txt file starts with this directive. This is used to warn the user if the project uses features of CMake that are only available from a certain version upward. Generally, we recommend setting the version to the lowest version that supports the features that are used in the project.
+第一行定义了构建这个项目所需的CMake的最低版本。每个CMakeLists.txt文件都以这个指令开始。这是用来提示用户，若项目使用了CMake的特性，可能只有在某个版本以上才可用。通常，建议将版本设置为支持项目中使用特性的最低版本。
 
 \item 
-The next directive is the name, version, and   description of the project to be built, followed by the programming languages that are used in the project. Here, we use CXX to mark this as a C++ project.
+下一行是要构建的项目的名称、版本和描述，后面是项目中使用的编程语言。这里，使用\texttt{CXX}将其标记为一个C++项目。
 
 \item 
-The add\_executable directive tells CMake that we want to build an executable (as opposed to a library or a custom artifact, which we will cover later in this book).
+\texttt{add\_executable}告诉CMake要构建一个可执行文件(与库或自定义目标不同，将在本书后面介绍)。
 
 \item 
-The target\_sources statement tells CMake where to look for the sources for the executable called Chapter1 and that the visibility of the sources is limited to the executable. We will go into the specifics of the single commands later in this book.
+\texttt{target\_sources}告诉CMake在哪里查找名为\texttt{Chapter1}的可执行文件的源文件，并且源文件的可见性仅限于可执行文件。将在本书后面详细介绍这个指令。
 \end{itemize}
 
-Congratulations – you are now able to create software programs with CMake. But to understand what is going on behind the commands, let's look at the CMake build process in detail.
+祝贺你——现在可以用CMake创建程序了。但是为了理解这些指令背后发生了什么，继续了解一下CMake的构建过程。
 
 
 
