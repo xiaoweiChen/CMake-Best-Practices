@@ -88,12 +88,12 @@ Test project /workspaces/CMake-Best-Practices/build
 Total Test time (real) = 0.51 sec
 
 The following tests FAILED:
-			1 - example_test (Failed)
+         1 - example_test (Failed)
 Errors while running CTest
-Output from these tests are in: 		
-	/workspaces/CMake-BestPractices/build/Testing/Temporary/LastTest.log
+Output from these tests are in: 	      
+     /workspaces/CMake-BestPractices/build/Testing/Temporary/LastTest.log
 Use "--rerun-failed --output-on-failure" to re-run the failed
-	cases verbosely.
+     cases verbosely.
 \end{tcblisting}
 
 Generally, the test suppresses all output to stdout. By passing the -V or -{}-verbose command-line argument, the output is always printed. However, usually, you're only interested in the output of the failed tests. So, the -{}-output-on-failure argument is often the better alternative. This way, only failed tests produce output. For very verbose tests, the output can be limited in size with the -{}-test-output-size-passed <size> and -{}-test-output-size-failed <size> options, where the size is the number of bytes.

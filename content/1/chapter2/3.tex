@@ -29,7 +29,7 @@ After running the command, a terminal-based UI will appear. The initial page is 
 After pressing the C key, the CMake configure step will be executed and the log output screen will be displayed with configuration output:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/24.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/24.jpg}\\
 Figure 2.24 – ccmake log screen after configuration
 \end{center}
 
@@ -88,7 +88,7 @@ If you are launching cmake-gui in a Windows environment and you intend to use th
 Here is the main window of the CMake GUI:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/29.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/29.jpg}\\
 Figure 2.29 – CMake GUI main window
 \end{center}
 
@@ -113,14 +113,14 @@ These are the four essential things we are going to interact with. To start conf
 After setting source and output paths, click Configure to start configuring the selected project. The CMake GUI will let you choose details such as the generator to be used, platform selection (if supported by the generator), toolset, and compiler, as shown in the following figure:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/30.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/30.jpg}\\
 Figure 2.30 – CMake GUI generator selection screen
 \end{center}
 
 After filling in these details according to your environment, click Finish to continue. The CMake GUI will start configuring your project with the given details and report the output in the log section. Upon successful configuration, you should also see the cache variables in the cache variable list section as well:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/31.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/31.jpg}\\
 Figure 2.31 – CMake GUI after configuration
 \end{center}
 
@@ -133,7 +133,7 @@ Be aware that the generated project is just the generator's artifact, and change
 Sometimes, a project may need tweaking some cache variables or you may decide to use a different build type, for example. To change any cache variables, click on the value of the desired cache variable; it should become editable. Depending on the variable type, a checkbox may be displayed instead of a string. If the desired variable is not visible on the list, it may be an advanced variable, which can only be visible when the Advanced checkbox on the window is checked. You can also use the search box to locate the variable with more ease. Here, you can see cmake-gui in Advanced Mode:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/32.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/32.jpg}\\
 Figure 2.32 – cmake-gui in advanced mode
 \end{center}
 
@@ -150,7 +150,7 @@ We have covered the most essential features of cmake-gui. Before moving to other
 The CMake GUI comes with a handy environment variable editor that allows CRUD operations on environment variables. To access it, simply click the Environment… button on the main screen. After clicking, the Environment Editor window will pop up, as can be seen in the following figure:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/33.jpg}\\
+\includegraphics[width=0.6\textwidth]{content/1/chapter2/images/33.jpg}\\
 Figure 2.33 – CMake GUI environment variable editor
 \end{center}
 
@@ -161,7 +161,7 @@ The Environment Editor window contains a list of the environment variables prese
 Have you ever wondered how a regular expression would get evaluated by CMake and what results it would give exactly? If so, you may have previously debugged it manually by printing out the regex match result variables with message(). What if I say there is a better way to do it? Let me introduce you to the Regular Expression Explorer tool of the CMake GUI.
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/34.jpg}\\
+\includegraphics[width=0.6\textwidth]{content/1/chapter2/images/34.jpg}\\
 Figure 2.34 – CMake GUI Regular Expression Explorer
 \end{center}
 
