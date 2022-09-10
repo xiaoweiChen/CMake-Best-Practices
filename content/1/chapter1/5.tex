@@ -1,24 +1,24 @@
 
-CMake's build process works in two steps, as shown in the following diagram. First, if it's invoked without any special flags, CMake scans the system for any usable toolchains during the configuration process and then decides what its output should be. The second step, which is when cmake -{}-build is invoked, is the actual compilation and building process:
+CMake的构建过程分为两步，如下图所示。首先，若使用时没有特殊标志，CMake会在配置过程中扫描系统中可用的工具链，再决定输出。第二步是调用\texttt{cmake -{}-build}时的实际编译和构建:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/1/chapter1/images/3.jpg}\\
-Figure 1.3 – CMake's two-stage build process
+\includegraphics[width=0.6\textwidth]{content/1/chapter1/images/3.jpg}\\
+图1.3 —— CMake的两阶段构建过程
 \end{center}
 
-The standard output is Unix Makefiles unless the only detected compiler is Microsoft Visual Studio, in which case a Visual Studio solution (.sln) will be created. 
+标准输出是Unix Makefiles，除非检测到唯一的编译器是Microsoft Visual Studio，这种情况下将创建Visual Studio解决方案(.sln)。
 
-To change the generator, you can pass the -G option to CMake, like this:
+修改生成器，可以使用\texttt{-G}选项:
 
 \begin{tcblisting}{commandshell={}}
 cmake .. -G Ninja
 \end{tcblisting}
 
-This will generate files to be used with Ninja (\url{https://ninja-build.org/}), an alternative build generator. Many generators are available for CMake. A list of the ones that are supported natively can be found on CMake's website: \url{https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html}.
+这将生成与Ninja(\url{https://ninja-build.org/})的构建文件。CMake支持很多生成器，Ninja是其中之一。在CMake的网站上可以找到一个生成器支持列表:\url{https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html}.
 
-There are two main types of generators – the ones where there are many Makefile flavors and Ninja generators, which are generally used from the command line, and the ones that create build files for an IDE such as Visual Studio or Xcode.
+主要有两种类型的生成器——一种是Makefile风格的生成器和Ninja生成器，多以命令行方式使用，另一种是为IDE(如Visual Studio或Xcode)创建构建工程文件。
 
-CMake addition differentiates between single-configuration generators and multiconfiguration generators. For single-configuration generators, the build files have to be rewritten each time the configuration is changed; multi-configuration build systems can manage different configurations without the need to regenerate. Although the examples in this book use single-configuration generators, they would also work on multiconfiguration generators. For most of the examples, the chosen generator is irrelevant; otherwise, it will be mentioned:
+这里，CMake会区分单配置生成器和多配置生成器。对于单配置生成器，必须在每次更改配置时重写构建文件;多配置构建系统可以自行管理不同的配置，不需要重新生成。尽管本书中的示例使用的是单配置生成器，但它们也适用于多配置生成器。对于大多数示例，所选生成器是无关紧要的(否则，就会特别说明):
 
 \begin{table}[H]
 	\centering
@@ -33,19 +33,19 @@ CMake addition differentiates between single-configuration generators and multic
 	\end{tabular}
 \end{table}
 
-In addition, there are extra generators that use a normal generator but also produce project information for an editor or IDE, such as Sublime Text 2, Kate Editor, Code::Blocks, and Eclipse. For each, you can select whether the editor should use Make or Ninja to internally build the application.
+此外，还有一些生成器，可以为编辑器或IDE生成项目信息，如Sublime Text 2、Kate editor、Code::Blocks和Eclipse。对于每个应用，可以选择编辑器或IDE使用Make还是Ninja进行内部构建。
 
-After the call, CMake will create a lot of files in the build folder, with the most notable being the CMakeCache.txt file. This is where all the detected configurations are stored. Note that when you're using cmake-gui, the first step is split into configuring the project and generating the build file. However, when it's run from the command line, the steps are merged into one. Once configured, all the build commands are executed from the build folder.
+构建完成后，CMake将在构建文件夹中多了许多文件，其中最重要的就是CMakeCache.txt，其存储了所有检测到的配置。注意，当使用\texttt{cmake-gui}时，第一步会分为配置项目和生成构建文件。但当以命令行运行它时，这些步骤合并为一个。配置完成后，将在构建文件夹执行构建。
 
 \subsubsubsection{1.5.1\hspace{0.2cm}源文件夹和构建文件夹}
 
-In CMake, two logical folders exist. One is the source folder, which contains a hierarchical set of projects, while the other is a build folder, which contains the build instructions, cache, and all the generated binaries and artifacts.
+CMake中存在两个逻辑文件夹。一个是源文件夹，包含项目的层次结构集；另一个是构建文件夹，包含构建指令、缓存以，及所有生成的二进制文件和工件。
 
-The root of the source folder is wherever the top CMakeLists.txt file is located. The build folder can be placed inside the source folder, but some people prefer to have it in another location. Both are fine; note that for the examples in this book, we decided to keep the build folder inside the source folder. The build folder is often called just build, but it can take any name, including prefixes and suffixes for different platforms. When using a build folder inside the source tree, it is a good idea to add it to .gitignore so that it does not get checked in accidentally.
+源文件夹是CMakeLists.txt文件所在的位置。构建文件夹可以放在源文件夹中，也可以将其放在另一个位置。两个都很好;注意，对于本书中的示例，我们决定将构建文件夹放在源文件夹中。构建文件夹通命名为\texttt{just build}，但也可以使用其他名称，包括不同平台的前缀和后缀。当在源代码树中使用构建文件夹时，最好将其添加到.gitignore中。
 
-When configuring a CMake project, the project and folder structure of the source folder is recreated inside the build folder so that all the build artifacts are in the same position. In each mapped folder, there is a subfolder called CMakeFiles that contains all the information that's generated by CMake's configuration step.
+当配置CMake项目时，将在构建文件夹中重新创建源文件夹的项目和文件夹结构，以便所有构建工件都位于相同的位置。每个映射文件夹中，都有一个名为CMakeFiles的子文件夹，其中包含CMake配置步骤生成的信息。
 
-The following code shows an example structure for a CMake project:
+下面显示了一个CMake项目的目录结构:
 
 \begin{tcblisting}{commandshell={}}
 .
@@ -56,7 +56,7 @@ The following code shows an example structure for a CMake project:
 ├── CMakeLists.txt
 \end{tcblisting}
 
-When you execute the CMake configuration, the file  structure of the CMake project is mapped into the build folder. Each folder containing a CMakeLists.txt file will be mapped and a subfolder called CMakeFiles will be created, which contains the information that's used by CMake for building:
+当执行CMake配置时，CMake项目的文件结构会映射到build文件夹中。每个包含CMakeLists.txt文件的文件夹将进行映射，将创建一个名为CMakeFiles的子文件夹，其中包含用于构建的信息:
 
 \begin{tcblisting}{commandshell={}}
 ├── build
@@ -65,7 +65,7 @@ When you execute the CMake configuration, the file  structure of the CMake proje
 │     └── CMakeFiles
 \end{tcblisting}
 
-So far, we have used existing projects to learn about the CMake build process. We learned about the configuration and the build step, as well as generators, and that we need CMakeLists.txt files to pass the necessary information to CMake. So, let's go a step further and see what the CMakeLists.txt files look like and how the CMake language works.
+目前为止，我们已经使用已有项目来学习了CMake构建过程。了解了配置和构建步骤，以及生成器，我们需要CMakeLists.txt文件来传递必要的信息给CMake。所以，接下来，了解一下CMakeLists.txt文件怎么写，以及CMake语言是如何工作的。
 
 
 

@@ -1,15 +1,15 @@
 
-When you're writing CMake files, there are a few core concepts and language features that you need to know about. We won't cover every detail of the language here as CMake's documentation does a pretty good job at this – especially when it comes to being comprehensive. In the following sections, we will provide an overview of the core concepts and language features. Further chapters will dive into the details of different aspects.
+写CMake时，有几个主要概念和语言特性需要知道。我们不会在这里详述语言的种种细节，若需要详细了解可以参考CMake的官方文档。下面的小节中，将简介主要概念和语言特性。后续章节将深入探讨其中细节。
 
-The full documentation for the language can be found at \url{https://cmake.org/cmake/help/latest/manual/cmake-language.7.html}.
+完整文档地址\url{https://cmake.org/cmake/help/latest/manual/cmake-language.7.html}.
 
 \subsubsubsection{1.6.1\hspace{0.2cm}CMake语言——一万英尺的全景}
 
-CMake uses configuration files called CMakeLists.txt files to determine build specifications. These files are written in a scripting language, often called CMake as well. The language itself is simple and supports variables, string functions, macros, function definitions, and importing other CMake files.
+CMake使用CMakeLists.txt文件的配置文件来确定构建规范。这些文件用脚本语言编写，通常也称为CMake。语言本身很简单，支持变量、字符串函数、宏、函数定义和导入其他CMake文件。
 
-Apart from lists, there is no support for data structures such as structs or classes. But it is this relative simplicity that makes the CMake project inherently maintainable if done properly.
+除了列表，不支持数据结构，如结构或类。但若操作得当，这种简单性使得CMake项目具有更好的可维护性。
 
-The syntax is based on keywords and whitespace-separated arguments. For example, the following command tells CMake which files are to be added to a library:
+语法基于关键字和以空格分隔的参数。例如，下面的指令会将相应的文件添加到库中:
 
 \begin{lstlisting}[style=styleCMake]
 target_sources(MyLibrary
@@ -17,17 +17,17 @@ target_sources(MyLibrary
                 PRIVATE src/internals.cpp src/foo.cpp)
 \end{lstlisting}
 
-The PUBLIC and PRIVATE keywords denote the visibility of the files when they're linked against this library and serve as delimiters between the lists of files.
+PUBLIC和PRIVATE关键字表示文件链接到这个库时的可见性，并充当文件列表之间的分隔符。
 
-Additionally, the CMake language supports so-called "generator expressions," which are evaluated during build system generation. These are commonly used to specify special information for each build configuration. They will be covered extensively in Chapter 3, Creating a CMake Project.
+此外，CMake语言支持“生成器表达式”，可以在生成构建系统时进行，通常用于为每个构建配置指定特殊信息。将在第3章进行详细介绍。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Projects}
+\textbf{工程}
 
-CMake organizes the various build artifacts such as libraries, executables, tests, and documentation into projects. There is always exactly one root project, although projects can be encapsulated into each other. As a rule, there should only be one project per CMakeLists.txt file, which means that each project has to have a separate folder in the source directory.
+CMake会将各种构建工件(如库、可执行文件、测试和文档)组织到项目中。虽然不同项目可以相互封装，但这里需要一个根项目。作为一个规则，每个CMakeLists.txt文件对应一个项目，这意味着每个项目必须在源目录中有一个单独的文件夹。
 
-Projects are described like this:
+项目描述如下:
 
 \begin{lstlisting}[style=styleCMake]
 project(
@@ -38,34 +38,34 @@ project(
 )
 \end{lstlisting}
 
-The current project that's being parsed is stored in the PROJECT\_NAME variable. For the root project, this is also stored in CMAKE\_PROJECT\_NAME, which is useful for determining whether a project is standalone or encapsulated in another. Since version 3.21, there's also a PROJECT\_IS\_TOP\_LEVEL variable to directly determine whether the current project is the top-level project. Additionally, with <PROJECT-NAME>\_IS\_TOP\_LEVEL, you can detect whether a specific project is a top-level project.
+正在解析的当前项目存储在PROJECT\_NAME变量中。根项目存储在CMAKE\_PROJECT\_NAME中，这对于确定一个项目是独立的还是封装在另一个项目中很有用。从3.21版本开始，还有一个PROJECT\_IS\_TOP\_LEVEL变量来直接确定当前项目是否是顶层项目。此外，使用<PROJECT-NAME>\_IS\_TOP\_LEVEL，可以检测特定的项目是否为顶级项目。
 
-The following are some additional variables regarding the projects. All of them can be prefixed with CMAKE\_ to the value for the root project. If they're not defined in the project() directive, the strings are empty:
+下面是关于项目的其他内置变量，它们可以在根项目的值前加上CMAKE\_前缀。若没有在\texttt{project()}指令中定义，则字符串为空:
 
 \begin{itemize}
 \item 
-PROJECT\_DESCRIPTION: The description string of the project
+PROJECT\_DESCRIPTION: 项目的描述字符串
 
 \item 
-PROJECT\_HOMEPAGE\_URL: The URL string for the project
+PROJECT\_HOMEPAGE\_URL: 项目的URL字符串
 
 \item 
-PROJECT\_VERSION: The full version that's given to the project
+PROJECT\_VERSION: 这个项目的完整版本信息
 
 \item 
-PROJECT\_VERSION\_MAJOR: The first number of the version string
+PROJECT\_VERSION\_MAJOR: 版本字符串的第一个数字
 
 \item 
-PROJECT\_VERSION\_MINOR: The second number of the version string
+PROJECT\_VERSION\_MINOR: 版本字符串的第二个数字
 
 \item 
-PROJECT\_VERSION\_PATCH: The third number of the version string
+PROJECT\_VERSION\_PATCH: 版本字符串的第三个数字
 
 \item 
-PROJECT\_VERSION\_TWEAK: The fourth number of the version string
+PROJECT\_VERSION\_TWEAK: 版本字符串的第四个数字
 \end{itemize}
 
-Each project has a source and binary directory, and they may be encapsulated in each other. Let's assume that each of the CMakeFiles.txt files in the following example defines a project:
+每个项目都有一个源目录和二进制目录，它们可以相互封装。假设下面的例子中的每个CMakeFiles.txt文件都定义了一个项目:
 
 \begin{tcblisting}{commandshell={}}
 .
@@ -74,81 +74,80 @@ Each project has a source and binary directory, and they may be encapsulated in 
 │      ├── CMakeLists.txt # defines project("Chapter 1"...)
 \end{tcblisting}
 
-When parsing the CMakeLists.txt file in the root folder, PROJECT\_NAME and CMAKE\_PROJECT\_NAME will both be CMakeBestPractices. When you're parsing chapter\_1/CMakeLists.txt, the PROJECT\_NAME variable will change to "Chapter\_1" but CMAKE\_PROJECT\_NAME will stay as CMakeBestPractices, as set in the file in the root folder.
+当解析根目录下的CMakeLists.txt文件时，PROJECT\_NAME和CMAKE\_PROJECT\_NAME都将是CMakeBestPractices。当解析chapter\_1/CMakeLists.txt时，PROJECT\_NAME变量将变为“chapter\_1”，但CMAKE\_PROJECT\_NAME还是CMakeBestPractices，并设置在根文件夹中。
 
-Although projects can be nested, it is good practice to write them in a way that they can work standalone. While they may depend on other projects that are lower in the file hierarchy, there should be no need for a project to live as a child of another. It is possible to put multiple calls to project() in the same CMakeLists.txt file, but we discourage this practice as it tends to make projects confusing and hard to maintain. In general, it is better to create a CMakeLists.txt file for each project and organize the structure with subfolders.
+尽管项目可以嵌套，但最好以独立的方式编写。虽然它们可能依赖于文件层次结构中较低的其他项目，但应该没有必要将一个项目作为另一个项目的子项目的必要。可以在同一个CMakeLists.txt文件中使用多个\texttt{project()}，但并不推荐这样做，其会使项目混乱，难以维护。通常，最好为每个项目创建一个CMakeLists.txt文件，并用子文件夹组织结构。
 
-This book's GitHub repository, which contains the examples in this book, is organized in a hierarchical way, where each chapter is a separate project that may contain even more projects for different sections and examples.
+本书的GitHub库，包含了本书中的例子，以分层的方式组织，其中每一章都是一个单独的项目，可能包含更多的项目，用于不同的部分和示例。
 
-While each example can be built on its own, you can also build this whole book from the root of the repository.
+虽然每个示例都可以单独构建，但也可以从库的根目录构建整本书的所有示例。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Variables}
+\textbf{变量}
 
-Variables are a core part of the CMake language. Variables can be set using the set command and deleted using unset. Variable names are case-sensitive. The following example shows how to set a variable named MYVAR and assign a value of 1234 to it:
+变量是CMake语言的核心部分。可以使用\texttt{set}指令设置变量，使用\texttt{unset}指令删除变量。变量名区分大小写。下面的例子展示了如何设置一个名为MYVAR的变量，并将其赋值为1234:
 
 \begin{lstlisting}[style=styleCMake]
 set(MYVAR "1234")
 \end{lstlisting}
 
-To delete the MYVAR variable, we can use unset:
+要删除MYVAR变量，可以使用\texttt{unset}:
 
 \begin{lstlisting}[style=styleCMake]
 unset(MYVAR)
 \end{lstlisting}
 
-The general code convention is to write variables in all caps. Internally, variables are always represented as strings.
+一般的代码约定使用全大写命名变量。在内部，变量总是表示为字符串。
 
-You can access the value of a variable with the \$ sign and curly brackets:
+这里，可以用\$符号和花括号来访问变量的值:
 
 \begin{lstlisting}[style=styleCMake]
 message(STATUS "The content of MYVAR are ${MYVAR}")
 \end{lstlisting}
 
-Variable references can even be nested and are evaluated inside out:
+变量的引用可以嵌套，并由内而外求值:
 
 \begin{lstlisting}[style=styleCMake]
 ${outer_${inner_variable}_variable}
 \end{lstlisting}
 
-Variables might be scoped in the following way:
+变量的作用域可以通过以下方式确定:
 
 \begin{itemize}
 \item 
-Function scope: Variables that are set inside a function are only visible inside the function.
+函数作用域:在函数内部设置的变量只在函数内部可见。
 
 \item 
-Directory scope: Each of the subdirectories in a source tree binds variables and includes any variable bindings from the parent directory
+目录作用域:源树中的每个子目录绑定变量，并包括来自父目录的任何变量。
 
 \item 
-Persistent cache: Cached variables can be either system- or user-defined. These persist their values over multiple runs.
+持久缓存:缓存的变量可以是系统的，也可以是用户定义的。它们在多次运行中保持它们的值不变。
 \end{itemize}
 
-Passing the PARENT\_SCOPE option to set() makes the variable visible in the parent scope.
+将PARENT\_SCOPE选项传递给\texttt{set()}会使变量在父作用域中可见。
 
-CMake comes with a wide variety of predefined variables. These are prefixed with CMAKE\_. A full list is available at \url{https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html}.
-
+CMake提供了各种预定义变量，通常以CMAKE\_为前缀。完整的列表地址\url{https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html}。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Lists}
+\textbf{列表}
 
-Even though CMake stores variables as strings internally, it is possible to work with lists in CMake by splitting values with a semicolon. Lists can be created by either passing multiple unquoted variables to set() or directly as a semicolon-separated string:
+尽管CMake在内部将变量存储为字符串，但可以在CMake中使用分号分隔值来处理列表。列表可以通过传递多个未加引号的变量给\texttt{set()}，或直接作为一个分号分隔的字符串来创建:
 
 \begin{lstlisting}[style=styleCMake]
 set(MYLIST abc def ghi)
 set(MYLIST "abc;def;ghi")
 \end{lstlisting}
 
-Manipulating lists by modifying their contents, reordering, or finding things can be done using the list command. The following code will query MYLIST for the index of the abc value and then retrieve the value and store it in the variable called ABC:
+使用\texttt{list}指令可以通过修改列表内容、重新排序或查找内容来操作列表。下面的代码将在MYLIST中查询abc值的索引，然后检索该值并将其存储在名为ABC的变量中:
 
 \begin{lstlisting}[style=styleCMake]
 list(FIND MYLIST abc ABC_INDEX)
 list(GET MYLIST ${ABC_INDEX} ABC)
 \end{lstlisting}
 
-To append a value to a list, we can use the APPEND keyword. Here, the xyz value is appended to MYLIST:
+要向列表追加一个值，可以使用APPEND 关键字。这里，xyz值会添加到MYLIST中:
 
 \begin{lstlisting}[style=styleCMake]
 list(APPEND MYLIST "xyz")
@@ -156,7 +155,7 @@ list(APPEND MYLIST "xyz")
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Cached variables and options}
+\textbf{缓存变量和选项}
 
 CMake caches some variables so that they run faster in subsequent builds. The variables are stored in CMakeCache.txt files. Usually, you don't have to edit them manually, but they are great for debugging builds that do not behave as expected. 
 
@@ -172,7 +171,7 @@ a quick summary of them.
 Most of the cached variables that are automatically generated are marked as advanced, which means they are hidden from the user in cmake-gui and ccmake by default. To make them visible, they have to be toggled explicitly. If additional cache variables are generated by a CMakeLists.txt file, they can also be hidden by calling the mark\_as\_advanced(MYVAR) command:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter1/images/4.jpg}\\
+\includegraphics[width=0.8\textwidth]{content/1/chapter1/images/4.jpg}\\
 Figure 1.4 – Left – cmake-gui does not show variables marked as advanced. Right – Marking the "Advanced" checkbox displays all the variables marked as advanced
 \end{center}
 
@@ -194,7 +193,7 @@ Options are often a convenient way to specify simple project configuration. They
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Properties}
+\textbf{属性}
 
 Properties in CMake are values that are attached to a specific object or scope of CMake, such as a file, target, directory, or test case. Properties can be set or changed by using the set\_property function. To read the value of a property, you can use the get\_property function, which follows a similar pattern. By default, set\_property overwrites the values that are already stored inside a property. Values can be added to the current value by passing APPEND or APPEND\_STRING to set\_property.
 
@@ -245,7 +244,7 @@ It is good practice to use direct functions such as set\_target\_properties and 
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Loops and conditions}
+\textbf{循环和条件}
 
 Like any programming language, CMake supports conditional and loop blocks. Conditional blocks are in-between if(), elseif(), else(), and endif() statements. Conditions are expressed using various keywords.
 
@@ -346,7 +345,7 @@ Although the RANGE version of foreach() could work with only a stop variable, it
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Functions}
+\textbf{函数}
 
 Functions are defined by function()/endfunction(). Functions open a new scope for variables, so all the variables that are defined inside are not accessible from the outside unless the PARENT\_SCOPE option is passed to set().
 
@@ -364,7 +363,7 @@ Functions are a great way to make parts of your CMake reusable and often come in
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Macros}
+\textbf{宏}
 
 CMake macros are defined using the macro()/endmacro() commands. They are a
 bit like functions, with the difference that in functions, the arguments are true variables, whereas in macros, they are string replacements. This means that all the arguments of a macro must be accessed using curly brackets.
@@ -373,7 +372,7 @@ Another difference is that by calling a function, control is transferred to the 
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Targets}
+\textbf{目标}
 
 The build system of CMake is organized as a set of logical targets that correspond to an executable, library, or custom command or artifact, such as documentation or similar.
 
@@ -387,7 +386,7 @@ It is good practice to work with targets instead of global variables when you're
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Generator expressions}
+\textbf{生成器表达式}
 
 Generator expressions are small statements that are evaluated during the configuration phase of the build. Most functions allow generator expressions to be used, with a few exceptions. They take the form of \$<OPERATOR:VALUE>, where OPERATOR is applied or compared to VALUE. You can think of generator expressions as small inline if-statements.
 
@@ -415,7 +414,7 @@ Since CMake supports a variety of build systems, compilers, and linkers, it is o
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{CMake policies}
+\textbf{CMake策略}
 
 For the top-level CMakeLists.txt file, cmake\_minimum\_required must be called before any call to the project as it also sets which internal policies for CMake are used to build the project.
 
@@ -435,7 +434,7 @@ By setting cmake\_policy(SET CMP0121 OLD), backward compatibility is enabled and
 
 Setting the policy to NEW will throw an error – [build] list index: any is not
 a valid index – during the configuration step of CMake.
-\
+
 \hspace*{\fill} \\ %插入空行
 \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Avoid Setting Single Policies Except When You're Including Legacy Projects]
 Generally, policies should be controlled by setting the cmake\_minimum\_required command and not by changing individual policies. The most common use case for changing single policies is when you're including legacy projects as subfolders.
