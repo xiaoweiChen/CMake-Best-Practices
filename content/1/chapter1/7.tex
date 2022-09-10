@@ -1,6 +1,6 @@
-The power of CMake comes from the fact that you can use the same build specification – that is, CMakeLists.txt – for various compiler toolchains without the need to rewrite anything. A toolchain typically consists of a series of programs that can compile and link binaries, as well as creating archives and similar.
+CMake的强大之处在于，可以为各种编译器工具链使用相同的构建规范。工具链通常由一系列程序组成，这些程序可以编译和链接二进制文件，以及创建存档和类似的文件。
 
-CMake supports a variety of languages that the toolchains can be configured for. In this book, we will focus on C++. Configuring the toolchain for different programming languages is done by replacing the CXX part of the following variables with the respective language tag:
+CMake支持各种可以配置工具链的语言。本书中，我们将重点关注C++。配置不同编程语言的工具链是通过用相应的语言标签，可以使用以下变量替换\texttt{CXX}部分来完成:
 
 \begin{itemize}
 \item 
@@ -22,56 +22,54 @@ OBJCXX – Objective C++
 Fortran
 
 \item 
-HIP – HIP C++ runtime API for NVIDIA and AMD GPUs
+HIP – 针对NVIDIA和AMD GPU的HIP C++运行时API
 
 \item 
-ISPC – C-based SPMD programming language
+ISPC – 基于C语言的SPMD编程语言
 
 \item 
-ASM – Assembler
+ASM – 汇编编译器
 \end{itemize}
 
-If a project does not specify its language, it's assumed that C and CXX are being used. CMake will automatically detect the toolchain to use by inspecting the system, but if needed, this can be configured by environment variables or, in the case of cross-compiling, by providing a toolchain file. This toolchain is stored in the cache, so if the toolchain changes, the cache must be deleted and rebuilt. If multiple compilers are installed, you can specify a non-default compiler by either setting the environment variables as CC for C or CXX for a C++ compiler before calling CMake. Here, we're using the CXX environment variable to overwrite the default compiler to be used in CMake:
-
+若一个项目没有指定它的语言，就假定使用了C和CXX，CMake将通过检查系统自动检测要使用的工具链。可以通过环境变量进行配置，或者在交叉编译的情况下，通过提供工具链文件进行配置。此工具链存储在缓存中，若工具链发生更改，则必须删除并重新构建缓存。如果安装了多个编译器，可以通过在调用CMake修改环境变量，CC对应于C编译器，CXX对应于C++编译器，从而指定一个非默认编译器。这里，我们使用\texttt{CXX}环境变量来覆盖CMake中使用的默认编译器:
 
 \begin{tcblisting}{commandshell={}}
 CXX=g++-7 cmake /path/to/the/source
 \end{tcblisting}
 
-Alternatively, you can overwrite the C++ compiler to use by passing the respective cmake variable using -D, as shown here:
+也可以通过使用\texttt{-D}传递相应的cmake变量来覆盖C++编译器，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake -D CMAKE_CXX_COMPILER=g++-7 /path/to/source
 \end{tcblisting}
 
-Both methods ensure that CMake is using GCC version 7 to build instead of whatever default compiler is available in the system. Avoid setting the compiler toolchain inside the CMakeLists.txt files as this clashes with the paradigm that states that CMake files should be platform- and compiler-agnostic.
+两种方法都可以确保CMake使用GCC版本7来构建，而不是使用系统中任何默认的编译器。避免在CMakeLists.txt文件中设置编译器工具链，因为这与CMake文件应该是平台和编译器无关的范式相冲突。
 
-By default, the linker is automatically selected by the chosen compiler, but it is possible to select a different one by passing the path to the linker executable with the CMAKE\_CXX\_LINKER variable.
+默认情况下，链接器由编译器自动选择，但也可以通过将链接器可执行文件路径传递给\texttt{CMAKE\_CXX\_LINKER}变量，来指定一个不同的连接器。
 
 \subsubsubsection{1.7.1\hspace{0.2cm}构建类型}
 
-When you're building C++ applications, it is quite common to have various buildtypes, such as a debug build that contains all debug symbols and release builds that are optimized.
+当构建C++应用时，有各种构建类型很常见，例如包含所有调试符号的Debug构建和优化的Release构建。
 
-CMake natively provides four build types:
+CMake本身提供了四种构建类型:
 
 \begin{itemize}
 \item 
-Debug: This is non-optimized and contains all the debug symbols. Here, all the asserts are enabled. This is the same as setting -O0 -g for GCC and Clang.
+Debug: 未优化，包含所有调试符号，所有的断言都是启用的。这与GCC和Clang设置\texttt{-O0 -g}是一样的。
 
 \item 
-Release: This is optimized for speed without debugging symbols and asserts disabled. Usually, this is the build type that is shipped. This is the same as -O3 -DNDEBUG.
+Release: 对运行速度进行优化，没有调试符号和断言禁用。通常，这是用于交付的构建类型。这与\texttt{-O3 -DNDEBUG}相同。
 
 \item 
-RelWithDebInfo: This provides optimized code and includes debug symbols but disabled asserts, which is the same as -O2 -g -DNDEBUG.
+RelWithDebInfo: 提供优化，并包括调试符号，禁用断言，这与\texttt{-O2 -g -DNDEBUG}相同。
 
 \item 
-MinSizeRel: This is the same as Release but optimized for a small binary size instead of speed, which would be -Os -DNDEBUG. Note that this configuration is not supported for all generators on all platforms.
-
+MinSizeRel: 这和Release是一样的，但优化了二进制大小，而不是速度，这与\texttt{-Os -DNDEBUG相同}。注意，并不是所有平台上的所有生成器都支持此配置。
 \end{itemize}
 
-Note that the build types must be passed during the configuration state and are only relevant for single-target generators such as CMake or Ninja. For multi-target generators such as MSVC, they are not used, as the build-system itself can build all build types. It is possible to create custom build types, but since they do not work for every generator, this is usually not encouraged.
+注意，构建类型必须在配置状态期间传递，并且只与单目标生成器相关，如CMake或Ninja。对于像MSVC这样的多目标生成器，因为构建系统本身可以构建所有构建类型，所以不能直接使用。可以创建自定义构建类型，但由于它们并不适用于每个生成器，因此不鼓励这样做。
 
-Since CMake supports such a wide variety of toolchains, generators, and languages, a frequent question is how to find and maintain working combinations of these options. Here, presets can help.
+由于CMake支持很多的工具链、生成器和语言，常见的问题是如何找到并维护这些选项的工作组合，预设会有帮助解决这个问题。
 
 
 
