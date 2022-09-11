@@ -1,199 +1,199 @@
 
-Being a common tool in software development, CMake has integrations with a wide variety of IDEs and source code editors. Using such integrations while using an IDE or editor is perhaps more convenient for the user. In this section, we will cover how CMake integrates with some of the popular IDEs and editors.
+作为软件开发中的常用工具，CMake可以与各种IDE和源代码编辑器集成。在使用IDE或编辑器的同时，这样的集成对用户来说可能会更方便。本节中，将介绍CMake如何与一些流行的IDE和编辑器的集成。
 
-If you are expecting a guide about how to use an IDE or editor, this section is not going to be about that. The main focus of this section is to investigate and learn about CMake integrations with such tools. This section assumes that you have existing experience with the IDE/editor you are going to interact with.
+若希望获得关于如何使用IDE或编辑器的指南，这一节将不会涉及这些内容。本节的主要重点是研究和学习CMake与这些工具的集成。本节假设读者已有使用将要交互的IDE/编辑器的经验。
 
-Let's start with Visual Studio.
+先从Visual Studio开始吧！
 
 \subsubsubsection{2.4.1\hspace{0.2cm}Visual Studio}
 
-Visual Studio was one of the latecomers to the party when supporting CMake. Unlike other popular IDEs, Visual Studio had no native support for CMake until the year 2017. In that year, Microsoft decided to make a move and introduced built-in support for handling CMake projects, which is shipped Visual Studio 2017. Since then, it has been a solid feature of Visual Studio IDE.
+Visual Studio是支持CMake的后来者之一。与其他流行的IDE不同，Visual Studio直到2017年才原生支持CMake。那一年，微软决定采取行动，引入了对处理CMake项目的内置支持，并发布了Visual Studio 2017。从那时起，内置支持CMake就成为了Visual Studio IDE的一个可靠特性。
 
-To get started, obtain a copy of Visual Studio 2017 or later. For the older versions of Visual Studio, the feature is completely absent. In our examples, we'll be using Visual Studio 2022 Community Edition.
+开始介绍前，请获取一份Visual Studio 2017或更高版本的副本，对于老版本的Visual Studio没有这个特性。我们的例子中，将使用Visual Studio 2022社区版。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Starting a CMake project from scratch}
+\textbf{从头开始创建一个CMake项目}
 
-The Visual Studio project creation feature is based on project templates. With VS2017 and upward, project templates contain a CMake project template as well. We are going to learn how to use this template to create new CMake projects.
+Visual Studio项目创建特性是基于项目模板的。在VS2017及以上版本中，项目模板也包含一个CMake项目模板。我们将学习如何使用这个模板来创建新的CMake项目。
 
-To create a new CMake project with Visual Studio, click the Create a new project button on the welcome page. Alternatively, you can access it by clicking on File | New | Project on the main IDE window, or using the Ctrl + Shift + N (New Project) keyboard shortcut. The VS22 welcome screen looks like this:
+要用Visual Studio创建一个新的CMake项目，请单击欢迎页面上的create a new project按钮。或者，可以通过在主IDE窗口中单击File | New | Project来访问，或者使用Ctrl + Shift + N (New Project)快捷键。VS2022的欢迎界面是这样的:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/35.jpg}\\
-Figure 2.35 – Visual Studio 2022 welcome screen
+图2.35 Visual Studio 2022欢迎界面
 \end{center}
 
-On the Create a new project screen, double-click on CMake Project in the project template list. You can filter project templates by using the search bar located at the top of the list:
+在“创建新项目”窗口上，双击项目模板列表中的CMake project。可以使用位于列表顶部的搜索栏来筛选项目模板:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/36.jpg}\\
-Figure 2.36 – Visual Studio 2022 Create a new project screen
+图2.36 - Visual Studio 2022创建新项目界面
 \end{center}
 
-After clicking Next, the project configuration screen will appear. On this page, you can give your new CMake project a name and choose where to put your new project. In our example, we'll go with the default project name, CMakeProject1.
+单击Next之后，将出现项目配置窗口。可以给CMake项目起一个名字，并选择将新项目放在哪里。在我们的示例中，将使用默认项目名称CMakeProject1。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/37.jpg}\\
-Figure 2.37 – Visual Studio 2022 new project configuration screen
+图2.37  Visual Studio 2022新项目配置界面
 \end{center}
 
-After filling in the details, click Create to create your new CMake project. The generated project will contain a top-level CMakeLists.txt file, a C++ source file, and a C++ header file, named after the chosen project name. The newly created project's layout can be seen in the following figure:
+填写详细信息后，单击Create创建新的CMake项目。生成的项目将包含一个顶级的CMakeLists.txt文件，一个C++源文件，和一个C++头文件，以所选的项目名称命名。新建的项目布局如下图所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/38.jpg}\\
-Figure 2.38 – First glance after creating a new CMake project with Visual Studio
+图2.38 用Visual Studio创建的新的CMake项目
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Opening an existing CMake project}
+\textbf{打开已有的CMake项目}
 
-To open an existing CMake project, go to File | Open | CMake... and select the top-level CMakeLists.txt file of the project to be opened. The following figure shows what the Open menu looks like:
+打开现有的CMake项目，\texttt{File | Open | CMake...}并选择待打开项目的顶层CMakeLists.txt文件。下图显示了“打开”菜单的样子:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/39.jpg}\\
-Figure 2.39 – CMake project open menu
+图2.39 CMake项目打开菜单
 \end{center}
 
-Next, let's see how a CMake project can be configured and built.
+接下来，让看看如何配置和构建CMake项目。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Configuring and building a CMake project}
+\textbf{配置和构建CMake项目}
 
-To build a CMake project in Visual Studio, go to Project | Configure first. This will invoke the CMake configure step and generate the required build system files. After configuration, click Build | Build All to build the project. You can also trigger Build All by using the F7 keyboard shortcut.
+要在Visual Studio中构建CMake项目，请先转到Project | Configure。这将调用CMake配置步骤并生成所需的构建系统文件。配置完成后，单击Build | Build All以生成项目。也可以通过使用F7快捷键来触发Build All。
 
-Note that Visual Studio will automatically invoke configure whenever you save a CMakeLists.txt file, which is a part of the project.
+注意，当保存CMakeLists.txt文件时，Visual Studio将自动重新配置，该文件是项目的一部分。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Executing common actions on a CMake target}
+\textbf{使用CMake目标执行通用操作}
 
-Visual Studio uses a startup target concept for target-requiring actions such as build, debug, and launch. To set a CMake target as a startup target, use the Select Startup Target drop-down box located on the toolbar. Visual Studio will automatically populate this drop-down box with Cmake targets on configuration.
+Visual Studio使用启动目标的概念来执行目标所需的操作，比如构建、调试和启动。要将CMake目标设置为启动目标，请使用工具栏上的“选择启动目标”下拉框。Visual Studio将自动在配置中使用CMake目标填充这个下拉框。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/40.jpg}\\
-Figure 2.40 – Startup target selection drop-down menu
+图2.40 启动目标的下拉菜单
 \end{center}
 
-After setting a startup target, you can invoke actions such as Debug, Build, or Launch, just as you always do in Visual Studio:
+设置启动目标后，可以使用诸如调试、构建或启动等操作:
 
 \begin{itemize}
 \item 
-To debug, first, click on Debug | Startup Target, and then click Debug | Start Debugging or use the F5 keyboard shortcut.
+要调试，首先单击“Debug | Startup Target”，然后单击“Debug | Start Debugging”或使用F5快捷键。
 
 \item 
-To start without debugging, click on Start without debug or use the Ctrl + F5 keyboard shortcut.
+要在不调试的情况下启动，单击“ Start without debug”或使用Ctrl + F5快捷键。
 
 \item 
-To build, click on Build, or click Build | Build <target>, or use the Ctrl + B keyboard shortcut.
+要构建，单击Build，或单击Build | Build <target>，或使用Ctrl + B键盘快捷键。
 
 \item
-Button locations are shown in the following figure:
+按钮位置如下图所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/41.jpg}\\
-Figure 2.41 – Toolbar button locations
+图2.41 工具栏按钮的位置
 \end{center}
 \end{itemize}
 
-In this section, we've covered the basics of the Visual Studio CMake integration. In the next section, we'll continue to learn with another Microsoft product, Visual Studio Code.
+本节中，已经介绍了Visual Studio CMake集成的基础知识。下一节中，将继续了解另一个微软产品，Visual Studio Code。
 
 \subsubsubsection{2.4.2\hspace{0.2cm}Visual Studio Code}
 
-Visual Studio Code (VSCode) is an open source code editor developed by Microsoft. It is not an IDE but can become powerful and have IDE-like features via extensions. The extension market has a wide variety of additional content, from themes to language servers. You can find an extension for pretty much anything, which makes VSCode both powerful and liked by a wide audience. With no surprise, VSCode has an official CMake extension too. This extension was originally developed by Colby Pike (also known as vector-of-bool) but it is now officially maintained by Microsoft. 
+Visual Studio Code (VSCode)是微软开发的一款开源代码编辑器。它不是一个IDE，但可以很强大，并通过扩展具有类似IDE的特性。扩展市场有各种各样的附加内容，从主题到语言服务器。可以找到几乎任何东西的扩展，这使VSCode既强大，喜欢广泛的观众，VSCode也有一个官方的CMake扩展。这个扩展最初是由Colby Pike开发的(也称为vector-of-bool)，但现在由微软官方维护。
 
-In this section, we are going to learn how to install the extension and perform basic CMake tasks using it.
+本节中，将学习如何安装扩展并使用它执行基本的CMake任务。
 
-Before going any further, VSCode must be already installed in your environment. If not, visit \url{https://code.visualstudio.com/learn/get-started/basics} for details on downloading and installing it.
+在继续之前，VSCode必须已经安装在您的环境中。若还没装，请访问\url{https://code.visualstudio.com/learn/get-started/basics}了解下载和安装的详细信息。
 
-Also, we will frequently access the Command Palette. It is strongly recommended to use it often to gain familiarity. For those asking What the heck is the Command Palette?, here is a screenshot:
+此外，我们将经常访问命令面板。强烈建议经常使用来熟悉它，而命令面板是什么?下面是截图:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/1/chapter2/images/42.jpg}\\
-Figure 2.42 – VSCode Command Palette
+图2.42 VSCode命令面板
 \end{center}
 
-Yeah, it is that thing. To be honest, I did not know it had a name until now. Shortcuts for accessing the Command Palette are F1 and Ctrl + Shift + P. The Command Palette is the bread and butter of VSCode; it speeds up the VSCode workflow.
+说实话，我直到现在才知道它有名字。访问命令面板的快捷键是F1和Ctrl + Shift + p。命令面板是VSCode的面包和黄油，加快了VSCode的工作流程。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Installing the extension}
+\textbf{安装扩展}
 
-Installing the extension is pretty straightforward and simple. To install it by using a CLI, invoke the following command (replace code with code-insiders if you're using the Insiders edition):
+安装扩展是非常直接和简单的。要使用CLI安装它，调用以下命令(如果使用的是Insiders版本，则用code-insiders替换code):
 
 \begin{tcblisting}{commandshell={}}
 code --install-extension ms-vscode.cmake-tools
 \end{tcblisting}
 
-Alternatively, you can do the same in the VSCode GUI as well. Open VSCode and navigate to the Extensions page by clicking Extensions on the left-side navigation pane. Alternatively, you can use the Ctrl + Shift + X shortcut. Type CMake Tools into the extension search box and select CMake Tools from Microsoft. Be careful not to confuse it with the CMake extension. Press the Install button to install it.
+也可以在VSCode GUI中做同样的事情。打开VSCode，单击左侧导航窗格上的Extensions导航到Extensions页面。或者，您可以使用Ctrl + Shift + X快捷键。在扩展搜索框中键入CMake工具，从微软选择CMake工具。注意不要将它与CMake扩展混淆，然后按下安装按钮来安装。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/43.jpg}\\
-Figure 2.43 – VSCode extensions marketplace
+图2.43  VSCode扩展市场
 \end{center}
 
-After installation completes, the extension is ready to use.
+安装完成后，扩展就可以使用了。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Quick Start project}
+\textbf{快速启动项目}
 
-The VSCode CMake Tools extension offers a Quick Start option that bootstraps a CMake project with example C++ code. To use it, first open the destination folder by using the File | Open Folder... menu, and then press F1 and type cmake quick start. Select CMake: Quick Start and press Enter on the keyboard.
+VSCode CMake工具扩展提供了一个快速启动选项，可以引导一个CMake项目，使用示例C++代码。要使用它，首先使用File | Open Folder…打开目标文件夹，然后按F1，并键入\texttt{cmake quick start}。选择“CMake: Quick Start”，按“Enter”键。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/44.jpg}\\
-Figure 2.44 – Command Palette – Locating CMake: Quick Start
+图2.44 命令面板——定位CMake:快速入门
 \end{center}
 
-Firstly, the extension will ask which kit to use. Select the one that is appropriate for your new project. Kits will be further discussed in the Dealing with kits section.
+首先，扩展会询问使用哪个套件。选择适合新项目的选项。工具包将在处理工具包一节中会进一步讨论。
 
-After selecting a kit, you will be asked to input a project name. This will be the name of your top-level CMake project. Enter a name of your choice.
+选择工具包之后，系统会要求输入项目名称，这将是顶层CMake项目的名称。
 
-Lastly, a choice for example application code will be shown. In this choice, you will be asked to create an executable application project or a library project. Select one, and voil•! You've got yourself a working CMake project. Upon selection, CMakeLists.txt and main.cpp files will be generated. The content of these files slightly varies between executable and library choices.
-
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Opening an existing project}
-
-There is nothing special about opening a CMake project in VSCode. Open the folder that contains the top-level CMakeLists.txt file of your project. The CMake Tools extension will automatically recognize this folder as a CMake project, and all CMake-related commands will become available on the VSCode Command Palette.
+最后，将显示选择一个示例应用程序。选择中，将会要求创建一个可执行的应用程序项目或一个库项目。选择其中之一，然后创建CMake项目，CMakeLists.txt和main.cpp文件将自动生成。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Configuring, building, and cleaning a project}
+\textbf{打开现有的项目}
 
-To configure a CMake project, select the CMake: Configure menu item from the Command Palette. To build the project, choose a build target by selecting the CMake: Set Build Target menu item from the Command Palette. This will let you choose what will be built when a build is invoked. Lastly, select CMake: Build to build the selected build target. To build a specific target without setting it as a build target, use the CMake: Build Target menu item.
-
-To clean build artifacts, use the CMake: Clean Command Palette item. This will run CMake's clean target and remove any build artifacts.
+VSCode中打开CMake项目没什么特别。打开包含项目顶层CMakeLists.txt文件的文件夹，CMake工具扩展将自动识别该文件夹为CMake项目，所有CMake相关的命令将在VSCode命令面板上可用。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Debugging a target}
+\textbf{配置、构建和清理项目}
 
-To debug a target, choose a debug target by selecting the CMake: Set Debug Target menu item from the Command Palette. You'll see the debuggable targets listed.
+要配置CMake项目，从命令面板中选择CMake: Configure菜单项。要构建项目，通过从命令面板中选择CMake: Set build target菜单项来选择一个构建目标，可以选择在调用构建时构建的内容。最后，选择CMake: Build来构建选定的构建目标。要生成一个特定的目标而不将其设置为生成目标，请使用CMake: build target菜单项。
+
+要清理构建工件，使用CMake:Clean命令面板项。这将运行CMake的clean目标并删除所有构建工件。
+
+\hspace*{\fill} \\ %插入空行
+\noindent
+\textbf{调试目标}
+
+要调试一个目标，从命令面板中选择CMake: Set debug target菜单项来选择一个调试目标。会看到列出的可调试目标。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/45.jpg}\\
-Figure 2.45 – Debug target selection
+图2.45 选择调试目标
 \end{center}
 
-Select the target and select CMake: Debug (Ctrl + F5) from the Command Palette. The selected target will be started under the debugger.
+选择目标并从命令面板中选择CMake: Debug (Ctrl + F5)，所选目标将在调试器下启动。
 
-If you want to run the selected target without the debugger, select CMake: Run Without Debugging (Shift + F5) instead.
+若想在没有调试器的情况下运行选定的目标，选择CMake: run without Debugging (Shift + F5)。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/46.jpg}\\
-Figure 2.46 – Executable Chapter1 target being debugged
+图2.46 正在调试可执行的Chapter1目标
 \end{center}
 
-In the next section, we will look at how we can provide arguments to the debugged target.
+下一节中，将研究如何为已调试的目标提供参数。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Passing arguments to the debugged target}
+\textbf{向调试的目标传递参数}
 
-The target you're trying to debug might be needing command-line arguments. To pass command-line arguments to the debug target, open VSCode's settings.json file and append the following lines:
+试图调试的目标可能需要命令行参数。要将命令行参数传递给调试目标，请打开VSCode的settings.json文件，并添加以下行:
 
 \begin{lstlisting}[style=styleCMake]
 "cmake.debugConfig": {
@@ -204,11 +204,11 @@ The target you're trying to debug might be needing command-line arguments. To pa
 	}
 \end{lstlisting}
 
-In the args JSON array, you can place any number of arguments your target requires. These arguments will be passed to all future debug targets unconditionally. If you want to have fine-grained control over the arguments, it is better to define a launch.json file instead.
+JSON中的args数组中，可以放置目标所需的任意数量的参数。这些参数将无条件地传递给所有未来的调试目标。若希望对参数进行更细粒度的控制，最好定义一个launch.json文件。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Dealing with kits}
+\textbf{处理套件}
 
 A kit in the CMake Tools extension represents a combination of tools that can be used to build the project; hence, the term kit is pretty much a synonym for the toolchain. Kits make it easier to work in a multi-compiler environment, allowing a user to choose which exact compiler to work with. Kits can be discovered automatically by the extension, read from toolchain files, or defined by the user manually.
 
@@ -216,7 +216,7 @@ To see available kits for a project, select the CMake: Select a Kit menu item fr
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/47.jpg}\\
-Figure 2.47 – Kit selection list
+图2.47 套件选择列表
 \end{center}
 
 The selected kit will be used for configuring the CMake project, which means the tools that are defined in the kit will be used for compiling the project. Kit selection will automatically trigger a CMake configuration.
@@ -236,8 +236,7 @@ Adding a new kit is not usually necessary since the extension does a good job of
 \end{lstlisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-In older versions of the CMake Tools extension, the cmake-tools-kits.
-json file may be named cmake-kits.json instead.
+旧版本的CMake工具扩展，cmake-tools-kits.json文件可以命名为cmake-kits.json。
 \end{tcolorbox}
 
 Keep in mind that if your kit name collides with an autogenerated name from CMake Tools, CMake Tools will override your entry on a scan, so, always give unique names to your kit definitions.
