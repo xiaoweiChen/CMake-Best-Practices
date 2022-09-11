@@ -1,4 +1,4 @@
-Although CMake can work with almost any file structure for a project, there are some good practices regarding how to organize files. The examples in this book use the following common pattern:
+虽然CMake可以用于任何文件结构，但有一些关于如何组织文件的良好实践。本书中的例子使用了以下常见模式:
 
 \begin{tcblisting}{commandshell={}}
 ├── CMakeLists.txt
@@ -7,29 +7,29 @@ Although CMake can work with almost any file structure for a project, there are 
 └── src
 \end{tcblisting}
 
-There are three folders and one file present in a minimal project structure. They are as follows:
+最小的项目结构中有三个文件夹和一个文件。它们如下:
 
 \begin{itemize}
 \item 
-build: The folder where the build files and binaries are placed.
+build: 放置构建文件和二进制文件的文件夹。
 
 \item 
-include/project\_name: This folder contains all the header files that are publicly accessible from outside the project. Adding a subfolder that contains the project's name is helpful since includes are done with <project\_name/somefile.h>, making it easier to figure out which library a header file is coming from.
+include/project\_name: 此文件夹包含从项目外部公开访问的所有头文件，包含<project\_name/somefile.h>使它更容易找出头文件来自哪个库。
 
 \item 
-src: This folder contains all the source and header files that are private.
+src: 此文件夹包含所有私有的源文件和头文件。
 
 \item 
-CMakeLists.txt: This is the root CMake file.
+CMakeLists.txt: 这是根CMake文件。
 \end{itemize}
 
-The build folder can be placed almost anywhere. Placing it in the project root is just very convenient. However, we strongly advise against choosing any non-empty folder as the build folder. Especially putting the built files into either include or src is considered as a bad practice. Additional folders such as test or doc can come in handy for organizing test projects and documentation pages.
+构建文件夹可以放置在任何地方，放在项目根目录最方便，但强烈建议不要选择任何非空文件夹作为构建文件夹。特别是将构建好的文件放入include或src中，这是一种糟糕的实践。其他文件夹，如test或doc，在组织测试项目和文档页面时就很方便。
 
-\subsubsubsection{3.2.1\hspace{0.2cm}Working with nested projects}
+\subsubsubsection{3.2.1\hspace{0.2cm}嵌套项目}
 
-When you're nesting projects inside each other, each project should map the file structure above and each CMakeLists.txt should be written so that the subproject can be built standalone. This means that each CMakeLists.txt file of a subproject should specify cmake\_minimum\_required and, optionally, a project definition as well. We will cover large projects and superbuilds in depth in Chapter 9, Creating Reproducible Build Environments.
+将项目相互嵌套时，每个项目都应该映射上面的文件结构，并且应该编写每个CMakeLists.txt以便子项目可以独立构建。每个子项目的CMakeLists.txt文件应该指定\texttt{cmake\_minimum\_required}，以及可选的项目定义。我们将在第9章中深入介绍大型项目和超级构建。
 
-Nested projects look something like this:
+嵌套项目看起来像这样:
 
 \begin{tcblisting}{commandshell={}}
 ├── CMakeLists.txt
@@ -43,9 +43,9 @@ Nested projects look something like this:
         └── src
 \end{tcblisting}
 
-Here, the folder structure is repeated inside the subproject folder. Sticking to such a folder structure and making the subproject buildable on its own makes it easier to move projects around. It also allows you to only build parts of a project, which can come in handy for big projects where build times may get rather long.
+文件夹结构在子项目文件夹中重复。坚持这样的文件夹结构，并使子项目能够自己构建，这样就更容易移植项目。其还允许只构建项目的一部分，这对于构建时间可能相当长的大型项目非常有用。
 
-Now that we have the file structure covered, let's start by creating a simple executable without any special dependencies. Later in this chapter, we will create various kinds of libraries and bring them all together.
+现在已经了解了文件结构，让我们开始创建一个没有任何特殊依赖的简单可执行文件。在本章的后面，我们将创建各种各样的库，并将它们集合在一起。
 
 
 

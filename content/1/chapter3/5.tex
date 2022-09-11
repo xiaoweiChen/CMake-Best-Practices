@@ -1,10 +1,10 @@
-So far, we have created three different libraries – a binary library to be linked either statically or dynamically, an interface or header-only library, and a precompiled but not linked object library.
+我们已经创建了三个不同的库——一个要静态或动态链接的二进制库，一个接口或头文件库，以及一个预编译但没有链接的对象库。
 
-Let's learn how to use them in an executable in a shared project. Installing them as system libraries or using them as external dependencies will be covered in Chapter 5, Integrating Third-Party Libraries and Dependency Management.
+了解如何在共享项目的可执行文件中使用它们。将它们安装为系统库或使用它们作为外部依赖，将在第5章中介绍。
 
-So, we can either put the add\_library calls in the same CMakeLists.txt file or we can integrate them by using add\_subdirectory. Both are valid options and depend on how the project is set up, as described in the Setting up a project and Working with nested projects sections of this chapter.
+所以，可以把\texttt{add\_library}放在同一个CMakeLists.txt文件中，或者使用\texttt{add\_subdirectory}将其整合起来。两者都是有效的选项，并取决于项目的设置方式，如本章的设置项目和使用嵌套项目部分所述。
 
-In the following example, we're assuming that three libraries have been defined with CMakeLists.txt files in the hello\_lib, hello\_header\_only, and hello\_object directories. These libraries can be included using the add\_subdirectory command. Here, a new target called chapter3, which is our executable, is created. Then, the libraries are added to the executable by target\_link\_libraries:
+下面的例子中，假设在\texttt{hello\_lib}、\texttt{hello\_header\_only}和\texttt{hello\_object}目录中已经用CMakeLists.txt文件定义了三个库。可以使用\texttt{add\_subdirectory}包含这些库。这里，创建了一个名为chapter3的新目标，它是可执行文件。然后，将这些库用\texttt{target\_link\_libraries}添加到可执行文件中:
 
 \begin{lstlisting}[style=styleCMake]
 add_subdirectory(hello_lib)
@@ -17,30 +17,30 @@ target_link_libraries(chapter3 PRIVATE hello_header_only hello
 	hello_object)
 \end{lstlisting}
 
-The target of target\_link\_libraries can also be another library. Again, the libraries are linked using an access specifier, which is either of the following:
+\texttt{target\_link\_libraries}的目标也可以是另一个库。同样，库使用访问说明符链接，可以是以下任意一个:
 
 \begin{itemize}
 \item 
-PRIVATE: The library is used to link against, but it is not a part of the public interface. The linked library is only a requirement when you're building the target.
+PRIVATE: 用于链接库，但它不是公共接口的一部分。只有在构建目标时才需要链接库。
 
 \item 
-INTERFACE: The library is not linked against, but it is part of the public interface. The linked library is a requirement when you're using the target somewhere else. This is usually only used when you're linking header-only libraries from other header-only libraries.
+INTERFACE: 没有链接到库，但它是公共接口的一部分。当在其他地方使用目标时，链接库是必需的。这通常仅限头文件库时使用。
 
 \item 
-PUBLIC: The library is linked against, and it is part of the public interface. So, the library is both a build dependency and a usage dependency.
+PUBLIC: 链接到库，是公共接口的一部分。因此，该库既是构建依赖项，也是使用依赖项。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Attention ——{} Bad Practices]
-The following practices are actively discouraged by the authors of this book as they tend to create unmaintainable projects that make it hard to port between different build environments. However, we have included them for completeness.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=注意——不推荐的做法]
+本书的作者极力反对下列实践，因为它们会创建难以维护的项目，使得在不同的构建环境之间难于移植。但为了完整起见，我们将它们包括进来。
 
-Instead of passing another target after PUBLIC, PRIVATE, or INTERFACE, you can also pass full paths to libraries or the filename of a library, such as  /usr/share/lib/mylib.so or just mylib.so. These practices are possible but discouraged as it makes the CMake project less portable. Additionally, it is possible to pass linker flags here by passing something such as -nolibc, though again, this is discouraged. If special linker flags are needed for all the targets, then passing them using the command line is the preferred way. If a single library needs special flags, then using target\_link\_options is the preferred way to do this, preferably in combination with the options that are set over the command line.
+除了传递\texttt{PUBLIC}、\texttt{PRIVATE}或\texttt{INTERFACE}之后的另一个目标，还可以传递库的完整路径或库的文件名，例如/usr/share/lib/mylib.so，或者只是mylib.so。这是实践可行的，但不鼓励这样做，因为这会降低CMake项目的可移植性。另外，也可以通过传递诸如\texttt{-nolibc}之类的链接器标志，不过还是不建议这么做。若所有目标都需要特殊的链接器标志，那么使用命令行传递是首选的方式。若单个库需要特殊标志，那么使用\texttt{target\_link\_options}则是首选的方法，最好与命令行上设置的选项结合使用。
 \end{tcolorbox}
 \end{itemize}
 
-In the next section, we'll look at setting compiler and linker options.
+下一节中，我们将研究如何设置编译器和链接器选项。
 
-\subsubsubsection{3.5.1\hspace{0.2cm}Setting compiler and linker options}
+\subsubsubsection{3.5.1\hspace{0.2cm}设置编译器和链接器选项}
 
-C++ compilers have lots of options regarding some of the most common flags to be set and it is also a common practice to set preprocessor definitions from the outside. In CMake, these are passed using the target\_compile\_options command. Changing linker behavior is done with the target\_link\_options command. Unfortunately, compilers and linkers may have different ways of how flags are set. For instance, in GCC and Clang, options are passed with a dash (-), while the Microsoft compiler takes slashes (/) as prefixes for its options. But by using generator expressions, which we covered in Chapter 1, Kickstarting CMake, this can be conveniently handled in CMake, as shown in the following example:
+C++编译器有很多选项来设置一些常见的标志，从外部设置预处理器定义也是一种常见的做法。CMake中，这些是使用\texttt{target\_compile\_options}传递，使用\texttt{target\_link\_options}更改链接器行为。不幸的是，编译器和链接器可能有不同的设置标志的方法。例如，在GCC和Clang中，选项是用减号(-)传递的，而Microsoft编译器将斜杠(/)作为选项的前缀。但是通过第1章中介绍的生成器表达式，可以很容易地在CMake中处理这个问题:
 
 \begin{lstlisting}[style=styleCMake]
 target_compile_options(
@@ -51,25 +51,25 @@ target_compile_options(
 )
 \end{lstlisting}
 
-Let's look at the generator expression in detail.
+让我们详细了解一下生成器表达式。
 
-\$<\$<CXX\_COMPILER\_ID:MSVC>:/SomeOption> is a nested generator expression that is evaluated inside out. Generator expressions are evaluated during build system generation. First, \$<CXX\_COMPILER\_ID:MSVC> evaluates to true if the C++ compiler equals MSVC. If this is the case, then the outer expression will return /SomeOption, which is then passed to the compiler. If the inner expression evaluates to false, then nothing is passed on.
+\$<\$<CXX\_COMPILER\_ID:MSVC>:/SomeOption>是一个嵌套的生成器表达式，由内而外求值。生成器表达式在生成阶段进行计算。首先，当C++编译器等于MSVC时，\$<CXX\_COMPILER\_ID:MSVC>为true。若是这种情况，那么外部表达式将返回/SomeOption，然后传递给编译器。如果内部表达式的计算结果为false，则不传递任何内容。
 
-\$<\$<CXX\_COMPILER\_ID:GNU,Clang,AppleClang>:-fopenmp> works similarly, but instead of just checking against a single value, a list containing GNU,Clang,AppleClang is passed. If CXX\_COMPILER\_ID matches either of these, the inner expression evaluates to true and someOption is passed to the compiler.
+\$<\$<CXX\_COMPILER\_ID:GNU,Clang,AppleClang>:-fopenmp>的工作原理类似，但不是只检查单个值，而是传递一个包含GNU，Clang，AppleClang的列表。若\texttt{CXX\_COMPILER\_ID}匹配其中任何一个，内部表达式计算为true，someOption会传递给编译器。
 
-Passing compiler or linker options as PRIVATE marks them as a build requirement for this target that is not needed for interfacing the library. if PRIVATE is substituted with PUBLIC, then the compile option also becomes a usage requirement and all the targets that depend on the original targets will use the same compiler options. Exposing compiler options to the dependent targets is something that needs to be done with caution. If a compiler option is only needed to use a target but not to build it, then keyword INTERFACE can be used. This is mostly the case when you're building header-only libraries.
+将编译器或链接器选项传递为\texttt{PRIVATE}，将其标记为与库接口不需要的此目标的构建需求。若使用\texttt{PUBLIC}，那么编译选项也成为构建需求，所有依赖于原始目标的目标将使用相同的编译选项。将编译器选项暴露给依赖的目标是需要谨慎做的事情。若编译器选项只用于使用目标而不用于构建目标，则可以使用关键字\texttt{INTERFACE}。在构建头文件库时，这是最常见的情况。
 
-A special case of compiler options is compile definitions, which are passed to the underlying program. These are passed with the target\_compile\_definitions function.
+编译器选项的特殊情况是编译定义，其会传递给底层程序。这通过\texttt{target\_compile\_definitions}进行传递。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Debugging compiler options}
+\textbf{调试编译器选项}
 
-To see all the compile options, you can look at the generated build files, such as Makefiles or Visual Studio projects. A much more convenient way is to let CMake export all the compile commands as a JSON compilation database.
+要查看所有编译选项，可以查看生成的构建文件，例如Makefiles 或Visual Studio项目。更方便的方法是让CMake将所有编译命令导出为JSON编译数据库。
 
-By enabling the CMAKE\_EXPORT\_COMPILE\_COMMANDS variable, a file called compile\_commands.json containing the full commands for compiling is created in the build folder.
+通过启用\texttt{CMAKE\_EXPORT\_COMPILE\_COMMANDS}变量，将生成一个名为compile\_commands.json的文件，其包含用于编译的完整命令。
 
-Enabling this option and running CMake will produce results similar to the following:
+启用此选项并运行CMake将产生如下结果:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -86,20 +86,11 @@ Enabling this option and running CMake will produce results similar to the follo
 },
 \end{lstlisting}
 
-Note the addition of the manually specified -fopenMP flag from the previous example. compile\_commands.json can be used as a build system-agnostic way to load the commands. Some IDEs, such as VS Code and CLion, can interpret the JSON file and generate project information themselves. It also often comes in handy for debugging compiler options in case something did not work as expected. The full specifications of the compile commands database can be found at \url{https://clang.llvm.org/docs/JSONCompilationDatabase.html}.
+注意，上一个示例中添加了手动指定的\texttt{-fopenMP}标志。compile\_commands.json可以用作构建系统无关的方式来加载命令。一些IDE，如VS Code和CLion，可以解释JSON文件并自己生成项目信息。也常用于调试编译器选项，以防某些事情没有按预期工作。编译命令数据库的完整规范可以在\url{https://clang.llvm.org/docs/JSONCompilationDatabase.html}找到。
 
-\subsubsubsection{3.5.2\hspace{0.2cm}Library aliases}
+\subsubsubsection{3.5.2\hspace{0.2cm}库别名}
 
-Library aliases are a way to refer to a library without creating a new build target,
-sometimes referred to as namespaces. A common pattern is to create a library alias in
-the form of MyProject::Library for each library that is installed from a project.
-They can be used to semantically group multiple targets. They also help avoid clashes in
-naming, especially when projects contain common targets such as libraries named utils,
-helpers, and similar. It is good practice to collect all the targets of the same project
-under the same namespace. When you're linking libraries from other projects, including
-the namespace avoids you accidentally including the wrong library. All the library targets
-in this chapter will be aliased with a namespace to group them so that they can be
-referenced by their namespace:
+库别名是在不创建新的构建目标的情况下引用库的一种方法，有时称为命名空间。一个常见的模式是为从项目中安装的每个库以MyProject::library的形式创建一个库别名，可以用于对多个目标进行语义分组。还有助于避免命名方面的冲突，特别是当项目包含公共目标时，比如名为utils的库、helper和类似的库。在相同的命名空间下收集相同项目的所有目标是一个很好的实践。在链接来自其他项目的库时，包含名称空间可以避免意外包含错误的库。本章中所有的库目标都将使用一个命名空间作为别名来分组它们，以便它们可以使用命名空间引用:
 
 \begin{lstlisting}[style=styleCMake]
 add_library(Chapter3::hello ALIAS hello)
@@ -107,13 +98,13 @@ add_library(Chapter3::hello ALIAS hello)
 target_link_libraries(SomeLibrary PRIVATE Chapter3::hello)
 \end{lstlisting}
 
-In addition to helping with determining the origin of a target, CMake uses namespaces to recognize imported targets and create better diagnostic messages, as we will see when we look at installing and packaging in Chapter 4, Packaging, Deploying, and Installing a CMake Project, as well as in Chapter 5, Integrating Third-Party Libraries and Dependency Management, where we will cover dependency management.
+除了帮助确定目标的来源，CMake使用命名空间来识别导入的目标，并提供更好的诊断消息，我们将在第4章和第5章中进行讨论，在那里详细了解依赖管理。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Always Use Namespaces]
-As a good practice, always ALIAS your targets with a namespace and reference them using the namespace:: prefix.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=总是使用命名空间]
+作为一种良好的实践，始终使用名称空间对目标进行别名，并使用\texttt{命名空间::前缀}引用它们。
 \end{tcolorbox}
 
-Namespaces are a great way to organize build artifacts, but sometimes, they are not enough. Sometimes, we want to see the bigger picture of what is using what and which artifact depends on which library. CMake can help with creating dependency graphs that provide such insights, as we'll see in the next chapter.
+命名空间是组织构建构件的一种很好的方式。但有时，这还不够，我们希望看到更大的视图，了解“什么正在使用什么”，以及哪个工件依赖于哪个库。CMake可以帮助创建提供这样深刻见解的依赖图，我们将在下一章中看到。
 
 
 

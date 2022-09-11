@@ -1,4 +1,4 @@
-First, we will create a simple executable from a simple hello world C++ program. The following C++ program will print out Welcome to CMake Best Practices:
+首先，我们将从一个简单的hello world C++程序创建一个简单的可执行文件。下面的C++程序将打印出\texttt{Welcome to CMake Best Practices}:
 
 \begin{lstlisting}[style=styleCXX]
 #include <iostream>
@@ -8,7 +8,7 @@ int main(int, char **) {
 }
 \end{lstlisting}
 
-To build this, we need to compile it and give the executable a name. Let's see what the CMakeLists.txt file to build this executable looks like:
+要构建此文件，需要编译它并为可执行文件指定一个名称。来看看CMakeLists.txt文件是怎样构建这个可执行文件的:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -25,21 +25,21 @@ add_executable(hello_world)
 target_sources(hello_world PRIVATE src/main.cpp)
 \end{lstlisting}
 
-With the first line, cmake\_minimum\_required(VERSION 3.21), we tell CMake which version of CMake we are expecting to see and which features CMake will enable. For this book, we are using CMake 3.21 for all the examples, but for compatibility reasons, you could select a lower version.
+第一行，\texttt{cmake\_minimum\_required(VERSION 3.21)}，期望看到的CMake的版本，以及CMake将启用哪些特性。对于本书，所有的例子中都使用CMake 3.21，但是出于兼容性的原因，读者们可以选择一个较低的版本。
 
-For this example, version 3.1 would be the absolute minimum because, before that, the target\_sources command is not available. It is good practice to put the cmake\_minimum\_required command at the top of each CMakeLists.txt file. 
+对于本例，3.1版本将是绝对的最小值，因为在此之前，\texttt{target\_sources}不可用。将\texttt{cmake\_minimum\_required}指令放在每个CMakeLists.txt文件的顶部是一个很好的做法。
 
-Next, the project is set up using the project() command. The first argument is the project's name – in our case, "hello\_world\_standalone".
+接下来，使用\texttt{project()}指令设置项目。第一个参数是项目的名称——我们的例子中为“hello\_world\_standalone”。
 
-Next, the version of the project is set to version 1.0. What follows is a brief description and the home page's URL. Finally, the LANGUAGES CXX attribute specifies that we are building a C++ project. Apart from the project's name, all the arguments are optional.
+接下来，项目的版本设置为1.0版本。下面是一个简短的描述和主页的URL。最后，\texttt{LANGUAGES CXX}属性指定正在构建一个C++项目。除了项目名称之外，所有参数都可选。
 
-Invoking the add\_executable(hello\_world) command creates a target called hello\_world. This will also be the name of the executable file that's created by this target.
+调用\texttt{add\_executable(hello\_world)}指令，会创建一个名为\texttt{hello\_world}的目标。这也将是这个目标创建的可执行文件名。
 
-Now that the target has been created, adding the C++ source files to the target is done with target\_sources. Chapter3 is the target name, as specified in add\_executable. PRIVATE defines that the sources are only used to build this target and not for any dependent targets. After the scope specifier, there's a list of source files that are relative to the path of the current CMakeLists.txt file. If needed, the location of the currently processed CMakeLists.txt file can be accessed with the CMAKE\_CURRENT\_SOURCE\_DIR variable.
+现在已经创建了目标，使用\texttt{target\_sources}完成了向目标添加C++源文件。\texttt{Chapter3}是目标名，在\texttt{add\_executable}中指定。\texttt{PRIVATE}定义源仅用于构建此目标，而不用于依赖的目标。在范围说明符之后，有一个相对于当前CMakeLists.txt文件路径的源文件列表。如果需要，当前处理的CMakeLists txt文件的位置可以通过\texttt{CMAKE\_CURRENT\_SOURCE\_DIR}得到。
 
-Sources can be added directly to the add\_executable function or separately using the target\_sources functions. Adding them with target\_sources allows you to explicitly define where the sources can be used by using PRIVATE, PUBLIC, or INTERFACE. However, specifying anything other than PRIVATE only makes sense for library targets.
+源码可以直接添加到\texttt{add\_executable}，也可以单独使用\texttt{target\_sources}，将它们与\texttt{target\_sources}一起添加。通过使用\texttt{PRIVATE}、\texttt{PUBLIC}或\texttt{INTERFACE}，可以显式地定义在何处使用源码。但是，指定\texttt{PRIVATE}以外的内容只对库目标有意义。
 
-A common pattern that you often see is naming the main executable of a project after the project's name, like this:
+经常看到的一种常见模式是用项目名称来命名项目的主可执行文件:
 
 \begin{lstlisting}[style=styleCMake]
 project(hello_world
@@ -48,9 +48,9 @@ project(hello_world
 add_executable(${PROJECT_NAME})
 \end{lstlisting}
 
-While this seems to be convenient at first glance, it should be avoided. The project's name and the target carry a different semantic meaning, so they should be treated as separate things, so using PROJECT\_NAME as the name for targets should be avoided.
+乍一看这似乎很方便，但不推荐这样做。项目名称和目标具有不同的语义含义，因此应该将其独立对待，因此应该避免使用\texttt{PROJECT\_NAME}作为目标的名称。
 
-Executables are important and quite easy to create, but unless you're building a huge monolith, you should be using libraries to modularize and distribute code. In the next section, we will learn how libraries are built and how to handle different linking methods.
+可执行文件非常重要，而且非常容易创建，除非构建的是一个庞然大物，否则应该使用库来模块化和分发代码。下一节中，我们将学习如何构建库，以及如何处理不同的链接方法。
 
 
 
