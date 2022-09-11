@@ -1,184 +1,184 @@
 
-The most common way of using CMake is via the command-line interface (CLI). CLIs exist in virtually every environment, thus, learning to use CMake in a CLI is essential. In this section, we are going to learn how to perform the most basic CMake operations using the CLI.
+使用CMake最常见的方式是通过命令行(CLI)。本节中，将了解如何使用CLI执行最基本的CMake操作。
 
-Interactions with the CMake CLI can be done by issuing the cmake command in your operating system's terminal, assuming that CMake is installed and the cmake executable is included in your system's PATH variable (or equivalent). You can verify that by issuing cmake in your terminal without any parameters, as shown in the following figure:
+与CMake CLI的交互可以通过在终端中输入CMake命令来完成，假设安装了CMake，并且CMake可执行文件包含在系统的PATH变量(或等效变量)中。就可以通过在终端中不带任何参数地执行\texttt{cmake}来进行验证:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/1.jpg}\\
-Figure 2.1 – Invoking the cmake command
+图2.1 调用cmake命令
 \end{center}
 
-If your terminal is complaining about a missing command, then you should either install CMake (explained in Chapter 1, Kickstarting CMake) or make it discoverable by adding it to your system's PATH variable. Consult your operating system's guide about how to add a path to the system's PATH variable.
+若终端抱怨缺少命令，那么需要安装CMake或者将其可执行文件的目录添加到系统的PATH变量中。关于如何向系统的PATH变量添加路径，请参考操作系统指南。
 
-After installing CMake and adding it to the PATH variable (if required), you should test whether CMake is usable. The most basic command you can execute in the command line is cmake -{}-version, which allows you to check CMake's version.
+在安装CMake并将其添加到PATH变量后(如果需要)，应该测试CMake是否可用。可以在命令行中执行的最基本命令是\texttt{cmake -{}-version}，它允许您检查CMake的版本。
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/2.jpg}\\
-Figure 2.2 – Checking CMake's version in the terminal
+图2.2 在终端中查看CMake的版本
 \end{center}
 
-CMake will output a version string in the form of cmake version <maj.min.rev>. You should see an output that contains the version number of CMake you've installed on your system.
+CMake版本将以<maj.min.rev>的形式输出一个版本字符串，其中包含您在系统上安装的CMake的版本号。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-If the version does not match with the installed one, then you probably have multiple installations of CMake on your system. Since this book contains examples written for CMake version 3.21 and above, it is recommended to have that issue fixed before going any further.
+若版本与安装的不匹配，可能系统中已经安装了多个CMake。由于本书包含了为CMake 3.21及以上版本编写的示例，因此建议在进一步讨论之前修复该问题。
 \end{tcolorbox}
 
-After installing CMake, you should install your build system and compiler as well. For Debian-like operating systems (for example, Debian and Ubuntu), this can be easily done by issuing the sudo apt install build-essential command. This package essentially contains gcc, g++, and make.
+安装CMake之后，应该安装构建系统和编译器。对于类似Debian的操作系统(例如，Debian和Ubuntu)，这可以通过发出\texttt{sudo apt install build-essential}命令轻松完成，这个包包含gcc、g++和make。
 
-The CLI usage will be illustrated in the Ubuntu 20.04 environment. Apart from the minor edge cases, the usage is the same in other environments as well. Those edge cases will be mentioned as we go on.
+CLI的用法将在Ubuntu 20.04环境中说明，在其他环境中的用法也是一样的。这些边缘情况会在后面介绍。
 
-\subsubsubsection{2.2.1\hspace{0.2cm}Learning the basics of the CMake CLI}
+\subsubsubsection{2.2.1\hspace{0.2cm}了解CMake命令行的基本操作}
 
-The three basic things you should learn about using the CMake CLI are listed here:
+下面列出了使用CMake命令行应该了解的三件事情:
 
 \begin{itemize}
 \item 
-Configuring a CMake project
+配置
 
 \item 
-Building a CMake project
+构建
 
 \item 
-Installing a CMake project
+安装
 \end{itemize}
 
-After learning the basics, you will be able to build and install any CMake project of your choice. Let's get started with configuring.
+学习了基础知识之后，将能够构建和安装任何CMake项目。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Configuring a project via the CLI}
+\textbf{通过命令行配置项目}
 
-To configure a CMake project via the command line, you can use the cmake -G "Unix Makefiles" -S <project\_root> -B <output\_directory> construct. The -S argument is used for specifying the CMake project to be configured, whereas -B specifies the configure output directory. Lastly, the -G argument allows us to specify the generator that will be used for the build system generation. The result of the configuration process will be written to <output\_directory>.
+要通过命令行配置CMake项目，可以使用\texttt{CMake -G "Unix Makefiles" -S  -B <output\_directory>}的方式。\texttt{-S}参数用于指定要配置的CMake项目，而\texttt{-B}参数用于指定配置输出目录。最后，\texttt{-G}参数指定将用于生成构建系统的生成器，配置过程的结果将写入\texttt{<output\_directory>}。
 
-As an illustration, let's configure our book's example project in the project root build directory:
+在项目根构建目录中配置我们书中的示例项目:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/3.jpg}\\
-Figure 2.3 – Cloning the example code repository
+图2.3 克隆示例代码存储库
 \end{center}
 
-\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Important Note]
-The project must be already present in your environment. If not, clone it via Git by issuing git clone \url{https://github.com/PacktPublishing/CMake-Best-Practices.git} in your terminal.
+\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=重要Note]
+项目必须存在于环境中。若没有，需要在Git在终端中执行\texttt{git clone \url{https://github.com/PacktPublishing/CMake-Best-Practices.git}}。
 \end{tcolorbox}
 
-Now go into the CMake-Best-Practices directory and issue cmake -G "Unix Makefiles" -S . -B ./build, as shown in the following figure:
+现在进入CMake-Best-Practices目录，使用\texttt{cmake -G "Unix Makefiles" -S . -B ./build}:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/4.jpg}\\
-Figure 2.4 – Configuring the example code with CMake
+图2.4 使用CMake配置示例代码
 \end{center}
 
-This command is like saying to CMake, Use the "Unix Makefiles" (-G "Unix Makefiles") generator to generate a build system for the CMake project in the current directory (-S .) to build (-B ./build) directory.
+这个命令就像对CMake说，使用"Unix Makefiles" (\texttt{-G "Unix Makefiles"})生成器在当前目录(\texttt{-S .})生成CMake项目的构建系统(\texttt{-B ./build})目录。
 
-CMake will configure the project located in the current folder in the build folder. As we omitted the build type, CMake used the Debug build type (the default CMAKE\_BUILD\_TYPE value for the project).
+CMake将设置源文件夹为当前文件夹中的项目。当我们省略构建类型时，CMake使用Debug构建类型(项目默认的\texttt{CMAKE\_BUILD\_TYPE})。
 
-In subsequent sections, we are going to learn about the fundamental settings that are used in the configure step.
+在后续章节中，我们将学习配置步骤中使用的基本设置。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Changing the build type}
+\textbf{修改构建类型}
 
-CMake does not assume any build type by default. In order to set the build type, an additional variable named CMAKE\_BUILD\_TYPE must be supplied to the configure command. To supply additional variables, the variable must be prefixed with -D.
+CMake默认不假定任何构建类型。为了设置构建类型，必须在配置阶段提供一个名为\texttt{CMAKE\_BUILD\_TYPE}的变量，变量必须以\texttt{-D}作为前缀。
 
-To get the Release build instead of Debug, add the CMAKE\_BUILD\_TYPE variable in the configure command, as mentioned previously: cmake -G "Unix Makefiles" -DCMAKE\_BUILD\_TYPE:STRING=Release -S . -B ./build.
+要获得Release版本，而不是Debug版本，在配置命令中添加\texttt{CMAKE\_BUILD\_TYPE}变量。如前所述，该命令为:\texttt{cmake -G "Unix Makefiles" -DCMAKE\_BUILD\_TYPE:STRING=Release -S . -B ./build}。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The CMAKE\_BUILD\_TYPE variable only makes sense for singleconfiguration generators, such as Unix Makefiles and Ninja. In multipleconfiguration generators, such as Visual Studio, the build type is a build-time parameter instead of a configuration-time parameter, thus, it cannot be configured by using the CMAKE\_BUILD\_TYPE parameter.
+\texttt{CMAKE\_BUILD\_TYPE}变量只对单个配置生成器有意义，例如Unix Makefiles和Ninja。在多个配置生成器中，例如Visual Studio，构建类型是一个构建时参数而，不是一个配置时参数，因此不能通过使用\texttt{CMAKE\_BUILD\_TYPE}参数来配置。
 \end{tcolorbox}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Changing the generator type}
+\textbf{更换生成器类型}
 
-Depending on the environment, CMake attempts to select an appropriate generator by default. To specify a generator explicitly, the -G argument must be supplied with a valid generator name. For example, if you want to use Ninja as a build system instead of make, you can change it as follows:
+根据不同的环境，CMake会在默认情况下尝试选择合适的生成器。要显式指定生成器，\texttt{-G}参数必须提供有效的生成器名称。例如，若想使用Ninja作为构建系统，而不是make，可以这样:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Ninja" -DCMAKE_BUILD_TYPE:STRING=Debug -S . -B ./
 build
 \end{tcblisting}
 
-The output should be similar to the command output shown in the following figure:
+输出的信息应如下图所示:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/5.jpg}\\
-Figure 2.5 – Checking the CMake's Ninja generator output
+图2.5 检查CMake的Ninja生成器输出
 \end{center}
 
-This will cause CMake to generate Ninja build files instead of makefiles.
+这将导致CMake生成Ninja的构建文件，而不是生成makefile文件。
 
-In order to see all available generator types for your environment, issue the cmake -{}-help command. Available generators will be listed at the end of the Help text generators section, as shown here:
+为了查看环境中所有可用的生成器类型，可使用\texttt{cmake -{}-help}。可用的生成器将在帮助文本生成器部分的末尾列出，如下所示:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/1/chapter2/images/6.jpg}\\
-Figure 2.6 – List of available generators in help
+图2.6 可用生成器列表
 \end{center}
 
-The generator with one asterisk next to it is the default for the environment you're currently in.
+带有星号的生成器是当前环境的默认值。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Changing the compiler}
+\textbf{修改编译器}
 
-In CMake, the compilers to be used are specified on a per-language basis via the CMAKE\_<LANG>\_COMPILER variables. In order to change the compiler for a language, CMAKE\_<LANG>\_COMPILER must be supplied to the Configure command. For a C/C++ project, the variables usually overridden are CMAKE\_C\_COMPILER (C compiler) and CMAKE\_CXX\_COMPILER (C++ compiler). Compiler flags are similarly controlled by the CMAKE\_<LANG>\_FLAGS variable. This variable can be used for holding configuration-independent compiler flags.
+CMake中，编译器可以通过\texttt{CMAKE\_<LANG>\_COMPILER}来指定。为了改变编译器，必须在配置命令中提供\texttt{CMAKE\_<LANG>\_COMPILER}。对于C/C++项目，通常覆盖的是\texttt{CMAKE\_C\_COMPILER}(C编译器)和\texttt{CMAKE\_CXX\_COMPILER}(C++编译器)。编译器标志由\texttt{CMAKE\_<LANG>\_FLAGS}控制。此变量可用于保存与配置无关的编译器标志。
 
-As an example, let's try to use g++-10 as a C++ compiler in an environment where it is not the default compiler:
+例如，尝试使用g++-10作为C++编译器，但它不是默认编译器:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=/usr/bin/g++-10 -S .  
   -B ./build
 \end{tcblisting}
 
-Here, we can see g++-10 is used instead of the system's default compiler, g++-9:
+可以看到使用了g++-10，而不是系统默认的编译器g++-9:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/7.jpg}\\
-Figure 2.7 – Configuring the project using a different compiler (g++-10)
+图2.7 使用不同的编译器配置项目(g++-10)
 \end{center}
 
-Without the compiler specification, CMake prefers to use g++-9 in this environment:
+没有编译器规范的情况下，CMake更倾向于在这种环境下使用g++-9:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/8.jpg}\\
-Figure 2.8 – Configuring behavior without a compiler preference
+图2.8 不使用编译器配置的情况
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Passing flags to the compiler}
+\textbf{向编译器传递编译标志}
 
-To illustrate how to specify compiler flags, suppose that you want to enable all warnings and treat them as an error. These behaviors are controlled with -Wall and -Werror compiler flags, respectively, in the gcc toolchain; thus, we need to pass these flags to the C++ compiler. The following code specifies how to do it:
+为了演示如何指定编译器标志，假设需要启用警告视为错误。这些行为在gcc工具链中分别用\texttt{-Wall}和\texttt{-Werror}编译器标志控制。因此，需要将这些标志传递给C++编译器:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
   -Werror" - S . B ./build S . -B ./build
 \end{tcblisting}
 
-We can see the flags specified in the command (-Wall and -Werror) are passed into the compiler in the following example:
+可以看到命令中指定的标志(\texttt{-Wall}和\texttt{-Werror})在下面的例子中传递给了编译器:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/9.jpg}\\
-Figure 2.9 – Passing flags to the C++ compiler
+图2.9 向C++编译器传递标志
 \end{center}
 
-Build flags can be customized for a per-build type by suffixing them with capitalized build type string. There are four variables for four  different build types, as listed next. They are useful for specifying build types depending on compiler flags. Flags specified in such variables are only valid when the configuration build type matches:
+构建标志可以为每个构建类型定制，方法是在它们后面加上大写的构建类型字符串。有四个变量用于四个不同的构建类型，它们对于根据编译器标志指定构建类型非常有用。这些变量中指定的标志只在配置构建类型匹配时有效:
 
 \begin{enumerate}
 \item 
-CMAKE\_<LANG>\_FLAGS\_DEBUG
+\texttt{CMAKE\_<LANG>\_FLAGS\_DEBUG}
 
 \item 
-CMAKE\_<LANG>\_FLAGS\_RELEASE
+\texttt{CMAKE\_<LANG>\_FLAGS\_RELEASE}
 
 \item 
-CMAKE\_<LANG>\_FLAGS\_RELWITHDEBINFO
+\texttt{CMAKE\_<LANG>\_FLAGS\_RELWITHDEBINFO}
 
 \item 
-CMAKE\_<LANG>\_FLAGS\_MINSIZEREL
+\texttt{CMAKE\_<LANG>\_FLAGS\_MINSIZEREL}
 \end{enumerate}
 
-In addition to the previous example, if you want to treat warnings as errors only in the Release builds, build type-specific compiler flags allow you to do so.
+除了前面的例子外，若希望只在Release构建中将警告视为错误，可以使用构建类型特定的编译器标志。
 
-Here is an example that illustrates the usage of the build type-specific compiler flags:
+下面是一个示例，演示了如何使用特定于构建类型的编译器标志:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
@@ -186,14 +186,14 @@ cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
   TYPE:STRING=Debug -S . -B ./build
 \end{tcblisting}
 
-Notice that an additional CMAKE\_CXX\_FLAGS\_RELEASE parameter is present in the preceding command. The contents in this variable will only be passed to the compiler when the build type is Release. Since the build type is specified as Debug, we can see the -O3 flag is not present in the flags passed to the compiler, as shown in the following figure:
+注意，前面的命令中有一个\texttt{CMAKE\_CXX\_FLAGS\_RELEASE}参数。只有当构建类型为Release时，这个变量中的内容才会传递给编译器。由于构建类型指定为Debug，可以看到传递给编译器的标志中没有\texttt{-O3}标志:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/10.jpg}\\
-Figure 2.10 – Specifying flags based on the build type; the –O3 flag is missing in the Debug build
+图2.10 根据构建类型指定标志——Debug版本中没有-O3标志
 \end{center}
 
-In Figure 2.10, notice that CMake is issuing a warning about a specified but unused variable, CMAKE\_CXX\_FLAGS\_RELEASE. This confirms that the CMAKE\_CXX\_FLAGS\_RELEASE variable is not used in the Debug build type. When the build type is specified as Release, we can see that the -O3 flag is present:
+图2.10中，CMake发出一个关于指定，但未使用的变量的警告，\texttt{CMAKE\_CXX\_FLAGS\_RELEASE}。这确认了\texttt{CMAKE\_CXX\_FLAGS\_RELEASE}没有在Debug构建类型中使用。当构建类型指定为Release时，可以看到\texttt{-O3}标志:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
@@ -201,126 +201,128 @@ cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
 -DCMAKE_BUILD_TYPE:STRING= "Release" -S . -B ./build
 \end{tcblisting}
 
-In this line, you are saying to CMake, Configure the CMake project located at the current directory to build/folder using the "Unix Makefiles" generator. For all build types, pass the -Wall flag to the compiler unconditionally. If the build type is Release, pass the -O3 flag as well.
+相当于对CMake说，配置位于当前目录的CMake项目，使用“Unix Makefiles”生成器来构建/文件夹。对于所有构建类型，无条件地将\texttt{-Wall}标志传递给编译器。若构建类型是Release，也传递\texttt{-O3}标志。
 
-Here is the output of the command when the build type is set to Release:
+以下是当构建类型设置为Release时命令的输出:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/11.jpg}\\
-Figure 2.11 – Specifying flags based on build type; the -O3 flag is present in the Release build
+图2.11 根据构建类型指定标志——在Release版本中有\texttt{-O3}标志
 \end{center}
 
 In Figure 2.11, we can confirm that the -O3 flag is passed to the compiler as well. Be aware that even though RelWithDebInfo and MinSizeRel are also release builds, they are separate from the Release build type, and so flags specified in the CMAKE\_<LANG>\_FLAGS\_RELEASE variable will not apply to them.
 
+图2.11中，可以确认\texttt{-O3}标志也传递给了编译器。注意，即使RelWithDebInfo和MinSizeRel也是Release版本，它们与Release版本类型是分开的，因此在\texttt{CMAKE\_<LANG>\_FLAGS\_RELEASE}中指定的标志不适用于它们。
+
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Listing cached variables}
+\textbf{缓存变量列表}
 
-You can list all the cached variables by issuing the cmake -L ./build/ command (see Figure 2.12). This, by default, does not show the advanced variables and help strings associated with each variable. To show them as well, use the cmake -LAH ./build/ command instead.
+可以通过\texttt{cmake -L ./build/}列出所有缓存的变量(参见图2.12)。默认情况下，这不会显示与每个变量关联的高级变量和帮助字符串。也可以使用\texttt{cmake -LAH ./build/}来显示它们。
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/1/chapter2/images/12.jpg}\\
-Figure 2.12 – List of cached variables dumped by CMake
+图2.12 CMake转储的缓存变量列表
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Building a configured project via CLI}
+\textbf{通过CLI构建配置好的项目}
 
-To build the configured project, issue the cmake -{}-build ./build command. This command tells DCMake to Build the CMake project already configured in the build folder.
+要生成已配置的工程，需要使用\texttt{cmake -{}-build ./build}。这个命令告诉CMake构建已经在构建文件夹中配置的CMake项目。
 
-You can also equivalently issue cd build \&\& make. The benefit of using cmake -{}-build is that it saves you from invoking build system-specific commands. It is especially helpful when building CI pipelines or build scripts. In this way, you can change your build system generator without changing your build command.
+也可以使用\texttt{cd build \&\& make}进行构建。使用\texttt{cmake -{}-build}的好处是，省去了调用特定于构建系统的命令。在构建CI管道或构建脚本时，可以在不更改构建命令的情况下，更改构建系统生成器。
 
-You can see an example output for the cmake --build ./build command in the following example:
+可以看到\texttt{cmake -{}-build ./build}的输出示例如下所示:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/13.jpg}\\
-Figure 2.13 – Building a configured project
+图2.13 构建配置好的项目
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Building in parallel}
+\textbf{并行构建}
 
-You can also customize build time details while issuing the build command. The most prominent build time configuration is the number of jobs that will be used to build the project. To specify job count, append -{}-parallel <job\_count> to your cmake -{}-build command.
+还可以在发出生成命令时，自定义生成时间详细信息。要指定并行构建的任务数，可以在\texttt{cmake -{}-build}中追加\texttt{-{}-parallel <job\_count>}。
 
-To build in parallel, issue cmake -{}-build ./build -{}-parallel 2, where the number 2 specifies the job count. The recommended number of jobs for a build system is, at most, one job per hardware thread. In multi-core systems, it is also recommended to use at least one less than the available hardware thread count to not affect the system's responsivity during the build process.
+要并行构建，请使用\texttt{cmake -{}-build ./build -{}-parallel 2}，其中数字2指定了任务数。对于构建系统，建议的任务数最多为每个硬件线程一个作业。多核系统中，还建议至少使用比可用硬件线程数少一个的线程，以避免在构建过程中影响系统的响应能力。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-You can usually use more than one job per hardware thread and get faster build times since the build process is mostly I/O bound, but your mileage may vary. Experiment and observe.
+通常可以在每个硬件线程中使用多个任务，从而获得更快的构建时间，因为构建过程主要受I/O限制，但实际情况可能有所不同，需要进行实验和观察。
 
-Also, some of the build systems, such as Ninja, will try to utilize as many hardware threads as are available in the system, so it is redundant to specify the job count for such build systems if your target is to use all hardware threads in your system. You can retrieve the hardware thread count by issuing the nproc command in Linux environments.
+此外，某些构建系统(如Ninja)会尝试利用系统中可用的尽可能多的硬件线程，若目标是使用系统中的所有硬件线程，那么为此类构建系统指定任务数就多余了。可以在Linux环境中，使用nproc命令来获取硬件线程计数。
 \end{tcolorbox}
 
-It is a good practice not to use fixed values for environment-dependent variables in the commands that are expected to be invoked in different environments, such as CI/CD scripts and build scripts. Here is an example build command that utilizes nproc to determine the number of parallel jobs dynamically:
+在期望在不同环境中调用的命令(如CI/CD脚本和构建脚本)中，不使用环境相关变量的固定值，这是一个很好的实践。下面是一个使用nproc动态确定并行任务数量的构建命令示例:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build ./build/ --parallel $(($(nproc)-1))
 \end{tcblisting}
 
-Let's observe how different job counts affect the build time. We will use the time tool to measure how long each command invocation is. The environment details are as follows:
+让我们观察不同的任务数如何影响构建时间，将使用时间工具来测试每次命令调用的时间。环境如下:
 
 \begin{itemize}
 \item 
 OS: Ubuntu 20.04.3 LTS (Focal Fossa)
 
 \item 
-CPU: AMD Ryzen Threadripper 1950X 16-Core Processor (32 hardware threads)
+CPU: AMD Ryzen Threadripper 1950X 16-Core Processor (32线程)
 
 \item 
 RAM: 32 GB
 \end{itemize}
 
-With one job (--parallel 1), the build time result would be as follows:
+对于一个任务(\texttt{-{}-parallel 1})，构建时间如下所示:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/14.jpg}\\
-Figure 2.14 – Parallelized build time result with one job
+图2.14 一个任务的并行构建时间结果
 \end{center}
 
-The build time result with two jobs (-{}-parallel 2) would be as follows:
+两个任务(\texttt{-{}-parallel 2})的构建时间结果如下:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/15.jpg}\\
-Figure 2.15 – Parallelized build time result with two jobs
+图2.15 两个任务的并行构建时间结果
 \end{center}
 
-This is the build time result with four jobs (-{}-parallel 3):
+三个任务(\texttt{-{}-parallel 3})的构建时间结果如下:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/16.jpg}\\
-Figure 2.16 – Parallelized build time result with three jobs
+图2.16 三个任务的并行构建时间结果
 \end{center}
 
-This is the build time result with four jobs (-{}-parallel 4):
+四个任务(\texttt{-{}-parallel 4})的构建时间结果如下:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/17.jpg}\\
-Figure 2.17 – Parallelized build time result with four jobs
+图2.17 四个任务的并行构建时间结果
 \end{center}
 
-Even though invoked on a very simple project, we can clearly see how extra jobs help get faster build times. Going from one job to two jobs reduces the build time by 0.3 seconds, whereas going from two jobs to three jobs gives us an additional 0.2 seconds. But, going from three jobs to four jobs makes only a 0.01-second difference, which means we've reached the limit of build parallelism for this project. From this point on, throwing more jobs will not achieve a notable difference in build time.
+即使是一个非常简单的项目，也可以清楚地看到多个任务并行可以减少构建时间。从一个作业到两个任务减少了0.3秒的构建时间，而从两个任务到三个任务则增加了0.2秒。但是，从3个作业到4个任务只会产生0.01秒的差异，这意味着已经达到了这个项目的构建并行性的极限，增加更多的工作将不会在构建时间上实现显著的差异。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Building specific target(s) only}
+\textbf{只构建特定的目标}
 
-By default, CMake will build all available targets that are configured. Since building all the targets is not always desirable, CMake allows building a subset of targets via the -{}-target sub-option. This sub-option may be specified multiple times, as shown here:
+默认情况下，CMake将构建已配置的所有可用目标。由于构建所有目标并不总是理想的，CMake允许通过\texttt{-{}-target}子选项构建目标的子集，子选项可以指定多次:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build ./build/ --target "ch2_framework_component1"
 --target "ch2_framework_component2"
 \end{tcblisting}
 
-This command will limit the build scope to just the ch2\_framework\_component1 and ch2\_framework\_component2 targets. If these targets also depend on other targets, they will be built as well.
+该命令将构建范围限制为\texttt{ch2\_framework\_component1}和\texttt{ch2\_framework\_component2}目标。若这些目标也依赖于其他目标，它们也会构建。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Removing previous build artifacts before the build}
+\textbf{构建之前删除以前的构建}
 
-If you want to run a clean build, you may want to remove the artifacts from the  previous run first. To do that, the -{}-clean-first sub-option can be used. This sub-option will invoke a special target that cleans all the artifacts generated by the build process (for example, invokes make clean).
+若想要运行一个干净的构建，可能想要首先从以前的运行中删除构建。为此，可以使用\texttt{-{}-clean-first}子选项。此子选项将调用一个特殊的目标，该目标清除由构建过程生成的所有构件(例如，调用\texttt{make clean})。
 
-Here is an example of how you can do it for a build folder named build:
+下面是一个示例，说明如何对名为build的构建文件夹执行此操作:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build ./build/ --clean-first
@@ -328,13 +330,11 @@ cmake --build ./build/ --clean-first
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Debugging your build process}
+\textbf{调试构建过程}
 
-As we did in the Passing flags to the compiler section previously, you may want to inspect
+正如在前面的向编译器传递标志一节中所做的那样，可能希望检查构建过程中使用哪些参数调用了哪些命令。\texttt{-{}-verbose}指示CMake以verbose模式调用所有构建命令，前提是该命令支持verbose模式。这使我们能够轻松地调试讨厌的编译和链接错误。
 
-which commands are invoked with which arguments in the build process. The -{}-verbose sub-command instructs CMake to invoke all build commands with verbose mode given that verbose mode is supported by the command. This enables us to investigate nasty compilation and linkage errors with ease.
-
-To build a folder named build in verbose mode, invoke -{}-build, as shown in the following example:
+要在详细模式下构建名为build的文件夹，使用\texttt{-{}-build}，示例如下:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build ./build/ --verbose
@@ -342,120 +342,120 @@ cmake --build ./build/ --verbose
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Passing command-line arguments to the build tool}
+\textbf{将命令行参数传递给构建工具}
 
-If you ever need to pass arguments to the underlying build tool, you can append -{}- at the end of the command and write the arguments that will be given:
+若需要将参数传递给底层构建工具，可以在命令的末尾加上\texttt{-{}-}，并输入给定的参数:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build ./build/ -- --trace
 \end{tcblisting}
 
-In the preceding case, -{}-trace will be directly forwarded to the build tool, which is make in our case. This will cause make to print tracing information for each recipe built.
+\texttt{-{}-trace}将直接传递给构建工具，我们的例子中就是make。这将导致make为构建的每个配方打印跟踪信息。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Installing a project via the CLI}
+\textbf{通过CLI安装项目}
 
-CMake natively allows installation of artifacts in the environment, if desired. In order to do that, CMake code must be already using CMake install() instructions to specify what to install when cmake -{}-install (or the build system equivalent) is invoked. The content of chapter\_2 is already configured in such a way for illustrating the command. We'll learn how to make CMake targets installable later in Chapter 4, Packaging, Deploying, and Installing a CMake Project.
+CMake允许在环境中进行安装，CMake代码必须使用\texttt{install()}指令来指定当调用\texttt{cmake -{}-install}(或构建系统等效)时安装什么。chapter\_2的内容已经以这样的方式配置用于说明指令。我们将在第4章中学习如何使CMake目标可安装。
 
-The cmake -{}-install command requires an already configured and built project. Configure and build the CMake project if you haven't done it yet. Afterward, issue the cmake -{}-install <project\_binary\_dir> command to install the CMake project. Since, in our examples, build is used as a project binary directory, <project\_binary\_dir> will be replaced with build.
+\texttt{cmake -{}-install}需要一个已经配置和生成的项目。然后，执行\texttt{cmake -{}-install <project\_binary\_dir>}来安装工程。我们的例子中，build作为一个项目二进制目录，所以<project\_binary\_dir>将被build取代。
 
-The following figure shows an example of the install command:
+示例输出如下图所示:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/18.jpg}\\
-Figure 2.18 – Installing a project
+图2.18 安装工程
 \end{center}
 
-The default installation directory varies between environments. For Unix-like environments, it defaults to /usr/local, whereas in a Windows environment, it defaults to C:/Program Files.
+不同环境的默认安装目录不同。对于类Unix环境，默认为\texttt{/usr/local}，而在Windows环境中，默认为\texttt{C:/Program Files}。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Tip]
-Keep in mind that the project must be already built before trying to install the project.
+在尝试安装项目之前，必须已经构建了项目。
 
-In order to be able to install the project successfully, you must have the appropriate rights/permissions to write to the installation target directory.
+为了能够成功安装项目，必须拥有适当的权限来写入安装目标目录。
 \end{tcolorbox}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Changing the default installation path}
+\textbf{修改默认安装路径}
 
-To change the default installation directory, you may specify the additional -{}-prefix parameter, as shown here, to change the installation directory:
+要更改默认安装目录，可以指定的\texttt{-{}-prefix}参数，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake --install build --prefix /tmp/example
 \end{tcblisting}
 
-The following figure shows the contents of the /tmp/example folder after invoking cmake -{}-install with the /tmp/example prefix:
+将安装目录指定为\texttt{/tmp/example}，使用\texttt{cmake -{}-install}后，\texttt{/tmp/example}目录下的内容如下图所示:
 
 \begin{center}
-\includegraphics[width=1.\textwidth]{content/1/chapter2/images/19.jpg}\\
-Figure 2.19 – Installing a project to a different path
+\includegraphics[width=0.8\textwidth]{content/1/chapter2/images/19.jpg}\\
+图2.19 将项目安装到不同的路径
 \end{center}
 
-As can be seen here, the installation root is successfully changed to /tmp/example.
+可以看到，安装根目录成功更改为\texttt{/tmp/example}。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Stripping binaries while installing}
+\textbf{安装时瘦身二进制文件}
 
-In the software world, build artifacts are usually bundled with some extra information, for example, a symbol table required for debugging. This information may not be necessary for executing the end product and may drastically increase binary sizes. If you're looking to reduce your end product's storage footprint, stripping binaries may be a good option. One additional benefit of stripping is that it makes it harder to reverse engineer binaries since essential symbol information is stripped away from the binaries.
+软件世界中，构建工件通常与一些额外的信息捆绑在一起，例如：调试所需的符号表。这些信息在执行最终产品时可能不是必需的，并且可能会极大地增加二进制大小。若希望减少最终产品的存储空间，瘦身二进制文件可能是一个不错的选择。瘦身的另一个好处是，这会使逆向工程二进制文件变得更加困难，因为从二进制文件中剥离了基本的符号信息。
 
-CMake's -{}-install command allows the stripping of binaries while installing the operation. It can be enabled by specifying an additional -{}-strip option in the -{}-install command, as shown next:
+CMake的\texttt{-{}-install}允许在安装操作时瘦身二进制文件。可以通过在\texttt{-{}-install}中指定附加的\texttt{-{}-strip}选项来启用，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake --install build --strip
 \end{tcblisting}
 
-In the following example, you can observe the size difference between unstripped and stripped binaries. Note that stripping static libraries has its own limitations and CMake does not perform it by default. You can see the size of the unstripped binaries in this figure:
+下面的示例中，可以观察未瘦身和瘦身的二进制文件之间的大小差异。注意，瘦身静态库有一些限制，CMake默认情况下不会执行:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/20.jpg}\\
-Figure 2.20 – Artifact size (unstripped)
+图2.20 工件大小(未瘦身)
 \end{center}
 
-With a stripped (cmake –install build -{}-strip) binary, the size difference looks as shown in the following figure:
+使用瘦身的(\texttt{cmake - install build -{}-strip})二进制文件，大小差异如下图所示:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/21.jpg}\\
-Figure 2.21 – Artifact size (stripped)
+图2.21 工件大小(已瘦身)
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Installing specific components only (component-based install)}
+\textbf{只安装特定组件(基于组件的安装)}
 
-If the project is using CMake's COMPONENT feature in the install() commands, you may install specific components by specifying their component names. The COMPONENT feature allows the installation to be separated into sub-parts. For illustrating this functionality, the chapter\_2 example is structured into two components named libraries and executables.
+若项目在\texttt{install()}中使用了CMake的\texttt{COMPONENT}特性，可以通过指定组件名称来安装特定的组件。组件特性允许将安装分离为子部分，为了说明这个功能，chapter\_2示例构造成两个组件，分别是库和可执行文件。
 
-In order to install a specific component, an additional -{}-component argument is needed along with the cmake -{}-install command:
+为了安装特定的组件，\texttt{cmake -{}-install}需要附加\texttt{-{}-component}参数:
 
 \begin{tcblisting}{commandshell={}}
 cmake --install build --component executables
 \end{tcblisting}
 
-Here is an example invocation:
+下面是一个示例:
 
 \begin{center}
 \includegraphics[width=1.\textwidth]{content/1/chapter2/images/22.jpg}\\
-Figure 2.22 – Installing a specific component only
+图2.22 只安装特定的组件
 \end{center}
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Installing a specific configuration (for multiple-configuration 	generators only)}
+\textbf{安装特定的配置(仅用于多配置生成器)}
 
-Some of the generators support multiple configurations for the same build configuration (for example, Visual Studio). For that kind of generator, the -{}-install option provides an additional -{}-config argument to specify which configuration of binaries is intended to be installed.
+有些生成器支持同一个构建配置的多个配置(例如，Visual Studio)。对于这种类型的生成器，\texttt{-{}-install}选项提供了一个\texttt{-{}-config}参数来指定要安装的二进制文件配置。
 
-Here's an example:
+这里有一个例子:
 
 \begin{tcblisting}{commandshell={}}
 cmake --install build --config Debug
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-As you may have noticed, the command parameters used in examples are pretty long and explicit. This is intentional. Explicitly specifying arguments allows us to get consistent results in each run, no matter which environment we're running our commands in. For example, without the -G argument, CMake will default to the environment's preferred build system generator, which may not be our intention. Our motto here is, Being explicit is almost always better than being implicit. The former makes our intention clearer and naturally enables more future-proof and maintainable CMake code in CI systems/scripts as well.
+示例中使用的命令参数非常长且明确，显式地指定参数允许我们在每次运行中获得一致的结果，无论在哪个环境中运行命令。若没有\texttt{-G}参数，CMake将默认使用环境首选的构建系统生成器。我们的座右铭是:显式总是比隐式好，前者使我们的意图更加清晰，也使CMake代码更容易维护。
 \end{tcolorbox}
 
-We have covered the fundamentals of CMake command-line usage. Let's continue to learn about the other available interface form – the graphical interface of the CMake.
+我们已经介绍了CMake命令行用法的基本原理，继续学习其他可用的交互形式——CMake的图形界面。
 
 
 
