@@ -1,5 +1,5 @@
 
-Most projects quickly grow to a size and complexity where they depend on files, libraries, and perhaps even programs that are managed outside the project. CMake provides built-in commands to find these things. At first glance, the process of searching and finding things appears to be quite simple. However, on closer analysis, there are quite a few things to consider. First, we have to handle the search order of where to look for files. Then, we might want to add additional locations where the file might be, and finally, we have to account for the differences between different operating systems.
+大多数项目的规模和复杂性都会迅速增长，它们依赖于文件、库，甚至可能是在项目外部管理的程序。CMake提供了内置指令可用来进行查找。搜索和寻找东西的过程似乎相当简单，但仔细分析一下，有很多事情需要考虑。首先，必须处理在哪里查找文件的搜索顺序。然后，可能想要添加文件可能所在的其他位置。最后，必须考虑不同操作系统之间的差异。
 
 On an abstraction level higher than the individual files, CMake has the ability to find whole packages that define targets, include paths, and package specific variables. Refer to the libraries in your CMake project section for more detail.
 
@@ -24,7 +24,7 @@ find\_package: This finds complete sets of packages.
 
 All of these commands work in a similar way, but there are some small but important differences when it comes to where they look for things. In particular, find\_package does more than just locate files; it not only looks for packages but makes the file content available for easy use in the CMake project. In this chapter, first, we will look at the simpler find functions before we cover how to find complex packages.
 
-\subsubsubsection{5.2.1\hspace{0.2cm}Finding files and paths}
+\subsubsubsection{5.2.1\hspace{0.2cm}查找文件和路径}
 
 The most low-level and basic things to find are files and paths. The find\_file and find\_path functions share the same signature. The only difference between them is that find\_path stores the directory in which a file is found in the result, while find\_file will store the full path, including the filename. The signature of the find\_file command is shown as follows:
 
@@ -146,7 +146,7 @@ Occasionally, you might want to ignore particular paths for searching. In such c
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Searching for files when cross-compiling}
+\textbf{交叉编译时搜索文件}
 
 When cross-compiling, the process of searching for files is often different because crosscompilation toolchains are collected under their own self-contained directory structure, which does not mix with the system toolchain. Generally, first, you will want to look inside the toolchain's directory for files. By setting the CMAKE\_FIND\_ROOT variable, the origin for all searches can be changed to a new location.
 
@@ -173,7 +173,7 @@ The following table shows the search order when setting either of the options or
 
 The CMAKE\_STAGING\_PREFIX variable is used to provide installation paths for crosscompiling. The CMAKE\_SYSROOT variable should not be changed by installing things on it. Setting up cross-compilation toolchains will be covered, in detail, in Chapter 11, Automated Fuzzing with CMake, where we talk about cross-compiling.
 
-\subsubsubsection{5.2.2\hspace{0.2cm}Finding programs}
+\subsubsubsection{5.2.2\hspace{0.2cm}查找应用}
 
 Finding executables is very similar to finding files and paths, and the find\_program command has almost the same signature as find\_file. Additionally, find\_program has the NAMES\_PER\_DIR option, which tells the command to search one directory at a time and search for all provided filenames in each directory instead of searching through each directory for each file.
 
@@ -200,7 +200,7 @@ CMAKE\_FIND\_ROOT\_PATH\_MODE\_PROGRAM is used to change the mode for searching 
 
 As with the other find commands, find\_program will set the <varname>-NOTFOUND variable if CMake is unable to find the program. This is often handy to determine whether a custom build step that depends on a certain external program should be enabled.
 
-\subsubsubsection{5.2.3\hspace{0.2cm}Finding libraries}
+\subsubsubsection{5.2.3\hspace{0.2cm}查找库}
 
 Finding libraries is a special case of finding files, so the find\_library command supports the same set of options as find\_file. And similar to the find\_program command, it has the additional NAMES\_PER\_DIR option that checks for all filenames first, before moving to the next directory. The difference between finding regular files and finding libraries is that find\_library automatically applies the platform-specific naming conventions to the filenames. On Unix platforms, the names will be prefixed with lib, while on Windows, the.dll or .lib extensions will be added.
 
@@ -221,7 +221,7 @@ CMake is generally aware of conventions regarding 32-bit and 64-bit search locat
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Finding static or shared libraries}
+\textbf{查找静态或动态库}
 
 In most cases, simply passing the base name of a library to CMake works well enough, but sometimes, the behavior has to be overridden. One reason for this is if, on some platform, the static version of a library should be preferred over the shared one or vice versa. The best way to do this is to split up the find\_library call into two calls instead of trying to achieve this in a single call. It is more robust if the static library is in a different directory from the dynamic one:
 

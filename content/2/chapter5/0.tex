@@ -1,21 +1,21 @@
-So far, in this book, we have covered how to build and install our own code with CMake. In this chapter, we will take a look at how to use files, libraries, and programs that are not part of a CMake project. The first part of the chapter will be about how to find those things in general, while the latter part will focus on how to manage dependencies to build your CMake project.
+已经介绍了如何使用CMake构建和安装自己的代码。在这一章，将看看如何使用那些不是CMake项目的文件、库和程序。本章的第一部分是关于如何找到这些文件，而后面的部分将专注于如何管理依赖来构建CMake项目。
 
-One of the biggest advantages of using CMake is that it has built-in dependency management for the discovery of many third-party libraries. In this chapter, we will look at how to integrate libraries that are installed on your system and locally downloaded dependencies. Additionally, you will learn how third-party libraries can be downloaded and used as binaries and, alternatively, how they can be built from source directly out of a CMake project.
+使用CMake的最大优势之一是，内置了用于发现许多第三方库的依赖项管理。本章中，将了解如何集成安装在系统上的库和本地下载的依赖项。此外，将了解如何下载第三方库，并将其作为二进制文件使用，以及如何直接从CMake项目的源代码进行构建。
 
-We will look at how to write instructions for CMake to reliably find almost any library on your system. Finally, we will take a look at how to use package managers such as Conan and vcpkg with CMake. The practices for dependency management, as covered in this chapter, will help you to create stable and portable builds with CMake. It doesn't matter if you are using precompiled binaries or compiling them in place from scratch, setting up CMake to handle dependencies in a structured and consistent way will reduce the time spent fixing broken builds in the future. Here's the list of main topics that we'll cover in this chapter:
+我们将了解如何为CMake编写指令，以便找到系统上的任何库。最后，将了解如何在CMake中使用包管理器，如Conan和vcpkg。本章所述的依赖关系管理将有助于使用CMake创建稳定和可移植的构建，无论是使用预编译的二进制文件，还是从头编译它们，设置CMake以一种结构化和一致性的方式处理依赖关系，将减少未来修复损坏的构建所花费的时间。以下是本章中涉及的主题:
 
 \begin{itemize}
 \item 
-Finding files, programs, and paths with CMake
+查找文件、程序和路径
 
 \item 
-Using third-party libraries in your CMake project
+使用第三方库
 
 \item 
-Using package managers with CMake
+包管理器
 
 \item 
-Getting the dependencies as source code
+获取依赖项源代码
 \end{itemize}
 
 

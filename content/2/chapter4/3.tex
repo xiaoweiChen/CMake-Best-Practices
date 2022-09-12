@@ -67,7 +67,7 @@ install(EXPORT ch4_ex05_lib_export
 /*…*/
 \end{lstlisting}
 
-\texttt{install(EXPORT…)}是这个文件中最重要的一段代码，是执行实际目标导出的代码。其生成一个CMake文件，其中包含给定导出名称中的所有导出目标。\texttt{EXPOR}T参数接受现有的导出名称来进行导出，它引用的是ch4\_ex05\_lib\_export导出名称，我们在之前的\texttt{install(TARGETS…)}中创建的。\texttt{FILE}参数用于确定导出的文件名，并设置为ch4\_ex05\_lib-config.cmake。\texttt{NAMESPACE}参数用于为所有导出的目标添加命名空间前缀。这允许将所有导出的目标连接到通用的命名空间下，并避免与具有相似目标名称的包发生冲突。最后，\texttt{DESTINATION}参数确定生成的导出文件的安装路径。设置为\$\{ch4\_ex05\_lib\_INSTALL\_CMAKEDIR\}以允许texttt{find\_package()}发现它。
+\texttt{install(EXPORT…)}是这个文件中最重要的一段代码，是执行实际目标导出的代码。其生成一个CMake文件，其中包含给定导出名称中的所有导出目标。\texttt{EXPOR}T参数接受现有的导出名称来进行导出，它引用的是ch4\_ex05\_lib\_export导出名称，我们在之前的\texttt{install(TARGETS…)}中创建的。\texttt{FILE}参数用于确定导出的文件名，并设置为ch4\_ex05\_lib-config.cmake。\texttt{NAMESPACE}参数用于为所有导出的目标添加命名空间前缀。这允许将所有导出的目标连接到通用的命名空间下，并避免与具有相似目标名称的包发生冲突。最后，\texttt{DESTINATION}参数确定生成的导出文件的安装路径。设置为\$\{ch4\_ex05\_lib\_INSTALL\_CMAKEDIR\}以便\texttt{find\_package()}发现它。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
 因为除了导出的目标之外，没有提供额外的内容，所以导出文件的名称是ch4\_ex05\_lib-config.cmake。它是此包所需的包配置文件名称。这样做是因为示例项目不需要满足任何依赖关系，可以按原样直接导入。若需要额外的操作，建议使用一个中间包配置文件来满足这些依赖关系，然后包含导出的文件。
