@@ -1,16 +1,16 @@
-Building a software project is only half the story. The other half is about delivering and presenting the software to your consumers. Consumers are the biggest stakeholders of any project, even if you are writing a hobby project for yourself. These consumers may have a variety of experiences and purposes. They might be developers, package maintainers, power users, or the average Joes. It is important to understand their use cases, scenarios, and requirements. Since the software is mostly abstract, let's assume that your project is baked beans instead – it may be delicious and may smell good in the factory, but improper packaging will reduce its shelf life, making it hard to transport or consume. This will make your product less likely to be desired by the consumers. Even though your product is wonderful at the start, the consumer will not notice it since their experience with your product is bad due to bad packaging. Therefore, it is important to get these things right from the start. Remember, happy consumers will bring value to a product.
+构建只是软件项目故事的一半，另一半是关于交付软件给使用者。使用者是项目的最大利益相关方，即使是为自己编写一个业余项目。使用者可能有各种各样的体验和目的，他们可能是开发人员、包维护人员、高级用户或普通的Joe，理解它们的用例、场景和需求很重要。由于软件大多是抽象的，假设项目是烘培的豆子——它可能很美味，在工厂闻起来很香，但不恰当的包装则会缩短它的保质期，使其难以运输或消费，这将使产品不太可能被消费者所接受。即使产品一开始很棒，消费者也不会注意到，因为糟糕的包装他们对产品的体验也很糟糕。因此，从一开始就做好这些事情很重要。记住，使消费者高兴会给产品带来更多价值。
 
-CMake has good internal support and tooling for making installing and packaging easy. The good side of this is that CMake leverages the existing project code to do such things. Thus, making a project installable or packaging a project does not result in heavy maintenance costs. In this chapter, we're going to learn how to leverage CMake's existing abilities regarding installing and packaging for deployments.
+CMake有良好的内部支撑和工具，使安装和包装更容易，CMake可以利用现有的项目代码来做这些事情。因此，使一个项目可安装或打包一个项目不会产生的维护成本。本章中，我们将学习如何利用CMake现有的能力来安装和打包部署。
 
-In this chapter, we will cover the following topics:
+本章中，将讨论以下主题:
 
 \begin{itemize}
 \item 
-Making CMake targets installable
+使CMake目标可安装
 
 \item 
-Supplying configuration information for others using your project
+提供项目配置信息
 
 \item 
-Creating an installable package with CPack
+使用CPack创建安装包
 \end{itemize}

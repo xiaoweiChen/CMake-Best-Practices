@@ -1,35 +1,35 @@
 
-In the previous section, we learned how to make our project installable so that others can consume our project by installing it on their system. But sometimes, delivering the artifacts is not enough. For example, if you are delivering a library, it must also be easy to import it into a project – especially a CMake project. In this section, we will learn how to make this importing process easier for other CMake projects.
+上一节中，学习了如何使我们的项目可安装，以便其他人可以通过在他们的系统上安装来使用我们的项目。但是有时候，交付工件是不够的。例如，若交付一个库，也必须很容易导入到一个项——特别是CMake项目。本节中，我们将学习如何使这个导入过程更容易(为其他CMake项目)。
 
-There are convenient ways of importing a library, given that the project to be imported has the proper configuration files. One of the prominent ways of doing so is by utilizing the find\_package() method (which we will cover in Chapter 5, Integrating Third-Party Libraries and Dependency Management). If you have consumers that are using CMake in their workflows, they will be happy if they can just write find\_package(your\_project\_name) and start using your code. In this section, we will learn how to generate the required configuration files to make find\_package() work for your project.
+若要导入的项目具有正确的配置文件，有很多导入库的方便方法。其中一个是使用\texttt{find\_package()}(将在第5章中讨论)。若有使用者在他们的工作流程中使用CMake，只需要\texttt{find\_package(your\_project\_name)}就可以使用你的代码，他们肯定会很高兴。本节中，我们将学习如何生成所需的配置文件，使\texttt{find\_package()}在项目中工作。
 
-CMake's preferred way of consuming dependencies is via packages. Packages convey dependency information for CMake-based build systems. Packages can be in the form of Config-file packages, Find-module packages, or pkg-config packages. All of the package types can be found and consumed via find\_package(). For the sake of space and simplicity, we will only be covering Config-file packages in this section. The rest of the ways are mostly workarounds for lack of config files, so they are better left in the past. Let's start discovering the Config-file packages.
+CMake使用依赖的首选方式是通过包。包为基于CMake的构建系统传递依赖信息，包可以是Config-file包、Find-module包或pkg-config包。所有的包类型都可以通过\texttt{find\_package()}找到并使用。出于篇幅和简单性的考虑，本节只介绍Config-file包。其余的方法大多是缺少配置文件的变通方法，所以最好将它们留在过去。让我们了解一下Config-file包。
 
-\subsubsubsection{4.3.1\hspace{0.2cm}Entering the CMake package world – Config-file packages}
+\subsubsubsection{4.3.1\hspace{0.2cm}进入CMake包世界——Config-file包}
 
-Config-file packages are based on configuration files that contain package content information. This information indicates the package's content locations, so CMake reads this file and uses the package. Thus, discovering only the package configuration files is enough to consume the package.
+Config-file包基于包含包内容信息的配置文件。该信息指示包的内容位置，因此CMake读取该文件并使用该包。因此，只使用包配置文件就可以使用该包。
 
-There are two types of configuration files – a package configuration file and an optional package version file. Both files must have a specific naming convention. Package configuration files can be named <ProjectName>Config.cmake or <projectname>-config.cmake, depending on personal preference. Both notations will be picked by CMake on find\_package(ProjectName)/find\_package(projectname) calls. The content of package configuration files looks similar to the following:
+有两种类型的配置文件——包配置文件和可选的包版本文件，两个文件都必须有一个特定的命名约定。包配置文件可以命名为<ProjectName>Config.cmake或<projectname>-config.cmake，这取决于个人喜好。这两个符号将由CMake在\texttt{find\_package(ProjectName)}/\texttt{find\_package(projectname)}调用中选择。包配置文件的内容如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 set(Foo_INCLUDE_DIRS ${PREFIX}/include/foo-1.2)
 set(Foo_LIBRARIES ${PREFIX}/lib/foo-1.2/libfoo.a)
 \end{lstlisting}
 
-Here, \$\{PREFIX\} is the installation prefix of the project. It is a variable since the installation prefix can be changed based on the system's type and can also be changed by the user.
+这里，\$\{PREFIX\}是项目的安装前缀。它是一个变量，因为安装前缀可以根据系统的类型更改，也可以由用户修改。
 
-Similar to package configuration files, package version files can be named <ProjectName>ConfigVersion.cmake or <projectname>-config-version. cmake as well. CMake expects package configuration and package version files to be present in the find\_package(...) search paths. You can create these files with the help of CMake. One of the many places that find\_package(...) looks while searching for packages is the <CMAKE\_PREFIX\_PATH>/cmake directory. We'll be putting our Config-file package configuration files into this folder throughout our examples.
+与包配置文件类似，包版本文件可以命名为<ProjectName>ConfigVersion.cmake或<projectname>-config-version.cmake。CMake期望包配置和包版本文件出现在\texttt{find\_package(…)}的搜索路径中。可以在CMake的帮助下创建这些文件。在搜索包时，\texttt{find\_package(…)}会查找<CMAKE\_PREFIX\_PATH>/cmake目录。我们的示例中，将把Config-file包配置文件放到这个文件夹中。
 
-To create config-file packages, we will need to learn a few extra things, such as exporting targets and the CmakePackageConfigHelpers module. To learn about these things, let's start diving into an actual example. We'll be following Chapter 4, Example 5 to learn how to structure a CMake project to make it a config-file package. It is located in the chapter4/ex05\_config\_file\_package folder. Let's start by inspecting the CMakeLists.txt file in the chapter4/ex05\_config\_file\_package directory (comments and project commands have been omitted in favor of space; also, note that the lines that are not relevant to the topic will not be mentioned):
+要创建config-file包，需要学习一些东西，比如导出目标和CmakePackageConfigHelpers模块。为了了解它，这里需要一个实际的例子。我们将跟随第4章示例5学习如何构造一个CMake项目，使其成为一个config-file包。它位于chapter4/ex05\_config\_file\_package文件夹。来看看chapter4/ex05\_config\_file\_package目录下的CMakeLists.txt文件(注释和项目命令在空格处被省略;另外，与主题无关的行这里不会提及):
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
 set(ch4_ex05_lib_INSTALL_CMAKEDIR cmake CACHE PATH
-"Installation directory for config-file package cmake files")
+	"Installation directory for config-file package cmake files")
 /*…*/
 \end{lstlisting}
 
-The CMakeLists.txt file is quite similar to chapter4/ex02\_static. This is because it is the same example, except it supports the config-file packaging. The first line, include(GNUInstallDirs), is used to include the GNUInstallDirs module. This provides the CMAKE\_INSTALL\_INCLUDEDIR variable, which will be used later. set(ch4\_ex05\_lib\_INSTALL\_CMAKEDIR...) is a user-defined variable for setting the target installation directory of the config-file packaging configuration files. It is a relative path that should be used in the install(…) directives, so it is implicitly relative to CMAKE\_INSTALL\_PREFIX:
+CMakeLists.txt文件非常类似于chapter4/ex02\_static，只是它支持config-file打包。第一行\texttt{include(GNUInstallDirs)}用于包含GNUInstallDirs模块。这提供了\texttt{CMAKE\_INSTALL\_INCLUDEDIR}变量，将在稍后使用。\texttt{set(ch4\_ex05\_lib\_INSTALL\_CMAKEDIR…)}是一个用户定义的变量，用于设置config-file打包配置文件的目标安装目录。它是一个相对路径，应该在\texttt{install(…)}指令中使用:
 
 \begin{lstlisting}[style=styleCMake]
 /*…*/
@@ -40,7 +40,7 @@ target_compile_features(ch4_ex05_lib PUBLIC cxx_std_11)
 /*…*/
 \end{lstlisting}
 
-The target\_include\_directories(...) call is quite different than the usual calls. It uses generator expressions to distinguish between build-time include directories and install-time include directories since the build-time include path will not be present when the target is imported into another project. The following set of commands will make the target installable:
+\texttt{target\_include\_directories(…)}与通常使用的方式有很大的不同。因为在将目标导入到另一个项目时将不存在构建时包含路径，其使用生成器表达式来区分构建时包含目录和安装时包含目录。下面的一组命令将使目标可安装:
 
 \begin{lstlisting}[style=styleCMake]
 /*…*/
@@ -55,7 +55,7 @@ install (
 /*…*/
 \end{lstlisting}
 
-install(TARGETS...) is a bit different than usual as well. It contains an extra EXPORT parameter. This EXPORT parameter is used to create an export name from the given install(…) targets. These targets can then be exported using this export name. The path that's specified with the INCLUDES DESTINATION parameter will be used to populate the INTERFACE\_INCLUDE\_DIRECTORIES property of the exported target and will be automatically prefixed with the install prefix path. Here, the install(DIRECTORY...) command is used to install the target's header files and is located in \$\{PROJECT\_SOURCE\_DIR\}/include/, in the \$\{CMAKE\_INSTALL\_PREFIX\}/\$\{CMAKE\_INSTALL\_INCLUDEDIR\} directory. The \$\{CMAKE\_INSTALL\_INCLUDEDIR\} variable is used to give consumers the ability to override the include directory for this installation. Now, let's create an export file from the export name we created in the preceding example:
+\texttt{install(TARGETS...)}也和平常有一点不同，包含一个\texttt{EXPORT}参数。这个\texttt{EXPORT}参数用于从给定的\texttt{install(…)}目标创建一个导出名称。然后,可以使用此导出名称导出这些目标。使用\texttt{INCLUDES DESTINATION}参数指定的路径，将用于填充导出目标的\texttt{INTERFACE\_INCLUDE\_DIRECTORIES}属性，并自动使用安装前缀路径作为前缀。这里，\texttt{install(DIRECTORY…)}用于安装目标的头文件，位于\$\{PROJECT\_SOURCE\_DIR\}/include/，在\$\{CMAKE\_INSTALL\_PREFIX\}/\$\{CMAKE\_INSTALL\_INCLUDEDIR\}目录中。\$\{CMAKE\_INSTALL\_INCLUDEDIR\}可以让使用者覆盖此安装的include目录。现在，可以根据前面例子中创建的导出名称创建一个导出文件:
 
 \begin{lstlisting}[style=styleCMake]
 /*…*/
@@ -67,13 +67,13 @@ install(EXPORT ch4_ex05_lib_export
 /*…*/
 \end{lstlisting}
 
-install(EXPORT...) is perhaps the most important piece of code in this file. It is the code that is doing the actual target exporting. It generates a CMake file that contains all the exported targets in the given export name. The EXPORT parameter accepts an existing export name to perform the export. It is referring to the ch4\_ex05\_lib\_export export name that we created by the previous install(TARGETS...) call. The FILE parameter is used to determine the export's filename and is set to ch4\_ex05\_lib-config.cmake. The NAMESPACE parameter is used to prefix all the exported targets with a namespace. This allows you to connect all the exported targets under a common namespace and avoid collisions with packages that have similar target names. Lastly, the DESTINATION parameter determines the installation path of the generated export file. This is set to \$\{ch4\_ex05\_lib\_INSTALL\_CMAKEDIR\} to allow find\_package() to discover it.
+\texttt{install(EXPORT…)}是这个文件中最重要的一段代码，是执行实际目标导出的代码。其生成一个CMake文件，其中包含给定导出名称中的所有导出目标。\texttt{EXPOR}T参数接受现有的导出名称来进行导出，它引用的是ch4\_ex05\_lib\_export导出名称，我们在之前的\texttt{install(TARGETS…)}中创建的。\texttt{FILE}参数用于确定导出的文件名，并设置为ch4\_ex05\_lib-config.cmake。\texttt{NAMESPACE}参数用于为所有导出的目标添加命名空间前缀。这允许将所有导出的目标连接到通用的命名空间下，并避免与具有相似目标名称的包发生冲突。最后，\texttt{DESTINATION}参数确定生成的导出文件的安装路径。设置为\$\{ch4\_ex05\_lib\_INSTALL\_CMAKEDIR\}以允许texttt{find\_package()}发现它。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Since we are not providing any extras other than exported targets, the name of the export file is ch4\_ex05\_lib-config.cmake. It is the package configuration file name that's required for this package. We've done this because the example project does not require any extra dependencies to be satisfied first and can be directly imported as-is. If any extra action is required, it is recommended to have an intermediate package configuration file that satisfies those dependencies and includes the exported file after.
+因为除了导出的目标之外，没有提供额外的内容，所以导出文件的名称是ch4\_ex05\_lib-config.cmake。它是此包所需的包配置文件名称。这样做是因为示例项目不需要满足任何依赖关系，可以按原样直接导入。若需要额外的操作，建议使用一个中间包配置文件来满足这些依赖关系，然后包含导出的文件。
 \end{tcolorbox}
 
-With the install(EXPORT...) command, we obtained the ch4\_ex05\_lib-config.cmake file. This means that our target can be consumed via find\_package(..). One additional step is required to achieve full support for find\_package(…), which is obtaining the ch4\_ex05\_lib-config-version.cmake file:
+使用\texttt{install(EXPORT…)}，获得了ch4\_ex05\_lib-config.cmake文件。从而目标可以通过\texttt{find\_package(...)}来使用，要实现对\texttt{find\_package(…)}的完全支持，还需要一个步骤，即获取ch4\_ex05\_lib-config-version.cmake文件:
 
 \begin{lstlisting}[style=styleCMake]
 /*…*/
@@ -92,9 +92,9 @@ install(FILES
 /* end of the file */
 \end{lstlisting}
 
-In the last few lines, you can find the code that's required to generate and install the ch4\_ex05\_lib-config-version.cmake file. With the include(CMakePackageConfigHelpers) line, the CMakePackageConfigHelpers module is imported. This module provides the write\_basic\_package\_version\_file(…) function. write\_basic\_package\_version\_file(…) is used to automatically generate package version files, depending on the given parameters. The first positional argument is the output's filename. The VERSION parameter is used to specify the version of the package we're generating in major.minor.patch form. It is opted out to allow write\_basic\_package\_version\_file to get it from the project version automatically. The COMPATIBILITY parameter allows you to specify compatibility policies, depending on the version's value. SameMajorVersion denotes that this package is compatible with any version that has the same major version value of this package. The other possible values are AnyNewerVersion, SameMinorVersion, and ExactVersion.
+最后几行中，可以找到生成和安装ch4\_ex05\_lib-config-version.cmake文件所需的代码。使用\texttt{include(CMakePackageConfigHelpers)}，导入CMakePackageConfigHelpers模块。这个模块提供了write\_basic\_package\_version\_file(…)函数，用于根据给定的参数自动生成包版本文件。第一个位置参数是输出的文件名。\texttt{VERSION}参数用于以major.minor.patch形式指定生成包的版本，允许write\_basic\_package\_version\_file从项目版本自动获取。\texttt{COMPATIBILITY}参数可以根据版本的值指定兼容性策略。SameMajorVersion表示此包与具有此包相同主版本值的任何版本兼容，其他可能的值为AnyNewerVersion、SameMinorVersion和ExactVersion。
 
-Now, let's test whether this works. To test the package configuration, we must install the project regularly:
+现在，来测试一下这个方法是否有效。为了测试包配置，我们必须定期安装项目:
 
 \begin{tcblisting}{commandshell={}}
 cmake –S . -B ./build
@@ -102,7 +102,7 @@ cmake --build ./build
 cmake --install ./build --prefix /tmp/install-test
 \end{tcblisting}
 
-The cmake -{}-install command's output should look as follows:
+\texttt{cmake -{}-install}的输出如下所示:
 
 \begin{tcblisting}{commandshell={}}
 /* … */
@@ -114,7 +114,7 @@ cmake
 /*…*/
 \end{tcblisting}
 
-Here, we can see that our package configuration files have been successfully installed in the /tmp/install-test/cmake directory. I'll leave inspecting the content of those files to you as an exercise. So, we have a consumable package in our hands. Let's switch sides and try to consume our freshly baked package. To do that, we'll look at the chapter4/ex05\_consumer example. Let's inspect the CMakeLists.txt file together:
+这里，可以看到包配置文件已经成功安装在/tmp/install-test/cmake目录下。我将检查这些文件的内容留给读者作为练习。所以，我们手上有一个消耗品包。让我们交换立场，试着吃掉新鲜出炉的包。为此，来看下chapter4/ex05\_consumer示例，一起看下CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 if(NOT PROJECT_IS_TOP_LEVEL)
@@ -129,7 +129,7 @@ target_link_libraries(ch4_ex05_consumer ch4_ex05_lib::ch4_ex05_
 	lib)
 \end{lstlisting}
 
-In the first few lines, we can see verification regarding whether the project is a top-level project or not. Since this example is intended to be an external application, it should not be part of the root example project. Thus, we can guarantee that we will use the targets that are exported by the package, not the root project's targets. The root project also does not include the ex05\_consumer folder. Next, there's a find\_package(…) call, where ch4\_ex05\_lib is given as a package name. It is also explicitly requested that the package should have a major version of 1; find\_package(…) must only consider CONFIG packages and packages specified in this find\_package(…) call are required. In the consequent lines, a regular executable is defined called ch4\_ex05\_consumer that's linked against ch4\_ex05\_lib in the ch4\_ex05\_lib namespace (ch4\_ex05\_lib::ch4\_ex05\_lib). ch4\_ex05\_lib::ch4\_ex05\_lib is the actual target we have defined in our package. Let's look at the source file, src/main.cpp:
+前几行中，可以看到关于项目是否是顶层项目的验证。因为这个示例是一个外部应用程序，所以不应该是根示例项目的一部分。因此，可以保证用包导出的目标，而不是根项目的目标，根项目也不包括ex05\_consumer文件夹。接下来，有一个\texttt{find\_package(…)}，其中ch4\_ex05\_lib作为包名给出。还明确要求包应该具有主版本1;\texttt{find\_package(…)}只考虑\texttt{CONFIG}包和\texttt{find\_package(…)}中指定的包是必需的。在随后的行中，一个常规的可执行文件定义为ch4\_ex05\_consumer，它在ch4\_ex05\_lib命名空间(ch4\_ex05\_lib::ch4\_ex05\_lib)中链接到ch4\_ex05\_lib。ch4\_ex05\_lib::ch4\_ex05\_lib是我们在包中定义的实际目标。来看看源文件src/main.cpp:
 
 \begin{lstlisting}[style=styleCXX]
 #include <chapter4/ex05/lib.hpp>
@@ -139,7 +139,7 @@ int main(void){
 }
 \end{lstlisting}
 
-This is a simple application that includes chapter4/ex05/lib.hpp, creates an instance of the greeter class, and calls the greet() function. Let's try to compile and run the application:
+这是一个包含chapter4/ex05/lib.hpp的简单应用程序，创建了一个greeter类的实例，并调用了greet()函数。试着编译并运行这个应用程序:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_4/ex05_consumer
@@ -148,14 +148,14 @@ cmake --build build/
 ./build/ch4_ex05_consumer
 \end{tcblisting}
 
-Since we have installed the package using a custom prefix (/tmp/install-test), we can indicate this by setting the CMAKE\_PREFIX\_PATH variable. This causes find\_package(…) to search /tmp/install-test for packages as well. For default prefix installations, this parameter setting is not required. We should see the infamous Hello, world! message if everything goes well: 
+已经使用自定义前缀(/tmp/install-test)安装了包，所以可以通过设置CMAKE\_PREFIX\_PATH变量来表明这一点。这会导致\texttt{find\_package(…)}也会在/tmp/install-test中搜索包。对于默认的前缀安装，不需要此参数设置。若一切顺利的话，我们应该看看是否输出Hello, world!: 
 
 \begin{tcblisting}{commandshell={}}
 ./build/ch4_ex05_consumer
 Hello, world!
 \end{tcblisting}
 
-Here, our consumers can use our little greeter and everybody is happy. Now, let's conclude this section by learning how to package with CPack.
+这样，消费者就可以使用我们的配置文件，每个人都很高兴。接下来，通过学习如何使用CPack进行打包来结束本节。
 
 
 

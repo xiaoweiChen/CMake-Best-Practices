@@ -1,46 +1,46 @@
-So far, we have seen how CMake can structure software projects. Although CMake is the star of the show, CMake has some powerful friends too. It is time to introduce you to CPack, the packaging tool of CMake. It is shipped with CMake installations by default. It allows you to leverage existing CMake code to generate platform-specific installations and packages. CPack is similar to CMake in concept. It is based on generators that generate packages instead of build system files. The following table shows the available CPack generator types, as of CPack version 3.21.3:
+已经看到了CMake是如何构建软件项目的，是时候向大家介绍CMake的打包工具CPack了。它默认随CMake安装一起提供，可以利用现有的CMake代码来生成特定于平台的安装和包。CPack在概念上类似于CMake，基于生成包而不是构建系统文件的生成器。下表显示了从3.21.3版本起可用的CPack生成器类型:
 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Generator} & \textbf{Description}             \\ \hline
-		7Z                 & 7-zip archive                    \\ \hline
-		DEB                & Debian package                   \\ \hline
-		External           & CPack external package           \\ \hline
-		IFW                & Qt Installer Framework           \\ \hline
-		NSIS               & Null Soft Installer              \\ \hline
-		NSIS64             & Null Soft Installer (64bit)      \\ \hline
-		NuGet              & NuGet Packages                   \\ \hline
-		RPM                & RPM packages                     \\ \hline
-		STGZ               & Self-extracting TAR gzip archive \\ \hline
-		TBZ2               & Tar BZip2 archive                \\ \hline
-		TGZ                & Tar GZIP archive                 \\ \hline
-		TXZ                & Tar XZ archive                   \\ \hline
-		TZ                 & Tar Compress archive             \\ \hline
-		TZST               & Tar Zstandard archive            \\ \hline
-		ZIP                & Zip archive                      \\ \hline
+		\textbf{生成器}    & \textbf{描述}             \\ \hline
+		7Z                 & 7-zip压缩包                    \\ \hline
+		DEB                & Debian包                   \\ \hline
+		External           & CPack外部包           \\ \hline
+		IFW                & Qt安装程序框架           \\ \hline
+		NSIS               & Null软安装程序              \\ \hline
+		NSIS64             & Null软安装程序 (64位)      \\ \hline
+		NuGet              & NuGet包                   \\ \hline
+		RPM                & RPM包                      \\ \hline
+		STGZ               & 自解压TAR gzip压缩包 \\ \hline
+		TBZ2               & Tar BZip2压缩包                \\ \hline
+		TGZ                & Tar GZIP压缩包                 \\ \hline
+		TXZ                & Tar XZ压缩包                   \\ \hline
+		TZ                 & Tar 压缩包             \\ \hline
+		TZST               & Tar Zstandard压缩包           \\ \hline
+		ZIP                & Zip压缩包                      \\ \hline
 	\end{tabular}
 \end{table}
 
-CPack uses CMake's installation mechanism to populate the content of the packages. CPack uses the configuration details that are present in the CPackConfig.cmake and CPackSourceConfig.cmake files to generate packages. These files can either be populated manually or generated automatically by CMake with the help of the CPack module. Using CPack on an existing CMake project is as easy as including the CPack module, given that the project already has proper install(…) commands. Including the CPack module will cause CMake to generate the CPackConfig.cmake and CPackSourceConfig.cmake files, which are the CPack configurations that are needed to pack the project. Also, an additional package target will become available for the build step. This step will build the project and run CPack so that it starts packaging. CPack can be used when the CPack configuration files have been populated properly, either by CMake or the user. The CPack module allows you to customize the packaging process. A large amount of CPack variables can be set. These variables are separated into two groups – common variables and generator-specific variables. Common variables affect all of the package generators, whereas generator-specific variables only affect a specific type of generator. We'll be inspecting the most basic and prominent ones and we will mostly deal with the common variables. The following table shows the most common CPack variables we will use in our examples: 
+CPack使用CMake的安装机制来填充包的内容，CPack使用CPackConfig.cmake中的配置细节， CPackSourceConfig.Cmake文件生成包。这些文件可以手动填写，也可以由CMake在CPack模块的帮助下自动生成。在已有的CMake项目上使用CPack，就像包含CPack模块一样简单，前提是该项目已有\texttt{install(…)}。包含CPack模块会导致CMake生成CPackConfig.cmake和CPackSourceConfig.cmake文件，这是打包项目所需的CPack配置。另外，附加包目标将用于构建步骤。这一步将构建项目并运行CPack，以便开始打包。当CMake或用户正确填充了CPack配置文件，就可以使用CPack。CPack模块允许定制包装过程，从而可以设置大量的CPack变量。这些变量分为两组——普通变量和生成器特定变量。公共变量影响所有包生成器，而生成器特定的变量只影响特定类型的生成器。下表显示了我们将在示例中最常使用的CPack变量:
 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{|l|l|l|}
 		\hline
-		\textbf{Variable Name}         & \textbf{Description}            & \textbf{Default Value} \\ \hline
-		CPACK\_PACKAGE\_NAME           & Package name                    & Project name           \\ \hline
-		CPACK\_PACKAGE\_VENDOR         & Package vendor name             & "Humanity"             \\ \hline
-		CPACK\_PACKAGE\_VERSION\_MAJOR & Package major version           & Project major version  \\ \hline
-		CPACK\_PACKAGE\_VERSION\_MINOR & Package minor version           & Project minor version  \\ \hline
-		CPACK\_PACKAGE\_VERSION\_PATCH & Package patch version           & Project patch version  \\ \hline
-		CPACK\_GENERATOR               & List of CPack generators to use & N/A                    \\ \hline
-		CPACK\_THREADS & \begin{tabular}[c]{@{}l@{}}Number of threads to use them\\ parallelism is supported.\end{tabular} & 1 \\ \hline
+		\textbf{变量名}         & \textbf{描述}            & \textbf{默认值} \\ \hline
+		CPACK\_PACKAGE\_NAME           & 包名                    & 项目名           \\ \hline
+		CPACK\_PACKAGE\_VENDOR         & 包供应商名             & "Humanity"             \\ \hline
+		CPACK\_PACKAGE\_VERSION\_MAJOR & 包主要版本           & 项目主要版本  \\ \hline
+		CPACK\_PACKAGE\_VERSION\_MINOR & 包次要版本           & 项目次要版本  \\ \hline
+		CPACK\_PACKAGE\_VERSION\_PATCH & 包补丁版本           & 项目补丁版本  \\ \hline
+		CPACK\_GENERATOR               & 使用的CPack生成器列表 & N/A                    \\ \hline
+		CPACK\_THREADS & 支持并行的线程数 & 1 \\ \hline
 	\end{tabular}
 \end{table}
 
-Any changes that must be made to the variables must be made before you include the CPack module. Otherwise, the defaults will be used. Let's dive into an example to see CPack in action. We will be following the Chapter 4, Example 6 (chapter4/ex06\_pack) example. This example is structured as a standalone project and is not part of the root example project. It is a regular project with two subdirectories named executable and library. The CMakeLists.txt file of the executable directory looks as follows:
+包含CPack模块之前，必须对变量进行更改。否则，将使用默认值。这里通过一个示例来了解CPack的实际应用，将使用第4章，例6 (chapter4/ex06\_pack)的示例。此示例构造为一个独立的项目，并不是根示例项目的一部分。它是一个常规项目，有两个子目录，分别名为executable和library。可执行目录的CMakeLists.txt文件如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch4_ex06_executable src/main.cpp)
@@ -50,7 +50,7 @@ target_link_libraries(ch4_ex06_executable PRIVATE ch4_ex06_
 install(TARGETS ch4_ex06_executable)
 \end{lstlisting}
 
-The CMakeLists.txt file of the library directory looks as follows:
+库目录的CMakeLists.txt文件如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_library(ch4_ex06_library STATIC src/lib.cpp)
@@ -67,7 +67,7 @@ install (
 )
 \end{lstlisting}
 
-The CMakeLists.txt files for these folders do not contain anything out of the ordinary. They contain regular, installable CMake targets and declare nothing about CPack. Let's take a look at the top-level CMakeLists.txt file as well:
+这些文件夹的CMakeLists.txt文件不包含任何不同寻常的东西。它们包含常规的、可安装的CMake目标，并没有声明关于CPack的内容。让我们看看顶层的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -92,28 +92,28 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "CTT Authors")
 include(CPack)
 \end{lstlisting}
 
-The top-level CMakeLists.txt file is pretty much a regular, top-level CMakeLists.txt file, except for the last four lines. It sets three CPack-related variables and then includes the CPack module. These four lines are enough to provide basic CPack support. The CPACK\_PACKAGE\_NAME and CPACK\_PACKAGE\_VERSION\_* variables are not set to let CPack deduce them from the top-level project's name and version parameters. Let's configure the project to see whether it works:
+顶层CMakeLists.txt文件除了最后四行之外，几乎和一个普通的顶层CMakeLists.txt文件无异。它设置了三个与CPack相关的变量，然后包含了CPack模块。这四条线足以提供基本的CPack支持。CPACK\_PACKAGE\_NAME和CPACK\_PACKAGE\_VERSION\_*变量没有让CPACK从顶层项目的名称和版本参数中进行推断。让我们配置这个项目，看看是否工作:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_4/ex06_pack
 cmake –S . -B build/
 \end{tcblisting}
 
-After configuring the project, the CpackConfig.cmake and CpackConfigSource. cmake files should be generated by the CPack module to the build/CPack* directory. Let's check if they're present:
+项目配置完成后，CpackConfig.cmake和CpackConfigSource.cmake文件将生成到build/CPack*目录下。看看他们是否存在:
 
 \begin{tcblisting}{commandshell={}}
 $ ls build/CPack*
 build/CPackConfig.cmake build/CPackSourceConfig.cmake
 \end{tcblisting}
 
-Here, we can see that the CPack configuration files are automatically generated. Let's build this and try to package the project with CPack:
+这里，可以看到CPack配置文件是自动生成的。构建它，并尝试用CPack打包项目:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build build/
 cpack --config build/CPackConfig.cmake -B build/
 \end{tcblisting}
 
-The -{}-config argument is the main input of the CPack command. The -B argument overrides the default package directory that CPack will write its artifacts to. Let's look at CPack's output:
+参数\texttt{-{}-config}是CPack命令的主要输入。参数\texttt{-B}修改了默认的包目录，CPack将把它的工件写入该目录。看看CPack的输出:
 
 \begin{tcblisting}{commandshell={}}
 CPack: Create package using DEB
@@ -129,27 +129,26 @@ generated.
 CPack: Create package using TBZ2
 /*…*/
 CPack: - package: /home/user/workspace/personal/CMake-BestPractices/
-chapter_4/ex06_pack/build/ch4_ex06_pack-1.0-Linux.tar.
-bz2 
+chapter_4/ex06_pack/build/ch4_ex06_pack-1.0-Linux.tar.bz2 
 generated.
 \end{tcblisting}
 
-Here, we can see that CPack has used the DEB, RPM, and TBZ2 generators to generate the ch4\_ex06\_pack-1.0-Linux.deb, ch4\_ex06\_pack-1.0-Linux.rpm, and ch4\_ex06\_pack-1.0-Linux.tar.bz2 packages, respectively. Let's try to install the generated Debian package on a Debian environment: 
+这里，可以看到CPack使用DEB、RPM和TBZ2生成器生成了ch4\_ex06\_pack-1.0-Linux.deb, ch4\_ex06\_pack-1.0-Linux.rpm和cch4\_ex06\_pack-1.0-Linux.tar.bz2。尝试在Debian环境中安装生成的Debian包:
 
 \begin{tcblisting}{commandshell={}}
 sudo dpkg -i build/ch4_ex06_pack-1.0-Linux.deb
 \end{tcblisting}
 
-If the packaging was correct, we should be able to invoke ch4\_ex06\_executable directly on the command line:
+若安装无误，应该能够在命令行中直接使用ch4\_ex06\_executable:
 
 \begin{tcblisting}{commandshell={}}
 13:38 $ ch4_ex06_executable
 Hello, world!
 \end{tcblisting}
 
-It works! As an exercise, try to install the RPM and tar.bz2 packages as well. In this
+没问题!作为练习，请尝试安装RPM和tar.bz2包。
 
-section, we learned how to use CPack to pack our project. This is by no means an exhaustive guide. CPack itself deserves several chapters so that it can be covered in detail. With that, we've successfully reached the end of this chapter.
+本节中，学习了如何使用CPack来打包我们的项目，这绝不是一个详尽的指南。CPack本身值得用几章来详细介绍。这样，我们就成功地完成了这一章的结尾。
 
 
 
