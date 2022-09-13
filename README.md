@@ -4,7 +4,7 @@
 
 *(使用CMake创建和维护项目)*
 
-<a><img src="cover.jpg" alt="CMake Best Practices " height="256px" align="right"></a>
+<a><img src="cover.jpg" height="256px" align="right"></a>
 
 * 作者：Dominik Berner, Mustafa Kemal Gilor  
 * 译者：陈晓伟
