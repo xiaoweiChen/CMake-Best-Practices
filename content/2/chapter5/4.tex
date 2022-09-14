@@ -1,19 +1,19 @@
 
-The easiest way to get dependencies into your project is to regularly install them using apt-get, brew, or Chocolatey. The downside of installing everything is that you can pollute your system with many different versions of libraries and the version you are looking for might not be available at all. This is especially true if you are working on multiple projects with different requirements regarding the dependencies side by side. Often, a developer downloads the dependencies locally for each project so that each project can work independently. A very good way to handle dependencies is by using package managers such as Conan or vcpkg.
+将依赖项添加到项目中最简单的方法是使用apt-get、brew或Chocolatey进行安装。安装的缺点是，可能会使用许多不同版本的库污染系统，并且所寻找的版本可能根本不可用。若正在处理多个项目，同时对依赖关系有不同的需求，那么这一点尤其重要。通常，开发人员会在本地为每个项目下载依赖项，以便每个项目能够独立工作。处理依赖关系的一个方法是使用包管理器，例如Conan或vcpkg。
 
-Using a dedicated package manager has many advantages when it comes to dependency management. Two of the more popular ones for handling C++ dependencies are Conan and vcpkg. Both of them can handle complex build systems, and mastering them will require whole books on their own, so we will only cover the bare necessities to start working with them here. In this book, we will focus on using packages that are already available in your CMake project, rather than on creating your own packages.
+在依赖性管理方面，使用专用的包管理器有许多优点。处理C++依赖的两个比较流行的是Conan和vcpkg。它们都可以处理复杂的构建系统，掌握它们需要阅读相关的书籍，所以这里只介绍使用它们所需的基本知识。本书中，我们将着重于使用CMake项目中已经提供的包，而不是自己创建的包。
 
-\subsubsubsection{5.4.1\hspace{0.2cm}Getting dependencies from Conan}
+\subsubsubsection{5.4.1\hspace{0.2cm}获取依赖——Conan}
 
-Over the last few years, the Conan package manager gained much popularity, mostly because it integrates very well with CMake. Conan is a decentralized package manager that has been built on a client/server architecture. This means that the local client fetches or uploads packages to one or more remote servers.
+过去的几年里，Conan包管理器获得了很大的普及，主要是因为它与CMake集成得非常好。Conan是一个分布式包管理器，构建在客户机/服务器架构上。所以，本地客户端可以获取或上传包到一个或多个远程服务器。
 
-One of the most powerful features of Conan is that it can create and manage binary packages for multiple platforms, configurations, and versions. When creating packages, they are described with a conanfile.py file that lists all dependencies, sources, and build instructions.
+Conan最强大的特性是可以为多个平台、配置和版本创建和管理二进制包。创建包时，使用conanfile.py文件描述它们，该文件列出了所有依赖项、源和构建指令。
 
-The packages are built and uploaded to the remote server with the Conan client. This has an additional benefit where, if no binary package that fits your local configuration can be found, the package can be built locally from its sources.
+使用Conan客户机构建包并将其上传到远程服务器。这还有一个好处，若找不到适合本地配置的二进制包，则可以从它的源代码在本地构建该包。
 
-A very convenient way to use Conan with CMake is to use Conan from CMake itself. However, if you do not desire to do this, calling Conan externally also works. While not strictly necessary, we recommend that you check for the Conan program using find\_program before using Conan.
+用CMake使用Conan的一个非常方便的方法是使用CMake本身的Conan。若不想这样做，可以在外部使用Conan。虽然不是严格必要的，但建议在使用Conan之前使用\texttt{find\_program}检查Conan程序是否存在。
 
-To call Conan out of CMake directly, Conan offers a CMake wrapper for downloading. The following example downloads the conan-cmake wrapper and then pulls the fmt formatting library from ConanCenter to be used as a regular library in the project:
+为了直接从CMake中调用Conan，Conan提供了一个CMake包装程序供下载。下面的例子下载了conan-cmake包装器，然后从ConanCenter中提取fmt格式化库作为项目中的常规库:
 
 \begin{lstlisting}[style=styleCMake]
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
@@ -51,38 +51,38 @@ add_executable(conan_example)
 target_link_libraries(conan_example PRIVATE fmt::fmt)
 \end{lstlisting}
 
-The preceding CMake code does the following things:
+CMake代码做了以下事情:
 
 \begin{enumerate}
 \item 
-If not already downloaded, the conan.cmake file is downloaded to the current binary directory.
+若还没有下载，conan.cmake文件将会下载到当前二进制目录下。
 
 \item 
-Next, it is included to make the Conan functions available.
+接下来，包含它使Conan函数可用。
 
 \item 
-Once included, Conan is told to detect the settings, such as the compiler, the platform, and more, from the current CMake configuration and to store them in the CONAN\_SETTINGS variable.
+当包含Conan，就可以从当前的CMake配置中检测设置，如编译器、平台等，并将它们存储在CONAN\_SETTING变量中。
 
 \item 
-The conan\_cmake\_configure functions define the requirements for fmt and set the generator for Conan so that we can use find\_package to include the dependencies. This will generate a conanfile.txt file that contains the necessary instructions for Conan in the current build directory.
+conan\_cmake\_configure函数定义了fmt，并为conan设置了生成器，这样就可以使用\texttt{find\_package}来包含依赖项。这将生成一个conanfile.txt文件，其中包含当前构建目录中Conan的必要指令。
 
 \item 
-And, finally, conan\_cmake\_install installs the dependencies.
+最后，conan\_cmake\_install会安装相应的依赖项。
 
 \item 
-PATH\_OR\_REFERENCE tells us where the definition of the dependencies is located. This command runs in the same build directory as conan\_cmake\_configure, so passing a single dot will search the same directory. BUILD missing tells Conan to build the packages locally if they are not available as binaries from the remote server.
+PATH\_OR\_REFERENCE会指出依赖关系的定义所在的位置。该命令的运行位置与conan\_cmake\_configure所处位置相同，因此将搜索相同的目录。若BUILD缺失，则这些包不能作为二进制文件从远程服务器获得，那就需要在本地进行构建。
 
 \item 
-SETTINGS passes the retrieved settings along to Conan.
+SETTINGS将检索到设置传递给Conan。
 
 \item 
-Since the generated find modules will be located in the current binary directory, they have to be added to CMAKE\_MODULE\_PATH.
+由于生成的查找模块位于当前二进制目录中，所以必须添加到CMAKE\_MODULE\_PATH中。
 
 \item 
-Once downloaded, the dependencies can be included by using find\_package and then added to the existing targets as usual.
+完成下载后，可以使用\texttt{find\_package}来包含依赖项，然后像往常一样添加到现有目标中。
 \end{enumerate}
 
-Instead of directly declaring the dependencies inside CMake, it is also possible to provide the information as a conanfile.txt file. It might look something like this:
+与其直接在CMake中声明依赖项，还可以直接提供conanfile.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 [requires]
@@ -90,8 +90,8 @@ fmt/6.1.2
 [generators]
 cmake_find_package
 \end{lstlisting}
- 
-Here, instead of running conan\_cmake\_configure and conan\_cmake\_install, Conan is invoked through conan\_cmake\_run. Adapting the preceding example to use a conanfile.txt file will look similar to the following (the part that downloads the conan.cmake file stays the same):
+
+这里，不运行conan\_cmake\_configure和conan\_cmake\_install，而是通过conan\_cmake\_run调用conan。调整前面的示例以使用conanfile.txt文件将类似于以下内容(下载conan.cmake文件保持不变):
 
 \begin{lstlisting}[style=styleCMake]
 include(${CMAKE_CURRENT_BINARY_DIR}/conan.cmake)
@@ -108,21 +108,21 @@ target_link_libraries(conan_conanfile_example PRIVATE
 	fmt::fmt)
 \end{lstlisting}
 
-This setup is similar to the previous example, except that Conan is pointed to the conanfile.txt file instead of generating it from the CMake instructions. BASIC\_SETUP will tell Conan to create the necessary CMake variables automatically. The conan\_cmake\_run command can also be used to run almost any Conan command.
+此设置与前面的示例类似，不同之处是Conan指向conanfile.txt文件，而不是由CMake指令生成它。BASIC\_SETUP会告诉Conan自动创建必要的CMake变量，conan\_cmake\_run命令也可以用来运行所有conan命令。
 
-Of course, Conan can also be called from outside CMake manually. While some find this to be a cleaner approach, because of the separation of concerns between Conan and CMake, it can be tedious to maintain. Indeed, the information about the dependency has to be tracked in two places, and the build configurations, such as the compilers, the libc version, the platform, and more, have to be configured not just for CMake but for Conan too.
+当然，Conan也可以从CMake外部使用。有些人认为这是一种更简洁的方法，因为Conan和CMake之间的关注点是分离的，但维护起来会很繁琐。关于依赖项的信息必须在两个地方进行跟踪，而且构建配置，例如：编译器、libc版本、平台等，不仅必须为CMake配置，也必须为Conan配置。
 
-The full Conan documentation can be found at \url{https://docs.conan.io/en/latest/}.
+完整的Conan文档可参阅\url{https://docs.conan.io/en/latest/}。
 
-\subsubsubsection{5.4.2\hspace{0.2cm}Using vcpkg for dependency management}
+\subsubsubsection{5.4.2\hspace{0.2cm}使用vcpkg进行依赖管理}
 
-Another popular open source package manager is vcpkg from Microsoft. It works similarly to Conan in the way that it is set up as a client/server architecture. It was originally built to work with the Visual Studio compiler environment, and CMake was added later. Packages can either be installed manually, by calling vcpkg in the so-called classic mode, or directly out of CMake in the so-called manifest mode. The command to install packages with vcpkg in classic mode is as follows:
+另一个流行的开源包管理器是微软的vcpkg，工作方式类似于Conan，使用客户机/服务器架构。最初构建它是为了与Visual Studio编译器环境一起工作，后来添加了CMake。包既可以在所谓的经典模式下调用vcpkg手动安装，也可以在清单模式下直接从CMake安装。使用经典方式安装vcpkg包的命令如下:
 
 \begin{tcblisting}{commandshell={}}
 vcpkg install [packages]
 \end{tcblisting}
 
-When run in manifest mode, the dependencies of a project are defined in a vcpkg.json file in the root of the project. Manifest mode has a big advantage in that it integrates better with CMake, so, whenever possible, use manifest mode. A vcpkg manifest might look like this:
+当以清单模式运行时，项目的依赖项在vcpkg.json中定义，文件在项目的根目录下。清单模式有一个很大的优势，可以更好地与CMake集成，因此请尽可能使用清单模式。vcpkg清单可能是这样的:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -136,16 +136,16 @@ When run in manifest mode, the dependencies of a project are defined in a vcpkg.
 }
 \end{lstlisting}
 
-In order for CMake to find the packages, a vcpkg toolchain file has to be passed to CMake, so the call to CMake will be as follows:
+为了让CMake找到这些包，vcpkg工具链文件必须传递给CMake，对CMake的使用如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
   FILE=[vcpkg root]/scripts/buildsystems/vcpkg.cmake
 \end{tcblisting}
 
-If they are run in manifest mode, the packages specified in the vcpkg.json file will be automatically downloaded and installed locally. If they are run in classic mode, the packages have to be manually installed before running CMake. When passing the vcpkg toolchain file, the installed packages can be used, as usual, by using find\_package and target\_link\_libraries.
+若以清单模式运行，则vcpkg.json文件中指定的包将自动下载并安装在本地。若以经典模式运行，则必须在运行CMake之前手动安装这些包。当传递vcpkg工具链文件时，可以使用\texttt{find\_package}和\texttt{target\_link\_libraries}使用已安装的包。
 
-Microsoft recommends that you install vcpkg as a submodule in the repository at the same level as the CMake root project, but it can be installed almost everywhere. Setting the toolchain file might cause problems when cross-compiling, as CMAKE\_TOOLCHAIN\_FILE might point to a different file already. In this case, a second toolchain file can be passed with the VCPKG\_CHAINLOAD\_TOOLCHAIN\_FILE variable. In this case, the call to CMake would look something like this:
+微软建议将vcpkg作为子模块安装在存储库中，与CMake根项目处于同一级别，但它可以安装在任何地方。设置工具链文件可能会在交叉编译时导致问题，因为CMAKE\_TOOLCHAIN\_FILE可能已经指向一个不同的文件。这种情况下，第二个工具链文件可以通过VCPKG\_CHAINLOAD\_TOOLCHAIN\_FILE传递，对CMake的调用看起来像这样:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
@@ -153,11 +153,11 @@ cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
   _CHAINLOAD_TOOLCHAIN_FILE=/path/to/other/toolchain.cmake
 \end{tcblisting}
 
-Conan and vcpkg are just two package managers for C++ and CMake that are popular. Of course, there are many more, but it would require a separate book to describe them all. Especially when projects get more complex, we highly advise that you use package managers.
+Conan和vcpkg只是C++和CMake中流行的两个包管理器。当然，还有更多知识点这里没有提及，但需要单独的一本书来描述它们。特别是当项目变得更加复杂时，强烈建议使用包管理器。
 
-Which package manager you choose will depend on the context a project is being developed in and your personal preference. Conan has a slight advantage over vcpkg in that it is supported on more platforms as it runs everywhere Python runs. In terms of features and ability for cross-compiling, both are more or less equal. Overall, Conan offers more advanced configuration options and control over the packages, which comes at the price of more complex handling. Another way to work with local dependencies is to create fully isolated build environments by using containers, sysroots, and more. This will be covered in Chapter 12, Cross-Platform Compiling and Custom Toolchains. For the moment, let's assume we're running CMake with your standard system installation. 
+选择哪个包管理器取决于开发项目的环境和个人偏好。Conan比vcpkg有一点优势，因为它在更多的平台上得到支持，它可以在任何Python运行的地方运行。就交叉编译的特性和能力而言，两者不相上下。总之，Conan提供了更高级的配置选项和对包的控制，这是以更复杂的处理为代价的。处理本地依赖关系的另一种方法是通过使用容器、sysroot等创建完全隔离的构建环境，这将在第12章中讨论。现在，假设我们正在使用标准系统安装运行CMake。
 
-Using packages managers for dependency management is the recommended way when working with project-specific dependencies. However, sometimes, package managers are not an option. This might be because of mysterious company policies or some other reason. In these cases, CMake also supports downloading dependencies as the source and integrating them into the project as external targets.
+处理特定于项目的依赖项时，推荐使用包管理器进行依赖项管理。然而，有时无法选择使用包管理器。这可能是因为公司政策或其他原因。这中情况下，CMake还支持将下载依赖项作为源，并将它们作为外部目标集成到项目中。
 
 
 

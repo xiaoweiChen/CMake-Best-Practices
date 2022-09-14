@@ -177,15 +177,15 @@ macOS平台上，还搜索以下文件夹:
 
 \subsubsubsection{5.3.1\hspace{0.2cm}编写查找模块}
 
-While CMake is almost an industry standard, there are still lots of libraries out there that are not managed with CMake or that are managed with CMake but do not export a CMake package. If they can be installed in the default location of a system, finding these libraries is usually not a problem, but this is not always possible or wanted. A common case is when using a proprietary third-party library that is only needed for a certain project or that uses a different version of a library to build from the one that is installed by the systems package manager.
+虽然CMake是一个行业标准，但仍然有很多库没有使用CMake管理，或者不导出CMake包。若可以将它们安装在系统的默认位置，那么找到这些库通常不是问题。常见的情况是，当使用仅为某个项目所需的专有第三方库，或者使用从系统包管理器安装的库构建的不同版本的库时，使用对应版本的库就成了件麻烦事。
 
-If you're developing multiple projects side by side, you might want to handle the dependencies locally for each project. Either way, it is good practice to set up your project in a way so that dependencies are managed locally and do not depend too much on what is installed on the system. Creating fully reproducible builds is described in Chapter 11, Automated Fuzzing with CMake; however, for now, let's focus on finding dependencies. 
+若正在并行地开发多个项目，可能希望在本地处理每个项目的依赖关系。无论哪种方式，都应该在本地管理依赖项，而不是过多依赖于系统安装的东西，这是一种很好的实践方式。创建完全可复制的构建在第11章会介绍描述，现在让我们专注于寻找依赖项。 
 
-If no module and no configuration file exists for a dependency, often, writing your so-called find module is the solution. The goal is to provide enough information so that, later, we can use any package by using find\_package.
+若依赖项不存在模块和配置文件，编写find模块就是解决方案。我们的目标是提供足够的信息，以便以后可以使用\texttt{find\_package}来使用任何包。
 
-Find modules are instructions for CMake on how to find the necessary header and binary files for a library and which create imported targets for CMake to use. As described earlier in this chapter, when invoking find\_package in module mode, CMake searches for files called Find<PackageName>.cmake in CMAKE\_MODULE\_PATH.
+find模块如何找到必要的头文件和二进制文件，以及为CMake创建导入目标的指令。如本章前面所述，当使用\texttt{find\_package}时，CMake在CMAKE\_MODULE\_PATH中搜索名为Find<PackageName>.cmake的文件。
 
-Let's assume that we're building a project where the dependencies have already been downloaded or built and have been placed in a folder called dep before we use them. So, the project structure might look like this:
+假设正在构建一个项目，已经下载或构建了依赖项，并在使用之前将其放置在一个名为dep的文件夹中。所以，项目目录结构看起来可能是这样:
 
 \begin{tcblisting}{commandshell={}}
 ├── dep <-- The folder where we locally keep dependencies
@@ -196,29 +196,29 @@ Let's assume that we're building a project where the dependencies have already b
 │       ├── *.cpp files
 \end{tcblisting}
 
-The first thing we have to do is to add the cmake folder to the CMAKE\_MODULE\_PATH, which is a list. So, first, we add the following line to the CMakeLists.txt file:
+要做的第一件事是将cmake文件夹添加到CMAKE\_MODULE\_PATH中，这是一个列表。因此，可在CMakeLists.txt文件中添加以下行:
 
 \begin{lstlisting}[style=styleCMake]
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 \end{lstlisting}
 
-This tells CMake that it should look for find modules in the cmake folder. Typically, a find module does things in the following order:
+CMake会在cmake文件夹中查找find模块。通常，find模块按以下顺序执行:
 
 \begin{enumerate}
 \item 
-It looks for files belonging to the package.
+查找属于包的文件。
 	
 \item 
-It sets up variables containing the include and library directories for the packages.
+为包设置包含include路径和库目录的变量。
 
 \item 
-It sets up targets for the imported package.
+为导入的包设置目标。
 
 \item 
-It sets properties for the targets.
+为目标设置属性。
 \end{enumerate}
 
-A simple FindModules.cmake for a library called obscure might look like this:
+一个简单的FindModules.cmake看起来像这样:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -256,17 +256,17 @@ if(NOT TARGET Obscure::Obscure)
 endif()
 \end{lstlisting}
 
-When looking at the example, we can observe that the following things happen:
+这个例子中，我们可以观察到以下情况:
 
 \begin{enumerate}
 \item 
-First, the actual library file belonging to the dependency is searched for using the find\_library command. If found, the path to it, including the actual filename, is stored in the OBSCURE\_LIBRARY variable. It is a common practice to name the <PACKAGENAME>\_LIBRARY variable. The NAMES argument is a list of possible names for the library. The names are automatically extended with common prefixes and extensions. So, although, in the preceding example, we look for the name "obscure," a file named libobscure.so or obscure.dll will be found. More details about the search order, hints, and paths will be covered later in this section.
+首先，使用\texttt{find\_library}指令搜索属于依赖项的实际库文件。若找到了，其路径会包括实际的文件名，并存储在OBSCURE\_LIBRARY变量中，通常称为<PACKAGENAME>\_LIBRARY。NAMES参数是库的可能名称列表，名称会自动扩展为通用前缀和扩展名。因此，尽管在前面的示例中，我们寻找名为“obscure”的文件libobscure。因此会找到libobscure.so或obsile.dll。关于搜索顺序、提示和路径的更多细节将在本节后面介绍。
 
 \item 
-Next, the Find module attempts to locate the include path. This is done by finding a known path pattern of the library, usually one of the public header files. The result is stored in the OBSCURE\_INCLUDE\_DIR variable. Again, the common practice is to name this variable as <PACKAGENAME>\_INCLUDE\_DIR.
+接下来，Find模块尝试定位包含路径。通过查找库的已知路径模式来实现，通常是公共头文件。结果会存储在OBSCURE\_INCLUDE\_DIR变量中。同样，通常这个变量名为<PACKAGENAME>\_INCLUDE\_DIR。
 
 \item 
-Since handling all the requirements for a find module can be tedious and is often very repetitive, CMake provides the FindPackageHandleStandardArgs module, which provides a handy function to handle all the common cases. It provides the find\_package\_handle\_standard\_args function, which handles REQUIRED, QUIET, and the version-related arguments of find\_package. find\_package\_handle\_standard\_args has a short signature and a long signature. In the example, the short signature is used:
+由于处理find模块的所有需求可能非常繁琐，而且会有重复，所以CMake提供了FindPackageHandleStandardArgs模块，该模块提供了一个方便的函数来处理所有常见的情况，其提供了find\_package\_handle\_standard\_args函数，该函数处理REQUIRED、QUIET和find\_package的版本相关参数。Find \_package\_handle\_standard\_args有一个短签名版本和一个长签名版本。本例中使用短签名版本:
 
 \begin{lstlisting}[style=styleCMake]
 find_package_handle_standard_args(<PackageName>
@@ -276,16 +276,16 @@ find_package_handle_standard_args(<PackageName>
 \end{lstlisting}
 
 \item 
-For most cases, the short form of find\_package\_handle\_standard\_args is sufficient. In the short form, the find\_package\_handle\_standard\_args function takes the package name as the first argument and a list of variables that are required for the package. The DEFAULT\_MSG argument tells it to print default messages in the event of success or failure, depending on whether find\_package was invoked with REQUIRED or QUIET. The message can be customized, but we recommend that you stick to the default messages whenever possible. That way, the messages are consistent for all the find\_package commands. In the preceding example, find\_package\_handle\_standard\_args checks whether the OBSCURE\_LIBRARY and OBSCURE\_INCLUDE\_DIR variables that have been passed are valid. If that is the case, the <PACKAGENAME>\_FOUND variable is set.
+对于大多数情况，find\_package\_handle\_standard\_args的简短形式就足够了。其中，find\_package\_handle\_standard\_args函数将包名作为第一个参数和包所需的变量列表。DEFAULT\_MSG参数告诉它在成功或失败的情况下打印默认消息，这取决于\texttt{find\_package}是用REQUIRED，还是QUIET。消息可以自定义，但建议尽可能使用默认消息。这样，所有\texttt{find\_package}的消息就一致了。前面的例子中，find\_package\_handle\_standard\_args检查已传递的OBSCURE\_LIBRARY和OBSCURE\_INCLUDE\_DIR变量是否有效。若是这种情况，则会设置<PACKAGENAME>\_FOUND变量。
 
 \item 
-If all goes well, the find module defines the target. Before we do this, it is helpful to check whether the target we are trying to create does not already exist (to avoid overwriting it in the case that we have multiple calls to find\_package for the same dependency). Creating the target is done with add\_library. Since we cannot be sure whether it is a static or dynamic library, the type is UNKNOWN and the IMPORTED flag is set.
+若一切顺利，find模块将定义目标。在这样做之前，对于检查目标是否存在是很有帮助(以避免在有多个调用为相同的依赖时，覆盖目标的情况)。使用\texttt{add\_library}创建目标，因为还不能确定它是静态库还是动态库，所以类型为UNKNOWN，并设置了IMPORTED标志。
 
 \item 
-Finally, the properties for the library are set. The minimum setting that we recommend is the MPORTED\_LOCATION property and the location of the include files in INTERFACE\_INCLUDE\_DIR.
+最后，设置库的属性。推荐的最小设置是MPORTED\_LOCATION属性，和包含文件所在的位置INTERFACE\_INCLUDE\_DIR。
 \end{enumerate}
 
-If everything works as expected, the library can then be used like this:
+若一切正常，库可以像这样使用:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Obscure PRIVATE REQUIRED)
@@ -293,5 +293,5 @@ find_package(Obscure PRIVATE REQUIRED)
 target_link_libraries(find_module_example Obscure::Obscure)
 \end{lstlisting}
 
-So, now we understand how other libraries are added to your projects if they are already available for use. But how do we get the libraries into our system in the first place? Let's find that out in the next section.
+现在我们了解了如何将其他库添加到您的项目中(已经可以使用的话)。但如何在一开始就将这些库引入系统呢?让我们在下一节中找出答案。
 

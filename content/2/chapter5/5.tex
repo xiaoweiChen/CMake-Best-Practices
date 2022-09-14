@@ -6,13 +6,13 @@ There are several ways to get dependencies as sources into your project. A relat
 The practice of downloading and integrating a copy of a third-party software directly into a product is called vendoring. While it has the advantage that it often makes building software easy, it creates issues with packaging libraries. Vendoring is avoided by either using either a package manager or by installing the third-party software in a location on your system.
 \end{tcolorbox}
 
-\subsubsubsection{5.5.1\hspace{0.2cm}Downloading dependencies as the source using pure CMake}
+\subsubsubsection{5.5.1\hspace{0.2cm}下载依赖项作为源代码}
 
 At the base of getting external content is the CMake ExternalProject module and the more sophisticated FetchContent module, which is built on ExternalProject. While ExternalProject offers more flexibility, FetchContent is often more convenient to use, especially if the downloaded project is also built using CMake. Both of them download projects as source files and can be used to build them.
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Using FetchContent}
+\textbf{使用FetchContent}
 
 For external projects that use CMake to build, using the FetchContent module is the way of choice to add source dependencies. For binary dependencies, using find\_package and find modules is still the preferred way. One of the main differences between ExternalProject and FetchContent is that FetchContent downloads and configures external projects during configuration time, while ExternalProject does everything during the build step. The drawback to this is that the source and its configuration are not available during configuration time.
 
@@ -120,7 +120,7 @@ At the beginning of the chapter, we looked at find\_package, which can be used t
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Using ExternalProject}
+\textbf{使用ExternalProject}
 
 The ExternalProject module is used to download and build external projects that are not fully integrated into the main project. When building an external project, the build is fully isolated, meaning that it will not automatically take over any settings regarding architecture or platforms. This isolation can come in handy to avoid clashes in the naming of targets or components. The external project creates a primary target and several child targets that contain the following isolated build steps:
 
@@ -203,7 +203,7 @@ Note that GIT\_TAG can be any valid revision number for Git, including tag names
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Using non-CMake projects and cross-compiling}
+\textbf{处理非CMake项目和交叉编译}
 
 A common use case for ExternalProject is to build dependencies that are not handled by CMake but by autotools or automake instead. In that case, you would need to specify the configuration and build commands as follows:
 
@@ -248,7 +248,7 @@ BUILD_ALWAYS YES
 
 \hspace*{\fill} \\ %插入空行
 \noindent
-\textbf{Managing the steps in ExternalProject}
+\textbf{管理ExternalProject中的步骤}
 
 As mentioned in the preceding section, the steps of ExternalProject can be configured further and used in a more granular way. ExternalProject can be told to create regular targets for each step either by passing the STEP\_TARGETS option or by calling ExternalProject\_Add\_StepsTargets. The following calls expose both the configure step and the build step of an external project as targets:
 
