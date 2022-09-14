@@ -1,15 +1,15 @@
 
-If you're writing software in earnest, sooner or later, you will hit the point where your project will rely on libraries from outside your project. Instead of looking for individual library files or header files, the recommended way by the CMake community and us authors is to do this with the find\_package command. The preferred approach for finding dependencies in CMake is using packages.
+若正在认真地编写软件，那么你的项目迟早会依赖于项目外部的库。而不是寻找单独的库文件或头文件，CMake社区和本书作者推荐的方法是使用\texttt{find\_package}，在CMake中查找依赖项的首选方法是使用包。
 
-Packages provide a set of information about dependencies for CMake and the generated build systems. They can be integrated into a project in two forms. This is either by their configuration details (also called config-file packages), which are provided by the upstream project, or as so-called find module packages, which are usually defined somewhere that is unrelated to the package, either by CMake itself or by the project using the package. Both types can be found by using find\_package, and the result is a set of imported targets and/or a set of variables containing information that is relevant to the build system.
+包提供了一组关于CMake和生成构建系统依赖关系的信息，可以以两种形式集成到项目中。可以通过上游项目提供的配置细节(也称为配置文件包)来实现，也可以通过所谓的查找模块包来实现，查找模块包通常定义在与包无关的地方，由CMake本身或使用包的项目来实现。这两种类型都可以通过使用\texttt{find\_package}找到，结果是一组导入的目标和/或一组变量，其中包含与构建系统相关的信息。
 
-The findPkgConfig module, which uses find-pkg to find the relevant metainformation for a dependency, also provides indirect support for packages.
+findPkgConfig模块使用find-pkg查找依赖项的相关元信息，还间接支持包的方式。
 
-Typically, Find modules are used for locating dependencies, for instance, when the upstream does not provide the necessary information for package configuration. They are not to be confused with CMake utility modules, which are used with include(). Whenever possible, using a package provided by the upstream should be used instead of the find modules. If possible, fixing the upstream project to provide the necessary information is preferred over writing a find module.
+通常，find模块用于定位依赖项，例如：上游没有为包配置提供必要的信息时。不要将它们与CMake实用程序模块混淆，后者与\texttt{include()}一起使用。只要可能，就应该使用上游提供的包而不是find模块，修复上游项目以提供必要的信息要优于编写find模块。
 
-Note that the find\_package command has two signatures: a basic or short signature and a full or long signature. In almost all scenarios, using the short signature is sufficient to find the packages we're looking for, and it should be preferred because it is easier to maintain. The short form supports both the module and config packages, but the long form only supports configuration mode.
+注意，\texttt{find\_package}有两个签名:基本签名或短签名，一个完整签名或长签名。所有场景中，使用短签名就足以找到正在寻找的包，因为它更容易维护，应该是首选。短格式同时支持模块和配置包，而长格式只支持配置模式。
 
-The signature of the short mode is as follows:
+短模式的签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
@@ -18,9 +18,9 @@ find_package(<PackageName> [version] [EXACT] [QUIET] [MODULE]
 	[NO_POLICY_SCOPE])
 \end{lstlisting}
 
-Let's suppose we want to write a program that converts a string into a sha256 hash by using the appropriate functionality of the OpenSSL library. To compile and link this example, we have to inform CMake that this project needs the OpenSSL library and then attach it to the target. For the moment, let's assume that the necessary libraries have been installed at a default location on your system; for example, by using a regular package manager such as apt, RPM, or similar for Linux, chocolatey for Windows, or brew for macOS.
+假设想要编写一个程序，通过OpenSSL库的适当功能将字符串转换为sha256散列码。为了编译和链接这个示例，必须通知CMake该项目需要OpenSSL库，然后将其附加到目标中。现在，假设必要的库已经安装在系统上的默认位置;例如：Linux使用apt、RPM或类似的包管理器，Windows使用chocoley，macOS使用brew。
 
-A sample CMakeLists.txt file might look like this:
+一个CMakeLists.txt文件可能是这样的:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(OpenSSL REQUIRED COMPONENTS SSL)
@@ -29,19 +29,21 @@ target_link_libraries(find_package_example PRIVATE
 	OpenSSL::SSL)
 \end{lstlisting}
 
-The preceding example does the following things:
+上面的例子做了以下事情:
 
 \begin{enumerate}
 \item 
-On the first line in the example, there is a find\_package(OpenSSL REQUIRED COMPONENTS SSL) call. This tells CMake that we're looking for a set of libraries and header files for OpenSSL. Specifically, we're looking for the SSL component and ignoring the crypto component. The REQUIRED keyword tells CMake that it is required to build this project. This means that CMake will stop the configuration process with an error if the library is not found.
+第一行\texttt{find\_package(OpenSSL REQUIRED COMPONENTS SSL)}，这表明正在为OpenSSL寻找一组库和头文件。具体来说，正在寻找SSL组件，而忽略加密组件。REQUIRED关键字说明必须使用其来构建这个项目，若没有找到库，CMake将停止配置过程，并出现错误。
 
 \item 
-Once the package has been found, we tell CMake to link the library to the target using target\_link\_libary. Specifically, we tell CMake to link the OpenSSL::SSL target provided by the package OpenSSL.
+找到包后，告诉CMake使用\texttt{target\_link\_library}将库链接到目标，告诉CMake链接OpenSSL包提供的OpenSSL::SSL目标。
 \end{enumerate}
 
 If a dependency has to be of a certain version, it can be specified either as a single version of the major[.minor[.patch[.tweak]]] format or as a version range with the versionMin..[<]versionMax format. For version ranges, both versionMin and versionMax should have the same format, and by specifying <, the upper version will be excluded.
 
-Unfortunately, as of version 3.21, CMake cannot query the modules for the available components. So, we have to rely on the documentation of the modules or library providers to find out which components are available. The available modules can be queried with the following commands:
+若依赖指定了版本，则可以将其指定为major[.minor[.patch[.tweak]]]，或使用versionMin..[<]versionMax的方式作为版本划定范围。对于版本范围，versionMin和versionMax应该具有相同的格式，通过指定小于号，将排除versionMax。
+
+但从3.21版本起，CMake无法查询可用组件的模块。因此，必须依赖模块或库提供者的文档，找出哪些组件是可用的。可用的模块可以通过以下命令查询:
 
 \begin{tcblisting}{commandshell={}}
 cmake --help-module-list #< lists all available modules
@@ -52,15 +54,15 @@ cmake --help-modules #< lists all modules and their
   documentation
 \end{tcblisting}
 
-A list of modules shipped with CMake can be found at \url{https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html}.
+可以在以下网站找到CMake附带的模块列表\url{https://cmake.org/cmake/help/latest/manual/cmake-modules.7.html}。
 
 \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=查找单个库和文件]
-It is possible to look for individual libraries and files, but the preferred way is to use packages. Finding individual files and making them available to CMake will be covered in the Writing your own find module section.
+可以查找单独的库和文件，但首选的方法是包。查找单独的文件，将它们提供给CMake将在编写查找模块的章节中介绍。
 \end{tcolorbox}
 
-When run in module mode, the find\_package command searches for files called Find<PackageName>.cmake; this occurs, first, in the paths specified by CMAKE\_MODULE\_PATH and then among the find modules provided by the CMake installation. If you wish to learn how to create CMake packages, head over to Chapter 4, Packaging, Deploying, and Installing a CMake Project.
+在模块模式下运行时，\texttt{find\_package}会搜索名为Find<PackageName>.cmake的文件;首先会在CMAKE\_MODULE\_PATH指定的路径中搜索，然后是在CMAKE安装提供的查找模块中。弱想学习如何创建CMake包，请阅读第4章的相关内容。
 
-When run in config mode, find\_package searches for files called after either of the following patterns:
+在配置模式下运行时，\texttt{find\_package}会搜索以下的文件:
 
 \begin{itemize}
 \item 
@@ -70,78 +72,78 @@ When run in config mode, find\_package searches for files called after either of
 <PackageName>Config.cmake
 
 \item 
-<lowercasePackageName>-config-version.cmake (if the version details were specified)
+<lowercasePackageName>-config-version.cmake (若指定了版本详细信息)
 
 \item 
-<PackageName>ConfigVersion.cmake (if the version details were specified)
+<PackageName>ConfigVersion.cmake (若指定了版本详细信息)
 \end{itemize}
 
-All searches will be conducted over a set of locations in a well-defined order; if needed, some of the locations can be skipped by passing the respective option to CMake. find\_package contains a few more options than the other find\_ commands. The following table shows the search order from a high level:
+所有的搜索将按照明确的顺序进行;若需要，可以通过将相应的选项传递给CMake来跳过一些位置。\texttt{find\_package}比其他\texttt{find\_}指令包含更多的选项。下表展示了搜索顺序:
 
 \begin{table}[H]
 	\centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\textbf{Location}                     & \textbf{Skip option in the command}  \\ \hline
-		Package root variables                & NO\_PACKAGE\_ROOT\_PATH              \\ \hline
-		CMake-specific cache variables        & NO\_CMAKE\_PATH                      \\ \hline
-		CMake-specific environment variables  & NO\_CMAKE\_ENVIRONMENT\_PATH         \\ \hline
-		Paths specified int the HINTS option  &                                      \\ \hline
-		System-specific environment variables & NO\_SYSTEM\_ENVIRONMENT\_PATH        \\ \hline
-		User package registry                 & NO\_CMAKE\_PACKAGE\_REGISTRY         \\ \hline
-		System-specific cache variables       & NO\_CMAKE\_SYSTEM\_PATH              \\ \hline
-		System package registry               & NO\_CMAKE\_SYSTEM\_PACKAGE\_REGISTRY \\ \hline
-		Paths specified in the PATHS option   &                                      \\ \hline
+		\textbf{位置}                     & \textbf{跳过命令中的选项}  \\ \hline
+		包的根变量                & NO\_PACKAGE\_ROOT\_PATH              \\ \hline
+		特定于CMake的缓存变量        & NO\_CMAKE\_PATH                      \\ \hline
+		特定于CMake的环境变量  & NO\_CMAKE\_ENVIRONMENT\_PATH         \\ \hline
+		HINTS选项中指定的路径  &                                      \\ \hline
+		系统环境变量 & NO\_SYSTEM\_ENVIRONMENT\_PATH        \\ \hline
+		用户包的注册表                 & NO\_CMAKE\_PACKAGE\_REGISTRY         \\ \hline
+		特定于系统的缓存变量       & NO\_CMAKE\_SYSTEM\_PATH              \\ \hline
+		系统包的注册表               & NO\_CMAKE\_SYSTEM\_PACKAGE\_REGISTRY \\ \hline
+		PATHS选项中指定的路径   &                                      \\ \hline
 	\end{tabular}
 \end{table}
 
-Let's look at the search order and search locations more closely:
+更仔细地了解一下搜索顺序和搜索位置:
 
 \begin{itemize}
 \item 
-Package root variables: The package root for each find\_package call is stored in a variable called <PackageName>\_ROOT. They are the first priority for searching files belonging to a package. The package root variables work in the same way as CMAKE\_PREFIX\_PATH, not just for the call to find\_package but for all other find\_ calls that might happen inside the find module belonging to the package.
+包的根变量:每个\texttt{find\_package}包的根变量存储在名为<PackageName>\_ROOT中，是搜索属于包的文件的第一处搜索的地方。包的根变量与CMAKE\_PREFIX\_PATH相同，不仅用于\texttt{find\_package}，而且用于可能发生在属于包的find模块内部的其他\texttt{find\_}指令。
 
 \item 
-CMake-specific cache variables: These are the locations derived from CMAKE\_PREFIX\_PATH. For macOS, the CMAKE\_FRAMEWORK\_PATH variable is also considered a search location.
+特定于CMake的缓存变量:是从CMAKE\_PREFIX\_PATH派生的位置。对于macOS, CMAKE\_FRAMEWORK\_PATH变量也认为是一个搜索位置。
 
 \item 
-By setting the CMAKE\_FIND\_USE\_CMAKE\_PATH variable to false, the locations from the CMake-specific cache variables will be skipped.
+通过设置CMAKE\_FIND\_USE\_CMAKE\_PATH变量为false，将跳过CMAKE特定缓存变量的位置。
 
 \item 
-CMake-specific environment variables: In addition to specifying CMAKE\_PREFIX\_PATH and CMAKE\_FRAMEWORK\_PATH as cache variables, CMake will also consider them if they are set as environment variables.
+特定于CMake的环境变量:除了指定CMAKE\_PREFIX\_PATH和CMAKE\_FRAMEWORK\_PATH作为缓存变量外，若设置为环境变量，CMAKE也会考虑搜索它们。
 
 \item 
-Setting the CMAKE\_FIND\_USE\_ENVIRONMENT\_PATH variable to false will disable this behavior.
+将CMAKE\_FIND\_USE\_ENVIRONMENT\_PATH设置为false将禁用此行为。
 
 \item 
-HINTS from find\_package: These are optional paths passed to find\_package.
+find\_package的HINTS :这些是传递给\texttt{find\_package}的可选路径。
 
 \item 
-System-specific environment variables: The PATH environment variable is used to look for packages and files and the trailing bin and sbin directories are removed. The default locations for each system, such as /usr, /lib, and similar locations, are usually searched at this point.
+特定于系统的环境变量:PATH环境变量用于查找包和文件，并删除尾随的bin和sbin目录。每个系统的默认位置，例如/usr、/lib和类似的位置。
 
 \item 
-User package registry: Often, packages are found either in the standard locations or in the locations passed to CMake by using the CMAKE\_PREFIX\_PATH option. Package registries are another way to tell CMake where to look for dependencies. Package registries are special locations where collections of packages reside. The user registry is valid for the current user account, while the system package registry is valid system-wide. On Windows, the location for the user package registry is stored in the Windows registry under the following:
+用户包的注册表:通常，包要么在标准位置中找到，要么在通过CMAKE\_PREFIX\_PATH选项传递给CMake的位置中找到。包注册表是告诉CMake在哪里查找依赖项的另一种方法。用户注册表对当前用户帐户有效，而系统包注册表在系统范围内有效。在Windows上，用户包的注册表位置存储在下面位置:
 
 \item 
 HKEY\_CURRENT\_USER\verb|\|Software\verb|\|Kitware\verb|\|CMake\verb|\|Packages\verb|\|<packageName>\
 
 \item 
-On the Unix platform, it is stored in the user's home directory as follows: ~/.cmake/packages/<PackageName>
+在Unix平台上，存储在用户的主目录中:~/.cmake/packages/<PackageName>
 
 \item 
-Platform-specific cache variables: For find\_package, the platformspecific cache variables, CMAKE\_SYSTEM\_PREFIX\_PATH, CMAKE\_SYSTEM\_FRAMEWORK\_PATH, and CMAKE\_SYSTEM\_APPBUNDLE\_PATH, work in a similar way to the other find calls. They are set by CMake itself and should not be changed by the project.
+特定于平台的缓存变量:对于\texttt{find\_package}，特定于平台的缓存变量CMAKE\_SYSTEM\_PREFIX\_PATH, CMAKE\_SYSTEM\_FRAMEWORK\_PATH和CMAKE\_SYSTEM\_APPBUNDLE\_PATH的工作方式与其他\texttt{find}类似。它们是由CMake自己设置的，不应该由项目更改。
 
 \item 
-System package registry: Similar to the user package registry, this is a location where CMake is looking for packages. On Windows, it is stored under HKEY\_LOCAL\_MACHINE\verb|\|Software\verb|\|itware\verb|\|CMake\verb|\|Packages\verb|\|<packageName>\verb|\|.
+系统包的注册表:与用户包注册表类似，这是CMake查找包的位置。在Windows上，存储在 HKEY\_LOCAL\_MACHINE\verb|\|Software\verb|\|itware\verb|\|CMake\verb|\|Packages\verb|\|<packageName>\verb|\|。
 
 \item 
-Unix systems do not provide a system package registry.
+Unix系统不提供系统包的注册表。
 
 \item 
-PATHS from find\_package: These are optional paths that are passed to find\_package. Usually, the HINTS options are computed from other values or depend on variables, whereas PATHS options are fixed paths.
+来自\texttt{find\_package}的路径:是传递给\texttt{find\_package}的可选路径。通常，HINTS选项是从其他值计算出来的，或者依赖于变量，而PATHS选项是固定路径。
 \end{itemize}
 
-Specifically, when looking for packages in config mode, CMake will look for the following file structure under the various prefixes:
+具体来说，当在配置模式下查找包时，CMake将在各种前缀下查找以下文件结构:
 
 \begin{lstlisting}[style=styleCMake]
 <prefix>/
@@ -158,7 +160,7 @@ Specifically, when looking for packages in config mode, CMake will look for the 
   (cmake|CMake)/
 \end{lstlisting}
 
-On macOS platforms, the following folders are also searched:
+macOS平台上，还搜索以下文件夹:
 
 \begin{lstlisting}[style=styleCMake]
 <prefix>/<packageName>.framework/Resources/
@@ -169,11 +171,11 @@ On macOS platforms, the following folders are also searched:
 <prefix>/<packageName>.app/Contents/Resources/CMake/
 \end{lstlisting}
 
-You can find out more about packages in the official CMake documentation at \url{https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html}.
+可以在官方的CMake文档中找到更多关于包的信息\url{https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html}。
 
-In terms of modules, so far, we've only covered how to find existing modules. But what happens if we want to look for dependencies that are neither integrated into CMake, nor in the standard places, or they do not provide configuration instructions for CMake? Well, let's find out about that in the next section.
+就模块而言，我们只讨论了如何查找现有的模块。但若想要寻找既没有集成到CMake中，也没有在标准位置中，或者没有为CMake提供配置说明的依赖项，会发生什么呢?让我们在下一节中寻找答案吧。
 
-\subsubsubsection{5.3.1\hspace{0.2cm}Writing your own find module}
+\subsubsubsection{5.3.1\hspace{0.2cm}编写查找模块}
 
 While CMake is almost an industry standard, there are still lots of libraries out there that are not managed with CMake or that are managed with CMake but do not export a CMake package. If they can be installed in the default location of a system, finding these libraries is usually not a problem, but this is not always possible or wanted. A common case is when using a proprietary third-party library that is only needed for a certain project or that uses a different version of a library to build from the one that is installed by the systems package manager.
 
