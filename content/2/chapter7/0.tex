@@ -1,29 +1,28 @@
-So far, we have focused on building and installing projects, as well as generating documentation and handling external dependencies. Another major task when writing quality software is testing and ensuring that the code quality is at the desired level by various other means. To achieve a high code quality, just writing unit tests and executing them once in a while is no longer enough. If you want to produce high-quality software, having proper test tools that integrate easily with your build system is not a luxury but a necessity. Only if building and testing work effortlessly together can the programmers focus on writing good tests instead of focusing on getting those tests to run. Methods
-such as test-driven development bring huge value to the software quality.
+之前，我们关注的是构建和安装项目，以及生成文档和处理外部依赖关系。编写高质量软件时的另一项主要任务是测试，并通过各种其他方法确保代码质量处于所需的水平。要实现高代码质量，仅仅编写单元测试，并偶尔执行它们是不够的。若想要生产高质量的软件，拥有与构建系统轻松集成的适当的测试工具是必要的。只有构建和测试能够毫不费力地一起工作，开发者才能专注于编写良好的测试，而不是专注于运行这些测试。测试驱动开发等方法为提高软件质量带来了巨大的价值。
 
-But, it is not just writing plain tests that increase the quality. Writing good tests is one thing; checking the effectiveness of the tests with coverage reports and ensuring general code quality with static code analysis is another.
+不仅仅是编写简单的测试来提高质量。编写好的测试是一种方式;使用覆盖报告检查测试的有效性，并使用静态代码分析确保通用代码质量是另一种方法。
 
-While tests, coverage, and static code analysis help determine whether the code functions as intended, one problem is often that some of the tools only work with a specific compiler or require special compiler settings. In order to benefit from the tools, it might be necessary to compile the same source in different ways with different compilers. But, luckily, this is exactly what CMake is extremely good at, which is why CMake can help to boost the quality of the code by making these quality tools accessible.
+虽然测试、覆盖和静态代码分析有助于确定代码是否按预期功能运行，但有些工具通常只使用特定的编译器或需要特殊的编译器设置。为了从这些工具中获益，可能需要用不同的编译器以不同的方式编译相同的源代码。但这正是CMake所擅长的，这就是为什么CMake可以通过使这些高质量的工具来帮助提高代码的质量。
 
-The good thing about a lot of the technology for ensuring high code quality is that it can often be automated. With today's easy availability of CI/CD systems, creating a high degree of automated checks for good quality software is quite easy, especially since, with CMake, these things can often be configured and executed right where you define how the software is built. In this chapter, you will learn how to define and orchestrate tests using CMake, as well as how to create code coverage reports to see which parts of the software are tested at all. We will go over how to integrate various code sanitizers and static code analyzers to check code quality already while compiling. We will show you various ways to include all the tools, and how to create a dedicated build type for running static code quality tools.
+许多用于确保代码高质量技术的好处是可以自动化。随着CI/CD系统的易用，为高质量的软件创建高度自动化检查相当容易，特别是使用CMake，这些事情通常可以在定义软件如何构建的地方进行配置和执行。本章中，将学习如何使用CMake定义和编排测试，以及如何创建代码覆盖率报告以查看软件的哪些部分测试了。我们将介绍如何集成各种代码消毒器和静态代码分析器，以在编译时检查代码质量。同时，将向您展示包含所有工具的各种方法，以及如何为运行静态代码质量工具创建专用的构建类型。
 
-This chapter covers the following main topics:
+我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-Defining, discovering, and running tests
+定义、发现和运行测试
 
 \item 
-Generating code coverage reports
+生成代码覆盖率报告
 
 \item 
-Sanitizing your code
+代码消杀
 
 \item 
-Static code analysis using CMake
+静态代码分析
 
 \item 
-Creating custom build types for quality tools
+为质量工具创建自定义构建类型
 \end{itemize}
 
 

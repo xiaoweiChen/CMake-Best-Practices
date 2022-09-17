@@ -1,32 +1,31 @@
-As with the previous chapters, all the examples are tested with CMake 3.21 and run on either of the following compilers:
+和前面的章节一样，所有的例子都已经用CMake 3.21测试过了，并可以由以下编译器编译:
 
 \begin{itemize}
 \item 
-GCC 9 or newer
+GCC 9或更高版本
 
 \item 
-Clang 12 or newer
+Clang 12或更高版本
 
 \item 
-MSVC 19 or newer
+MSVC 19或更高版本
 \end{itemize}
 
-Some of the examples for code coverage, sanitizers, and static code analysis require
-GCC or Clang to run and will not work with MSVC. For running Clang on Windows, have a look at Chapter 8, Executing Custom Tasks with CMake, where toolchain files are introduced. Some examples need the Catch2 unit testing suite installed to compile. Some examples pull dependencies from various online locations, so an internet connection is required as well. 
+代码覆盖、消毒程序和静态代码分析的示例需要运行GCC或Clang，不能与MSVC一起工作。要在Windows上运行Clang，请参阅第8章，其中介绍了工具链文件。有些示例需要安装Catch2单元测试套件进行编译。有些例子从不同的在线位置提取依赖项，因此还需要网络连接。 
 
-In addition to a working compiler, the following software is used for the examples:
+除了可工作的编译器，示例需要以下软件:
 
 \begin{itemize}
 \item 
-Gcov and Gcovr for the examples on code coverage
+Gcov和Gcovr的代码覆盖率示例
 	
 \item 
-Cppcheck, Cpplint, and include-what-you-use for the examples on static code analyzers
+Cppcheck、Cpplint和include-what-you-use用于静态代码分析器的示例
 \end{itemize}
 
-All examples and source code are available on the GitHub repository of this book at \url{https://github.com/PacktPublishing/CMake-Best-Practices}. 
+所有的例子和源代码都可以在本书的GitHub库中找到，网址是\url{https://github.com/PacktPublishing/CMake-Best-Practices}。 
 
-If any of the software is missing, the corresponding examples will be excluded from the build.
+若缺少相应的软件，应将相应的示例将从构建中排除。
 
 
 
