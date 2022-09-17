@@ -1,24 +1,24 @@
 
 
-There are several ways to get dependencies as sources into your project. A relatively straightforward but dangerous way is to manually download or clone them into a subfolder inside your project and then add this folder with add\_subdirectory. While this works and is pretty fast, it quickly becomes tedious and hard to maintain. So, this should be automated as soon as possible.
+有几种方法可以将依赖项作为源获取到项目中。一种相对直接(但危险)的方法是，将代码手动下载或克隆到项目内的子文件夹，然后使用\texttt{add\_subdirectory}添加这个文件夹。虽然这样做很有效，而且速度很快，但很快就会变得乏味且难以维护。所以，这应该尽可能实现自动化。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-The practice of downloading and integrating a copy of a third-party software directly into a product is called vendoring. While it has the advantage that it often makes building software easy, it creates issues with packaging libraries. Vendoring is avoided by either using either a package manager or by installing the third-party software in a location on your system.
+下载并将第三方软件的副本集成到产品中的做法，称为供应商方式。优点是常常使构建软件变得容易，但在打包库方面产生了问题。通过使用包管理器或在系统上的某个位置安装第三方软件，可以避免使用供应商方式。
 \end{tcolorbox}
 
 \subsubsubsection{5.5.1\hspace{0.2cm}下载依赖项作为源代码}
 
-At the base of getting external content is the CMake ExternalProject module and the more sophisticated FetchContent module, which is built on ExternalProject. While ExternalProject offers more flexibility, FetchContent is often more convenient to use, especially if the downloaded project is also built using CMake. Both of them download projects as source files and can be used to build them.
+获取外部内容的基础模块是\texttt{ExternalProject}模块和更复杂的\texttt{FetchContent}模块，后者构建在\texttt{ExternalProject}上。虽然\texttt{ExternalProject}提供了更多的灵活性，但\texttt{FetchContent}使用起来更方便，特别是下载的项目也可以使用CMake构建。它们都将项目作为源文件下载，并可用于构建当前项目。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{使用FetchContent}
 
-For external projects that use CMake to build, using the FetchContent module is the way of choice to add source dependencies. For binary dependencies, using find\_package and find modules is still the preferred way. One of the main differences between ExternalProject and FetchContent is that FetchContent downloads and configures external projects during configuration time, while ExternalProject does everything during the build step. The drawback to this is that the source and its configuration are not available during configuration time.
+对于构建的外部项目，使用\texttt{FetchContent}模块是添加源依赖项的一种方法。对于二进制依赖，使用\texttt{find\_package}和Find<PackageName>.cmake式的方式仍然是首选。\texttt{ExternalProject}和\texttt{FetchContent}之间的主要区别是，\texttt{FetchContent}可以在配置时下载和配置外部项目，而\texttt{ExternalProject}需要在构建时中完成所有工作。这样做的缺点是，源及其配置在配置时不可用。
 
-Before FetchContent, you would have used Git submodules to manually download the dependencies and then add them using add\_subdirectory. This works in some cases, but it can be rather inconvenient and cumbersome to maintain.
+没使用\texttt{FetchContent}之前，需要使用Git子模块手动下载依赖项，然后使用\texttt{add\_subdirectory}添加源。在某些情况下这是可行的，但维护起来则会很麻烦。
 
-FetchContent provides a list of functions to pull in source dependencies, mainly FetchContent\_Declare, which defines the parameters for downloading and building FetchContent\_MakeAvailable, which populates the targets of the dependency and makes them available for the build. In the following example, the bertrand library for design by contract is pulled from Git using GitHub and made available for use:
+\texttt{FetchContent}提供了一系列函数来拉取源依赖项，主要是\texttt{FetchContent\_Declare}，它定义了下载和构建\texttt{FetchContent\_MakeAvailable}的参数，\texttt{FetchContent\_MakeAvailable}填充依赖项的目标，并使它们可用于构建。下面的例子中，契约式设计的bertrand库是通过Git将代码从GitHub上拉下来的:
 
 \begin{lstlisting}[style=styleCMake]
 include(FetchContent)
@@ -36,22 +36,23 @@ target_link_libraries(
 )
 \end{lstlisting}
 
-FetchContent\_MakeAvailable has been available since version 3.14, and it is recommended that you overpopulate the project manually by using FetchContent\_Populate. This should be used whenever possible because it makes code bases very maintainable due to its simplicity. As ExternalProject, FetchContent can download from HTTP(S), Git, SVN, Mercurial, and CVS, and the same good practices, such as specifying MD5 hashes for the downloaded content or using Git hashes, apply.
+3.14版本之后，可以使用\texttt{FetchContent\_MakeAvailable}，建议通过使用\texttt{FetchContent\_Populate}手动填充项目，因为它的简单性使代码库非常可维护。和\texttt{ExternalProject}一样，\texttt{FetchContent}也可以从HTTP(S)、Git、SVN、Mercurial和CVS下载，相应的实践(例如为下载的内容指定MD5哈希值或使用Git哈希值)也适用。
 
-FetchContent\_MakeAvailable is the recommended way to make external CMake-based projects available, but if you want to have more control over your external projects, it is also possible to populate the projects manually. The following example does the same as the previous example but in a more verbose way:
+\texttt{FetchContent\_MakeAvailable}是使基于CMake的外部项目可用的推荐方法，但若想对外部项目有更多的控制，也可以手动填充项目。下面的示例与前面的示例相同，但更详细:
 
 \begin{lstlisting}[style=styleCMake]
 FetchContent_Declare(
 	bertrand
 	GIT_REPOSITORY https://github.com/bernedom/bertrand.git
 	GIT_TAG 0.0.17)
+	
 if(NOT bertrand_POPULATED)
-FetchContent_Populate(bertrand)
-add_subdirectory(${bertrand_SOURCE_DIR} ${bertrand_BINARY_DIR})
+	FetchContent_Populate(bertrand)
+	add_subdirectory(${bertrand_SOURCE_DIR} ${bertrand_BINARY_DIR})
 endif()
 \end{lstlisting}
 
-FetchContent\_Populate has additional options to be specified to control the build more closely. The signature is as follows:
+\texttt{FetchContent\_Populate}需要指定的附加选项，可以更细粒度地控制构建。签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 FetchContent_Populate( <name>
@@ -63,90 +64,91 @@ FetchContent_Populate( <name>
 )
 \end{lstlisting}
 
-Let's look at the options of FetchContent\_Populate:
+来看看\texttt{FetchContent\_Populate}的选项:
 
 \begin{itemize}
 \item 
-QUIET: This can be specified to suppress the output of the population if it succeeds. If the command fails, the output will be shown even if the option is specified to allow for debugging.
+QUIET: 若成功，可以指定此值来抑制屏幕输出。若失败，即使指定了允许调试的选项，也会显示输出。
 
 \item
-SUBBUILD\_DIR: This specifies where the external project will be located. The default is \$\{CMAKE\_CURRENT\_BINARY\_DIR\}/<name>-subbuild. Generally, this option should be left as it is.
+SUBBUILD\_DIR: 这指定了外部项目的位置。默认值是\$\{CMAKE\_CURRENT\_BINARY\_DIR\}/ <name>-subbuild。通常，这个选项应该保持不变。
 
 \item
-SOURCE\_DIR and BINARY\_DIR: These change where the source and build directories of the external project are located. The default settings are \$\{CMAKE\_CURRENT\_BINARY\_DIR\}/<lcName>-src for SOURCE\_DIR and \$\{CMAKE\_CURRENT\_BINARY\_DIR\}/<lcName>-build for BINARY\_DIR.
+SOURCE\_DIR和BINARY\_DIR: 这更改了外部项目的源目录和构建目录的位置。对于SOURCE\_DIR，默认设置为\$\{CMAKE\_CURRENT\_BINARY\_DIR\}/<lcname>-src;对于BINARY\_DIR，默认设置为\$\{CMAKE\_CURRENT\_BINARY\_DIR\}/<lcname>-build。
 
 \item
-Any additional parameters added will be passed on to the underlying ExternalProject\_Add. However, FetchContent prohibits you from editing the commands for the different steps, so attempts to tamper with CONFIGURE\_COMMAND, BUILD\_COMMAND, INSTALL\_COMMAND, and TEST\_COMMAND will cause FetchContent\_Populate to fail with an error.
+添加的附加参数将传递到底层的\texttt{ExternalProject\_Add}。然而，\texttt{FetchContent}禁止编辑不同步骤的命令，因此试图修改\texttt{CONFIGURE\_COMMAND}、\texttt{BUILD\_COMMAND}、\texttt{INSTALL\_COMMAND}和\texttt{TEST\_COMMAND}的操作，将导致\texttt{FetchContent\_Populate}的失败，并显示相应的错误信息。
 \end{itemize}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-If you find yourself in a situation where you need to pass options to the underlying ExternalProject\_Add, consider using ExternalProject directly instead of first going through FetchContent.
+若发现自己处于需要将选项传递给底层\texttt{ExternalProject\_Add}的情况下，可以考虑直接使用\texttt{ExternalProject}。
 \end{tcolorbox}
 
-Information about the source and build directories, along with whether a project has been populated, can be retrieved either by reading the <name>\_SOURCE\_DIR, <name>\_BINARY\_DIR, and <name>\_POPULATED variables or by calling FetchContent\_GetProperties. Note that <name> will always be available in all caps and all lowercase. This is so that CMake can identify the packages despite different capitalizations.
+关于源和构建目录的信息，以及项目是否填充，可以通过读取<name>\_SOURCE\_DIR、<name>\_BINARY\_DIR和<name>\_POPULATED变量或使用\texttt{FetchContent\_GetProperties}来检索。注意<name>或是全大写，或是全小写。尽管大小写不同，这是为了让CMake识别不同的包。
  
-Another big advantage of FetchContent is that it can handle cases where the external projects share common dependencies and prevent them from being downloaded and built multiple times. The first time a dependency is defined over FetchContent the details are cached, and any further definitions will be silently ignored. The benefit of this is that a parent project can overrule the dependencies of the child projects.
+\texttt{FetchContent}的另一个优势是，可以处理外部项目的公共依赖，并避免被多次下载和构建。第一次在\texttt{FetchContent}上定义依赖时，信息会缓存，之后的定义都会忽略。这样做可让父项目可以改写子项目的依赖关系。
 
-Let's assume we have a top project called MyProject that fetches two external projects, Project\_A and Project\_B, with each depending on a third external project called AwesomeLib, but on a different minor version. In most cases, we do not want to download and use two versions of AwesomeLib but only one to avoid conflicts. The following diagram, shows what the dependency graph might look like:
+假设有一个名为MyProject的顶层项目，它获取两个外部项目，project\_A和project\_B，每个项目都依赖于名为AwesomeLib的外部项目，但依赖于不同的版本。大多数情况下，我们不想下载和使用两个版本的AwesomeLib，而只想使用一个版本以避免冲突。下图显示了目前依赖关系的样子:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/2/chapter5/images/1.jpg}\\
-Figure 5.1 – Both Project\_A and Project\_B depend on different versions of AwesomeLib
+图5.1  Project\_A和Project\_B依赖于不同版本的AwesomeLib
 \end{center}
 
-To resolve this, we can specify which version of AwesomeLib to pull by placing a FetchContent\_Declare call for AwesomeLib in the top-level CMakeLists.txt file. The order of the declaration inside the CMakeLists.txt file is not relevant here, only the level on which it is declared. Since both Project\_A and Project\_B contain the code to populate AwesomeLib, the top-level project does not need to use FetchContent\_MakeAvailable or FetchContent\_Populate. The resulting top-level CMakeLists.txt file might appear as follows:
+为了解决这个问题，可以通过在顶层的CMakeLists.txt文件中，使用\texttt{FetchContent\_Declare}对AwesomeLib进行调用，来指定要提取哪个版本的AwesomeLib。这里，CMakeLists.txt文件中声明的顺序并不重要，重要的是声明级别。因为Project\_A和Project\_B都使用了AwesomeLib的源码，所以顶层项目不需要使用\texttt{FetchContent\_MakeAvailable}或\texttt{FetchContent\_Populate}。生成的顶级CMakeLists.txt文件可能会这样写:
 
 \begin{lstlisting}[style=styleCMake]
 include(FetchContent)
 FetchContent_Declare(Project_A GIT_REPOSITORY ... GIT_TAG ...)
 FetchContent_Declare(Project_B GIT_REPOSITORY ... GIT_TAG ...)
+
 # Force AwesomeLib dependency to a certain version
 FetchContent_Declare(AwesomeLib
-GIT_REPOSITORY … GIT_TAG 1.2 )
+	GIT_REPOSITORY … GIT_TAG 1.2 )
 FetchContent_MakeAvailable(Project_A)
 FetchContent_MakeAvailable(Project_B)
 \end{lstlisting}
 
-This will force AwesomeLib to be pinned to version 1.2 for all projects. Of course, this only works if the interface between the versions required by Project\_A and Project\_B are compatible, resulting in a dependency graph, as illustrated in the following diagram:
+这将迫使所有项目都使用AwesomeLib的1.2版本。当然，只有当Project\_A和Project\_B需要的版本之间的接口是兼容的情况下，才有以下依赖:
 
 \begin{center}
-\includegraphics[width=0.5\textwidth]{content/2/chapter5/images/2.jpg}\\
-Figure 5.2 – The corrected dependency graph after MyProject declares the version of AwesomeLib
+\includegraphics[width=0.3\textwidth]{content/2/chapter5/images/2.jpg}\\
+图5.2  MyProject声明了AwesomeLib版本后的依赖关系图
 \end{center}
 
-Adding dependencies as sources has some advantages, but it comes with major drawbacks in that it increases configuration and build time considerably. In Chapter 9, Creating Reproducible Build Environments, we will tackle superbuilds with distributed repositories and provide more information about how to handle source dependencies.
+添加依赖项作为源有优点，也有缺点，这会增加了配置和构建时间。第9章中，我们将使用分布式存储库处理超级构建，并提供关于处理源依赖关系的更多信息。
 
-At the beginning of the chapter, we looked at find\_package, which can be used to include binary dependencies, but we did not talk about how to conveniently download local binary dependencies using CMake. While FetchContent and ExternalProject can be used for that, it is not their purpose. Instead, dedicated package managers such as Conan and vcpkg will be better suited. Let's learn more about them next.
+在本章的开头，我们讨论了\texttt{find\_package}，其可以用来包含二进制依赖项，但是没有讨论如何使用CMake方便地下载本地二进制依赖项。虽然\texttt{FetchContent}和\texttt{ExternalProject}可以用，但这不是它们的目的。相反，专门的包管理器，如Conan和vcpkg会更适合。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{使用ExternalProject}
 
-The ExternalProject module is used to download and build external projects that are not fully integrated into the main project. When building an external project, the build is fully isolated, meaning that it will not automatically take over any settings regarding architecture or platforms. This isolation can come in handy to avoid clashes in the naming of targets or components. The external project creates a primary target and several child targets that contain the following isolated build steps:
+\texttt{ExternalProject}模块用于下载和构建未完全集成到主项目中的外部项目。在构建外部项目时，构建完全隔离，不会自动接管与架构或平台相关的设置。这种隔离可以避免在命名目标或组件时发生冲突。外部项目创建主目标和几个包含以下独立构建步骤的子目标:
 
 \begin{enumerate}
 \item 
-Download: ExternalProject can download content in several ways, such as through pure HTTPS downloads or by accessing versioning systems such as Git, Subversion, Mercurial, and CVS. If the contents are archived, the download step will also unpack them.
+下载: \texttt{ExternalProject}可以通过几种方式下载内容，例如HTTPS下载，或者通过访问版本控制系统，如Git、Subversion、Mercurial和CVS。若内容打包，下载后将进行解包操作。
 
 \item 
-Updating and patching: The downloaded source code can either be patched or updated to the newest version if the content is pulled from a Server Configuration Monitor (SCM).
+更新和打补丁: 若从Server Configuration Monitor (SCM)提取内容，则可以对下载的源代码进行打补丁或更新到最新版本。
 
 \item 
-Configure: If the downloaded source uses CMake, the configure step is executed on it. For non-CMake projects, a custom command that does the configuration can be provided.
+配置: 若下载的源代码使用CMake，则在其上执行配置步骤。对于非CMake项目，可以提供执行配置的自定义命令。
 
 \item 
-Build: By default, the same build tool that is used in the main project is used to build the dependency, but a custom command can be provided if this is not desired. If a custom build command is supplied, it is up to the user to ensure that the necessary compiler flags are passed on so that the results are ABI-compatible.
+构建: 默认情况下，用于构建依赖项的构建工具与主项目中使用的构建工具相同，但若不需要这样做，可以提供自定义命令。若提供了自定义构建命令，则由用户来确保传递必要的编译器标志，以使结果与ABI兼容。
 
 \item 
-Install: The isolated build can be installed locally, usually somewhere in the build tree of the main project.
+安装: 隔离构建可以在本地安装，通常安装在主项目的构建树中的某个位置。
 
 \item 
-Test: If the external content comes with a set of tests, the main project might choose to run them. By default, the tests are not run.
+测试: 若外部内容附带测试，则主项目可以选择运行它们。默认情况下，不运行测试。
 \end{enumerate}
 
-All the steps, including downloading, run at build time. So, depending on the external project, this can increase the build time quite significantly. CMake caches the downloads and builds, so unless the external project has been changed, the overhead is primarily for the first run. The possibility of adding more steps to the external build does exist, but for most projects, the default steps are sufficient. The steps can be customized or omitted, as we will discover later.
+包括下载在内的所有步骤都在构建时运行。因此，根据外部项目的不同，这可以显著增加构建时间。CMake缓存下载和构建，开销主要是第一次运行时的耗时，除非外部项目进行了更改。可以向外部构建添加更多步骤，但对于大多数项目，默认的步骤已经足够了。这些步骤可以自定义，也可以省略。
 
-In the following example, the bertrand library for using the design by contract is downloaded over HTTPS and locally installed in the current build directory:
+以下示例中，使用契约设计的bertrand库通过HTTPS下载，并安装在当前构建目录中:
 
 \begin{lstlisting}[style=styleCMake]
 include(ExternalProject)
@@ -159,15 +161,15 @@ ExternalProject_Add(
 	CMAKE_CACHE_ARGS -DBERTRAND_BUILD_TESTING:BOOL=OFF
 	-DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
 )
-\end{lstlisting}
+\end{lstlisting} 
 
-Note that the ExternalProject module is not available by default and has to be included in the first line with include(ExternalProject). As the external library is installed in the local build directory, the INSTALL\_DIR option is specified. Since bertrand itself is a CMake project, the installation directory is passed as <INSTALL\_DIR> by using the CMAKE\_INSTALL\_PREFIX variable to build the project. <INSTALL\_DIR> is a placeholder that points back to the INSTALL\_DIR option. ExternalProject knows placeholders for the various directories, such as <SOURCE\_DIR>, <BINARY\_DIR>, and <DOWNLOAD\_DIR>. For a complete list, please consult the module documentation at \url{https://cmake.org/cmake/help/latest/module/ExternalProject.html}. 
+注意，\texttt{ExternalProject}模块在默认情况下不可用，必须通过\texttt{include(ExternalProject)}将其包含在第一行中。由于外部库安装在本地构建目录中，因此指定了INSTALL\_DIR选项。由于bertrand本身是一个CMake项目，可以通过CMAKE\_INSTALL\_PREFIX来构建项目，安装目录为<INSTALL\_DIR>(是一个占位符)，指向INSTALL\_DIR选项。\texttt{ExternalProject}了解各种目录的占位符，例如<SOURCE\_DIR>、<BINARY\_DIR>和<DOWNLOAD\_DIR>。完整的列表，请参考模块文档\url{https://cmake.org/cmake/help/latest/module/ExternalProject.html}。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Verify Your Downloads]
-It is highly recommended that you add the download hash to any URL, as this sends you a notification if the contents of an artifact change.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=验证下载]
+强烈建议将为下载URL添加哈希码，因为若工件的内容发生更改，这会将让您知晓。
 \end{tcolorbox}
 
-For this to work, any target that depends on bertrand has to be built after the external dependency. As bertrand is a header-only library, we want to add the include path to a target. Using the external project for another target in CMake could look similar to the following:
+为此，任何依赖bertrand的目标都必须在外部依赖之后构建。由于bertrand是一个只包含头文件的库，所以想要将include路径添加到目标。在CMake中目标使用外部项目:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Get_Property(bertrand INSTALL_DIR)
@@ -175,8 +177,8 @@ set(BERTRAND_DOWNLOADED_INSTALL_DIR "${INSTALL_DIR}")
 
 # Create a target to build an executable
 add_executable(external_project_example)
-# make the executable to be built depend on the external
-project
+
+# make the executable to be built depend on the external project
 # to force downloading first
 add_dependencies(external_project_example bertrand)
 
@@ -185,13 +187,13 @@ target_include_directories(external_project_example PRIVATE
 ${BERTRAND_DOWNLOADED_INSTALL_DIR}/include)
 \end{lstlisting}
 
-In the first line, the installation directory is retrieved with ExternalProject\_Get\_Property and stored in the INSTALL\_DIR variable. Unfortunately, the variable name is always the same as the property, so it is recommended that you store it immediately after retrieval in a variable with a unique name that expresses its use better.
+第一行中，使用\texttt{ExternalProject\_Get\_Property}检索安装目录，并将其存储在INSTALL\_DIR中。不幸的是，变量名总是与属性相同，因此建议在检索后立即将其存储在具有惟一名称的变量中。
 
-Next, the target we want to build is created and made dependent on the target created by ExternalProject\_Add. This is necessary to enforce the correct build order.
+接下来，创建目标并依赖于\texttt{ExternalProject\_Add}的目标。这对于执行构建的正确顺序很有必要。
 
-And, finally, the path to the local installation is added to the target with target\_include\_directories. Additionally, we could import the CMake targets provided by the external library, but the purpose of this is to illustrate how this could work if the external project is not built by CMake.
+最后，使用\texttt{target\_include\_directories}将安装路径添加到目标。此外，若外部项目不是由CMake构建的，可以导入由外部库提供的CMake目标。
 
-Downloading from source code management systems happens with the respective options. For Git, this usually looks like the following:
+通过相应的选项从源代码管理系统下载。对于Git，通常像这样:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add(MyProject GIT_REPOSITORY
@@ -199,13 +201,13 @@ ExternalProject_Add(MyProject GIT_REPOSITORY
 		GIT_TAG 56cc1aaf50918f208e2ff2ef5e8ec0111097fb8d )
 \end{lstlisting}
 
-Note that GIT\_TAG can be any valid revision number for Git, including tag names and long and short hashes. If GIT\_TAG is omitted, the latest version of the default branch—usually called main or master—is downloaded. We highly recommend that you always specify the version to download. The most robust way is to define a commit hash, as tags can be moved around, although they rarely are in practice. Downloading from SVN is similar to downloading from Git. For additional details, please consult the official documentation for ExternalProject.
+注意GIT\_TAG可以是GIT的任何有效提交版本号，包括标记名和长、短哈希码。若省略GIT\_TAG，则会下载默认分支(通常称为main或master)的最新版本，建议指定要下载的版本。因为标签可以移动(尽管在实践中很少这样做)，所以最健壮的方法是定义一个提交哈希码。SVN与从Git类似，更多细节请参考官方文档。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{处理非CMake项目和交叉编译}
 
-A common use case for ExternalProject is to build dependencies that are not handled by CMake but by autotools or automake instead. In that case, you would need to specify the configuration and build commands as follows:
+\texttt{ExternalProject}的一个常见用例是构建依赖关系，但有时需要使用CMake之外的工具进行处理，比如：autotools或automake。这时候，需要指定如下的配置和构建命令:
 
 \begin{lstlisting}[style=styleCMake]
 find_program(MAKE_EXECUTABLE NAMES nmake gmake make)
@@ -217,7 +219,7 @@ ExternalProject_Add(MyAutotoolsProject
 )
 \end{lstlisting}
 
-Note that the first find\_program command is used to find a version of make and store it in the MAKE\_EXECUTABLE variable. A common issue with external projects is that you have to closely control where the dependencies are installed. Most projects want to install to a default system location, which often requires root privileges and could accidentally pollute a system. So, passing the necessary options to the configuration or a build step is often necessary. Another way to handle this is to avoid the installation process entirely by replacing INSTALL\_COMMAND with an empty string as follows:
+第一个\texttt{find\_program}用于查找make的版本，并将其存储在MAKE\_EXECUTABLE变量中。外部项目的一个常见问题是，必须控制依赖项的安装位置。大多数项目都希望安装到默认的系统位置，这通常需要Root特权，可能会污染系统。因此，将必要的选项传递给配置或构建步骤是必要的。另一种处理方法是将INSTALL\_COMMAND替换为一个空字符串来完全避免安装过程:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add(MyAutotoolsProject
@@ -228,9 +230,9 @@ ExternalProject_Add(MyAutotoolsProject
 )
 \end{lstlisting}
 
-One problem with using non-CMake projects such as this is that they do not define the necessary targets for using the dependency directly. So, in order to use an externally built library in another target, you often have to add the full library name to the target\_link\_libraries calls. The major drawback of this is that you have to manually maintain the different names and locations of the files for the various platforms. The find\_library or find\_file calls are of little use because they happen at configuration time, while ExternalProject only creates the necessary files at build time.
+使用此类的非CMake项目的问题是，它们没有为直接使用依赖定义必要的目标。因此，为了在另一个目标中使用外部构建的库，通常必须将完整的库名称添加到\texttt{target\_link\_libraries}中，这样做的缺点是必须手动维护不同平台的文件的不同名称和位置。\texttt{find\_library}或\texttt{find\_file}发生在配置时，所以对于\texttt{ExternalProject}没有用，\texttt{ExternalProject}只在构建时才创建必要的文件。
 
-Another common use case is to use ExternalProject to build the contents of an existing source directory for a different target platform. In this case, the parameter that handles the downloading is simply omitted. If the external project is using CMake to build, the toolchain file can be passed as a CMake option to the external project. More information about toolchain files is available in Chapter 11, Automated Fuzzing with CMake. A very common pitfall here is that ExternalProject will not recognize any changes to the sources of the external projects, so CMake might not rebuild them. For this reason, the BUILD\_ALWAYS option should be passed, which has the downside of often making the build time considerably longer:
+另一个常见的用例是\texttt{ExternalProject}为不同的目标平台构建现有源目录的内容。本例中，直接省略了处理下载的参数。若外部项目使用CMake进行构建，则可以将工具链文件作为CMake选项传递给外部项目。关于工具链文件的更多信息请参见第11章。这里有常见问题是，\texttt{ExternalProject}不会识别外部项目源的更改，因此CMake可能不会重新构建它们。因此，应该传递BUILD\_ALWAYS选项，其缺点是使构建时间拉长:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add(ProjectForADifferentPlatform
@@ -250,7 +252,7 @@ BUILD_ALWAYS YES
 \noindent
 \textbf{管理ExternalProject中的步骤}
 
-As mentioned in the preceding section, the steps of ExternalProject can be configured further and used in a more granular way. ExternalProject can be told to create regular targets for each step either by passing the STEP\_TARGETS option or by calling ExternalProject\_Add\_StepsTargets. The following calls expose both the configure step and the build step of an external project as targets:
+如上一节所述，可以进一步配置\texttt{ExternalProject}的步骤，并以更细粒度的方式使用。通过传递STEP\_TARGETS选项或使用\texttt{ExternalProject\_Add\_StepsTargets}，告诉\texttt{ExternalProject}为每个步骤创建常规目标。以下调用将外部项目的配置步骤和构建步骤形成目标:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add(MyProject
@@ -260,7 +262,7 @@ ExternalProject_Add(MyProject
 ExternalProject_Add_StepTargets(MyProject configure build)
 \end{lstlisting}
 
-The targets are named after <mainName>-step. In the preceding example, two additional targets, MyProject-configure and MyProject-build, will be created. Creating step targets has two main uses: you are able to create custom steps that are sorted in the order of the download, configure, build, install, or test sequence, or you can make the steps dependent on other targets. These can either be regular targets, created by add\_executable, add\_library, or add\_custom\_target, or targets from other add executables. A common case is when external projects depend on each other, so the configuration step of one has to depend on another. In the next example, the configure step of project B will depend on the completion of project A:
+目标以<mainName>-step命名。前面的示例中，将创建另外两个目标，MyProject-configure和MyProject-build。创建步骤目标有两个主要用途:可以创建按照下载、配置、构建、安装或测试顺序排序的自定义步骤，或者可以使步骤依赖于其他目标。这些目标可以是普通的目标，通过\texttt{add\_executable}、\texttt{add\_library}或\texttt{add\_custom\_target}创建，也可以添加入其他可执行文件的目标中。常见的情况是外部项目相互依赖，因此一个项目的配置步骤必须依赖另一个项目。下一个例子中，项目B的配置步骤将取决于项目A的完成情况:
  
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add(ProjectA
@@ -274,7 +276,7 @@ ExternalProject_Add_StepDependencies(ProjectB configure
 	ProjectA)
 \end{lstlisting}
 
-Finally, we can also create custom steps to be interjected into an external project. The process of adding steps is done with the ExternalProject\_Add\_Step command. Custom steps cannot be named the same as any of the predefined steps (such as mkdir, download, update, patch, configure, build, install, or test). The following example will create a step that adds the license information of an external project to a specific tar file after building:
+最后，还可以创建插入到外部项目中的自定义步骤。添加步骤可以通过\texttt{ExternalProject\_Add\_Step}指令完成。自定义步骤的名称不能与任何预定义步骤相同(例如创建文件夹、下载、更新、补丁、配置、构建、安装或测试)。下面的示例将创建一个步骤，构建后将外部项目的许可信息添加到特定的tar文件中:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add_Step(bertrand_downloaded copy_license
@@ -284,7 +286,7 @@ ExternalProject_Add_Step(bertrand_downloaded copy_license
 )
 \end{lstlisting}
 
-All in all, ExternalProject is a very powerful tool; however, it can become very complex to manage. Often, it is that flexibility that also makes ExternalProject hard to use. While it can help isolate builds, it often forces the project maintainer to manually expose any information from the inner workings of the external project to CMake, which, ironically, is what CMake is supposed to help with in the first place.
+总之，\texttt{ExternalProject}是一个非常强大的工具，但管理起来可能会很复杂，正是这种灵活性也使得\texttt{ExternalProject}难以使用。虽然它可以帮助隔离构建，但它迫使项目维护者手动将来自外部项目内部工作的信息公开给CMake，具有讽刺意味的是，这正是CMake最初所不愿看到的情况。
 
 
 

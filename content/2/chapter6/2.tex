@@ -1,15 +1,15 @@
 
-Most people, either knowingly or not, structure their software projects in an organized way. The organization is a positive side effect of methodologies and procedures such as object-oriented (OO) design, programming language rules, personal preference, habits, or dictated by project rules. While rules and conventions tend to be boring, adhering to them results in a more understandable project structure. As we can all agree, organized material is better for both human perception and computers. When procedure, rules, order, and organization exist, the computer can make sense of it. Documentation generation software leverages that fact to our benefit.
+大多数人，都会以有组织的方式组织他们的软件项目。组织是方法和过程(如面向对象(OO)设计、编程语言规则、个人偏好、习惯或由项目规则规定的)的积极副作用。虽然规则和约定往往很无聊，但遵守它们会使项目结构更容易理解，有条理的材料对人类和计算机的感知都更好。当程序、规则、秩序和组织存在时，计算机可以对其进行理解。文档生成软件正是利用了这一点。
 
-We will now introduce you to one of the most prominent documentation generation software for C and C++ programming languages: Doxygen. We will learn how we can integrate Doxygen with CMake to automatically generate documentation for CMake projects. 
+现在将介绍C和C++编程语言中最著名的文档生成软件之一:Doxygen。我们将学习如何将Doxygen与CMake集成，以自动生成CMake项目的文档。
 
-Up next, the basics of Doxygen await.
+接下来，先来了解一下Doxygen。
 
-\subsubsubsection{6.2.1\hspace{0.2cm}Understanding what Doxygen is}
+\subsubsubsection{6.2.1\hspace{0.2cm}了解Doxygen}
 
-Doxygen is a very popular documentation software for C++ projects that allows the generation of documentation from code. Doxygen understands C and C++ grammar and can see the code structure in a way that a compiler would see it. This allows Doxygen to dive into the structure of a software project and look into all class definitions, namespaces, anonymous functions, encapsulation, variables, inheritance relations, and so on. Doxygen combines this information with inline code documentation written by the programmer. The final result is human-readable documentation in various format that is compatible for both online and offline reading. 
+Doxygen是一个非常流行的C++项目文档软件，允许从代码生成文档。Doxygen理解C和C++语法，能够以编译器能够看到的方式看到代码结构。这允许Doxygen深入到软件项目的结构中，查看所有的类定义、命名空间、匿名函数、封装、变量、继承关系等。Doxygen将这些信息与开发者编写的内联代码文档结合起来。最终的结果是生成可读的各种文档，其兼容在线和离线阅读。
 
-But there is no such thing as a free lunch, as is the saying. In order to be able to make sense of code comments, Doxygen requires comments to be in a predefined set of formats. For the sake of not distracting from the focus of this chapter, please take a look at \url{https://www.doxygen.nl/manual/docblocks.html} to find out the comment formats compatible with Doxygen. We will be using Javadoc-style comments in our examples. An example Javadoc comment for a C++ function is provided here:
+但\textit{天下没有免费的午餐}。为了能够理解代码注释，Doxygen要求注释采用预定义的一组格式。为了不分散本章的重点，请查看\url{https://www.doxygen.nl/manual/docblocks.html}，找出与Doxygen兼容的注释格式。我们将在示例中使用Javadoc风格的注释。这里提供了一个C++函数的Javadoc注释示例:
 
 \begin{lstlisting}[style=styleCXX]
 /**
@@ -21,17 +21,17 @@ But there is no such thing as a free lunch, as is the saying. In order to be abl
 void foo(int bar, const char* baz){}
 \end{lstlisting}
 
-Doxygen also requires a Doxyfile, which essentially contains all the parameters of documentation generation, such as output format, excluded file patterns, project name, and so on. Because of the sheer number of configuration parameters, configuring Doxygen may be intimidating at the start, but fear not—CMake will generate a Doxyfile for you too.
+Doxygen还需要一个Doxyfile，其包含文档生成的所有参数，比如输出格式、排除的文件模式、项目名称等。因为配置参数太多，开始配置Doxygen可能会让人望而生畏，但CMake也自动生成一个Doxyfile。
 
-As we dive further into this chapter, you will start to see the benefits of using documentation generation software for your project. Through this, it is way easier to keep the documentation consistent with code, and the ability to read the code structure also makes graphing easier.
+随着我们深入了解，将了解为项目使用文档生成软件的好处。通过这种方式，使文档与代码保持一致变得更加容易，而且读取代码结构的能力也使绘图更加容易。
 
-Enough theory for now. Let's begin using Doxygen together with CMake.
+理论到此为止。让我们开始使用Doxygen和CMake。
 
-\subsubsubsection{6.2.2\hspace{0.2cm}Using Doxygen with CMake}
+\subsubsubsection{6.2.2\hspace{0.2cm}使用Doxygen和CMake}
 
-Make, being a C++-oriented build system generator, has good support for integrating external tools that are commonly used in C++ projects. As you would expect, integrating Doxygen with CMake is pretty straightforward. We'll utilize the FindDoxygen.cmake module of CMake to integrate Doxygen into our projects. This module is, by default, provided by the CMake installation and requires no extra setup.
+CMake是一个面向C++的构建系统生成器，对集成C++项目中常用的外部工具有很好的支持。将Doxygen与CMake整合起来非常简单。我们将使用FindDoxygen.cmake将Doxygen集成到我们的项目中。默认情况下，该模块由CMake安装提供，不需要额外设置。
 
-FindDoxygen.cmake is, as the name suggests, a module package file designated to be consumed by the find\_package() CMake function. Its primary use is locating Doxygen in the environment, and also providing some extra utility functions to enable documentation generation in a CMake project. To illustrate Doxygen's abilities, we will be following the Chapter 6 - Example 01 example for this section. Our goal is to generate documentation for a simple calculator library along with its README file. The interface definition of this library looks like this:
+FindDoxygen.cmake是一个指定由\texttt{find\_package()}使用的模块包文件。主要用途是在环境中定位Doxygen，并提供一些额外的实用功能，以支持在CMake项目中生成文档。为了说明Doxygen的能力，本节将遵循第6章-示例01的示例。目标是为一个简单的计算器库，及其README文件生成文档。库的接口定义:
 
 \begin{lstlisting}[style=styleCXX]
 class calculator : private calculator_interface {
@@ -66,12 +66,11 @@ public:
 }; // class calculator
 \end{lstlisting}
 
-The calculator class implements the class interface defined in the calculator\_interface class. It is properly documented in Javadoc format. We will expect Doxygen to generate application programming interface (API) documentation for the calculator and calculator\_interface classes, together with an inheritance diagram. The class definition is in the calculator.hpp file and can be found under the include/chapter6/ex01 subdirectory of the chapter6/ex01\_doxdocgen directory. Additionally, we have a Markdown file named README.md in the chapter6/ex01\_doxdocgen directory—this contains essential information about the example project's layout. We expect this file to be the main page of the documentation. As our input material is ready, let's start diving into the example further by inspecting the example's CMakeLists.txt file, chapter6/ex01\_doxdocgen/CMakeLists.txt, as usual. The CMakeLists.txt file begins with finding the Doxygen package, as can be seen here:
+calculator类实现了在calculator\_interface类中定义的类接口，以Javadoc格式进行了正确的文档记录。我们期望Doxygen为calculator和calculator\_interface类生成应用程序编程接口(API)文档，以及继承图。类定义在calculator.hpp文件中，可以在chapter6/ex01\_doxdocgen目录的include/chapter6/ex01子目录下找到。另外，这里有一个名为README.md的Markdown文件。在chapter6/ex01\_doxdocgen目录中这包含了关于示例项目布局的基本信息，我们希望这个文件成为文档的主页。输入材料准备好后，通过检查示例的CMakeLists.txt文件也就是chapter6/ex01\_doxdocgen/CMakeLists.txt来进一步深入这个示例。CMakeLists.txt文件从寻找Doxygen包开始，如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Doxygen)
-set(DOXYGEN_OUTPUT_DIRECTORY"${CMAKE_CURRENT_BINARY_DIR}
-	/docs")
+set(DOXYGEN_OUTPUT_DIRECTORY"${CMAKE_CURRENT_BINARY_DIR}/docs")
 set(DOXYGEN_GENERATE_HTML YES)
 set(DOXYGEN_GENERATE_MAN YES)
 set(DOXYGEN_MARKDOWN_SUPPORT YES)
@@ -86,69 +85,64 @@ set(DOXYGEN_CALL_GRAPH YES)
 set(DOXYGEN_QUIET YES)
 \end{lstlisting}
 
-The find\_package(...) call will utilize the FindDoxygen.cmake module provided by the CMake installation to find Doxygen in the environment if present. The REQUIRED parameter is omitted in order to allow package maintainers to pack the project without having to install. This ensures that Doxygen in their environment is found before proceeding any further. The subsequent lines are setting several Doxygen configurations. These configurations will be placed into the Doxyfile that will be generated by CMake. Detailed descriptions for each option are listed here:
+\texttt{find\_package(…)}将使用FindDoxygen.cmake安装提供的cmake模块，以便在环境中查找Doxygen(如果存在的话)。省略REQUIRED参数是为了允许包维护人员打包项目而不需要安装，这可以确保在他们的环境中找到Doxygen，然后再进行下一步。接下来的几行设置了几个Doxygen配置。这些配置将存在由CMake生成的Doxyfile中。下面列出了每个选项的说明:
 
 \begin{itemize}
 \item 
-DOXYGEN\_OUTPUT\_DIRECTORY: Sets the output directory for Doxygen.
+DOXYGEN\_OUTPUT\_DIRECTORY: 设置Doxygen的输出目录。
 
 \item 
-DOXYGEN\_GENERATE\_HTML: Instructs Doxygen to emit HyperText Markup Language (HTML) output.
+DOXYGEN\_GENERATE\_HTML: 生成超文本标记语言(HTML)。
 
 \item 
-DOXYGEN\_GENERATE\_MAN: Instructs Doxygen to emit MAN page output.
+DOXYGEN\_GENERATE\_MAN: 生成MAN页面。
 
 \item 
-DOXYGEN\_AUTOLINK\_SUPPORT: Allows Doxygen to automatically link language symbols and filenames to relevant documentation pages if available.
+DOXYGEN\_AUTOLINK\_SUPPORT: 允许Doxygen自动链接语言符号和文件名到相关文档页面(若可用)。
 
 \item 
-DOXYGEN\_HAVE\_DOT: Tells Doxygen the environment has the dot command available, which can be utilized for generating graphs. This will enable Doxygen to  enrich generated documentation with diagrams such as dependency, inheritance, and collaboration diagrams.
+DOXYGEN\_HAVE\_DOT: Doxygen环境有可用的dot，该命令可用于生成图像。这将使Doxygen能够使用依赖关系图、继承图和协作图来丰富生成的文档。
 
 \item 
-DOXYGEN\_COLLABORATION\_GRAPH: Tells Doxygen to generate collaboration diagrams for classes.
+DOXYGEN\_COLLABORATION\_GRAPH: 为类生成协作图。
 
 \item 
-DOXYGEN\_CLASS\_GRAPH: Tells Doxygen to generate class diagrams for classes.
+DOXYGEN\_CLASS\_GRAPH: 生成类图。
 
 \item 
-DOXYGEN\_UML\_LOOK: Instructs Doxygen to generate Unified Modeling Language (UML)-like diagrams.
+DOXYGEN\_UML\_LOOK: Instructs 生成类似统一建模语言(UML)的图。
 
 \item 
-DOXYGEN\_DOT\_UML\_DETAILS: Adds type and parameter information to UML diagrams
+DOXYGEN\_DOT\_UML\_DETAILS: 将类型和参数信息添加到UML图中。
 
 \item 
-DOXYGEN\_DOT\_WRAP\_THRESHOLD: Sets the line wrapping threshold for UML diagrams.
+DOXYGEN\_DOT\_WRAP\_THRESHOLD: 为UML图设置行换行阈值。
 
 \item 
-DOXYGEN\_CALL\_GRAPH: Instructs Doxygen to generate call graphs for functions in function documentation.
+DOXYGEN\_CALL\_GRAPH: 为函数文档中的函数生成调用图。
 
 \item 
-DOXYGEN\_QUIET: Suppresses Doxygen output generated to standard output (stdout).
+DOXYGEN\_QUIET: 静默生成到标准输出(stdout)的Doxygen输出。
 \end{itemize}
 
-Doxygen's set of options is pretty extensive and offers a lot more than just the options we've covered. If you want to customize documentation generation further, take a look at the full list of parameters that can be used in Doxyfiles at \url{https://www.doxygen.nl/manual/config.html}. To set any Doxygen option in CMake, prefix the variable name with DOXYGEN\_ and set the desired value using set(). With that side note written down, let's go back to the example code. The CMake code shown before is followed by the target declarations. The following lines of code define a regular static library that contains our example code for the documentation:
+Doxygen的选项相当广泛，提供了更多的选项。若想进一步定制文档生成，请查看可以在Doxyfiles中使用的完整参数列表，网址是\url{https://www.doxygen.nl/manual/config.html}。要在CMake中设置Doxygen选项，在变量名前加上Doxygen\_并使用\texttt{set()}设置所需的值就好。写好旁注后，回到示例代码。前面显示的CMake代码后面跟着目标声明。以下代码行定义了一个静态库，其中包含了文档的示例代码:
 
 \begin{lstlisting}[style=styleCMake]
 add_library(ch6_ex01_doxdocgen_lib STATIC)
-target_sources(ch6_ex01_doxdocgen_lib PRIVATE
-	src/calculator.cpp)
-target_include_directories(ch6_ex01_doxdocgen_lib PUBLIC
-	include)
-target_compile_features(ch6_ex01_doxdocgen_lib PRIVATE
-	cxx_std_11)
+target_sources(ch6_ex01_doxdocgen_lib PRIVATE src/calculator.cpp)
+target_include_directories(ch6_ex01_doxdocgen_lib PUBLIC include)
+target_compile_features(ch6_ex01_doxdocgen_lib PRIVATE cxx_std_11)
 \end{lstlisting}
 
-Subsequently, the following lines of code define an executable that consumes the static library target defined before:
+随后，以下代码行定义了一个使用前面定义的静态库目标的可执行文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch6_ex01_doxdocgen_exe src/main.cpp)
-target_compile_features(ch6_ex01_doxdocgen_exe PRIVATE
-	cxx_std_11)
-target_link_libraries(ch6_ex01_doxdocgen_exe PRIVATE
-	ch6_ex01_doxdocgen_lib)
+target_compile_features(ch6_ex01_doxdocgen_exe PRIVATE cxx_std_11)
+target_link_libraries(ch6_ex01_doxdocgen_exe PRIVATE ch6_ex01_doxdocgen_lib)
 \end{lstlisting}
 
-Lastly, the doxygen\_add\_docs(...) function is called to specify code that we wish to generate documentation from, as can be seen next:
+最后，使用\texttt{doxygen\_add\_docs(…)}来指定希望生成文档的代码:
 
 \begin{lstlisting}[style=styleCMake]
 doxygen_add_docs(
@@ -160,7 +154,7 @@ doxygen_add_docs(
 )
 \end{lstlisting}
  
-The doxygen\_add\_docs(...) function is a function provided by the FindDoxygen.cmake module. Its sole purpose is to provide a convenient way to create a CMake target for documentation generation without explicitly dealing with Doxygen. The signature for the doxygen\_add\_docs(...) function is shown here (non-relevant parameters are omitted):
+\texttt{doxygen\_add\_docs(…)}由FindDoxygen.cmake模块提供。其唯一目的是提供一种方便的方法来为文档生成创建CMake目标，\texttt{doxygen\_add\_docs(…)}函数的签名显示在这里(省略不相关的参数):
 
 \begin{lstlisting}[style=styleCMake]
 doxygen_add_docs(targetName
@@ -169,31 +163,31 @@ doxygen_add_docs(targetName
 	[COMMENT comment])
 \end{lstlisting}
 
-The first parameter of the targetName function is the name for the documentation target. The function will generate a custom target named targetName. This target will trigger Doxygen and create documentation from the code when built. The next list of parameters, filesOrDirs, is a list of files or directories that contain the code we want to generate from the documentation. The ALL parameter is used to make CMake's ALL meta-target depend on the documentation target created by the doxygen\_add\_docs(...) function, so documentation generation is automatically triggered when the ALL meta-target is built. Lastly, the COMMENT parameter is for making CMake print a message to the output when the target is being built. COMMENT is primarily useful for diagnostic purposes so that we can quickly know whether documentation is being generated or not. 
+第一个参数targetName是文档目标的名称，该函数将生成一个名为targetName的自定义目标。这个目标将触发Doxygen，并在构建时从代码创建文档。下一个参数列表filesOrDirs，是包含想要从文档生成的代码的文件或目录的列表。ALL参数用于使CMake的ALL元目标依赖于\texttt{doxygen\_add\_docs(…)}创建的文档目标，因此在构建ALL元目标时自动触发文档生成。最后，COMMENT参数用于让CMake在构建目标时输出一条消息。COMMENT主要用于诊断目的，以便快速知道是否生成了文档。
 
-After this brief introduction to doxygen\_add\_docs(...), let's go back to the example code and explain what the doxygen\_add\_docs(...) function call does in our scenario. It creates a target named ch6\_ex01\_doxdocgen\_generate\_docs, adds \$\{CMAKE\_CURRENT\_LIST\_DIR\} to the documentation generation directory, requests the ALL meta-target to depend on it, and specifies a COMMENT parameter that will be printed when the target is built.
+对\texttt{doxygen\_add\_docs(…)}进行了简短的介绍之后，回到示例代码，并解释\texttt{doxygen\_add\_docs(…)}在场景中做了什么。其创建了一个名为ch6\_ex01\_doxdocgen\_generate\_docs的目标，将\$\{CMAKE\_CURRENT\_LIST\_DIR\}添加到文档生成目录，请求ALL元目标依赖于它，并指定在构建目标时打印COMMENT参数。
 
-All right—it's time to test whether this works or not. Go into the chapter\_6/ directory and configure the project in the build/ directory with the following command:
+好了，是时候测试一下这个是否有效了。进入chapter\_6/目录，在build/目录中使用以下命令配置项目:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_6/
 cmake –S . -B build/
 \end{tcblisting}
 
-Check the CMake output to see whether the configuration succeeded or not. If the configuration was successful, that means CMake succeeded to find Doxygen in the environment. You should be able to see that in the CMake output, as can be seen next:
+检查CMake输出，查看配置是否成功。若配置成功，CMake成功地在环境中找到了Doxygen。应该可以在CMake的输出中看到:
 
 \begin{tcblisting}{commandshell={}}
 Found Doxygen: /usr/bin/doxygen (found version "1.9.1")
-	found components: doxygen dot
+    found components: doxygen dot
 \end{tcblisting}
 
-After a successful configuration, let's try to build it with the following command:
+成功配置之后，尝试使用以下命令构建:
 
 \begin{tcblisting}{commandshell={}}
 cmake --build build/
 \end{tcblisting}
 
-In the build output, you should be able to see that the text we've given into the COMMENT parameter is being printed to the CMake output. This means the documentation target is being built and Doxygen is running. Notice that we did not specify a -{}-target argument to the CMake build command, which effectively causes CMake to build the ALL meta-target. Since we have given the ALL argument to the doxygen\_add\_docs(...) function, a ch6\_ex01\_doxdocgen\_generate\_docs target is being built too. The output of the build command should look similar to the output given here:
+构建输出中，应该能够看到提供给COMMENT参数的文在CMake输出中，所以文档目标正在构建，Doxygen正在运行。注意，这里没有为CMake构建命令指定-{}-target参数，这将直接构建ALL元目标。由于我们已经将ALL参数赋给了\texttt{doxygen\_add\_docs(…)}，因此也构建了一个ch6\_ex01\_doxdocgen\_generate\_docs目标。build命令的输出应该类似于这样:
 
 \begin{tcblisting}{commandshell={}}
 [ 20%] Generating documentation for Chapter 6 - Example 01
@@ -218,14 +212,14 @@ libch6_ex01_doxdocgen_lib.a
 [100%] Built target ch6_ex01_doxdocgen_exe
 \end{tcblisting}
 
-It seems we have succeeded in building the project and the documentation. Let's inspect the generated documentation in the \$\{CMAKE\_CURRENT\_BINARY\_DIR\}/docs output folder, as follows:
+我们已经成功地构建了项目和文档，检查一下在\$\{CMAKE\_CURRENT\_BINARY\_DIR\}/docs输出文件夹中生成的文档:
 
 \begin{tcblisting}{commandshell={}}
 14:27 $ ls build/ex01_doxdocgen/docs/
 html man
 \end{tcblisting}
 
-Here, we can see Doxygen has emitted the HTML and MAN page output into the html/ and man/ directories. Let's inspect the final result for each type. To inspect the generated MAN page, simply type the following:
+这里，可以看到Doxygen将HTML和MAN页面输出发送到html/和man/目录中，检查每种类型的最终结果。要检查生成的MAN页面，只需输入以下命令:
 
 \begin{lstlisting}[style=styleCMake]
 man build/ex01_doxdocgen/docs/man/man3
@@ -259,60 +253,60 @@ Manual page chapter6_ex01_calculator.3 line 1 (press h for
 	help or q to quit)
 \end{lstlisting}
 
-Great! Our code comments turned into a MAN page. Similarly, let's inspect the HTML output as well. Use a browser of your choice to open the build/ex01\_doxdocgen/docs/html/index.html file, as shown next:
+太棒了!代码注释变成了MAN页面。同样，查一下HTML输出。使用您选择的浏览器打开build/ex01\_doxdocgen/docs/html/index.html文件:
 
 \begin{tcblisting}{commandshell={}}
 google-chrome build/ex01_doxdocgen/docs/html/index.html
 \end{tcblisting}
 
-This will display the main page of your documentation, as shown in the following screenshot:
+这将显示文档的主页面，如下图所示:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/2/chapter6/images/1.jpg}\\
-Figure 6.1 – The main page of the documentation
+\includegraphics[width=0.6\textwidth]{content/2/chapter6/images/1.jpg}\\
+图6.1 文档的主页
 \end{center}
 
-In the preceding screenshot, we can see that Doxygen has rendered the README.md Markdown file content into the main page. Note that the main page is just provided as an example. Doxygen can embed an arbitrary number of Markdown files into generated documentation. It even replaced filenames, class names, and function names with links to the relevant documentation. This is achieved by Doxygen's AUTOLINK feature and the @ref Doxygen command. Click on the calculator link under the Static library section of the main page to access API documentation for the calculator class. The calculator class documentation page should look similar to this:
+可以看到Doxygen渲染了README.md Markdown文件内容到主页。注意，主页只是作为示例提供的。Doxygen可以在生成的文档中嵌入任意数量的Markdown文件，甚至可以用到相关文档的链接替换了文件名、类名和函数名。这是通过Doxygen的AUTOLINK特性和@ref指令实现的。单击主页面的静态库部分下面的calculator链接，以访问calculator 类的API文档。calculator类文档页面应该如下所示:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/2/chapter6/images/2.jpg}\\
-Figure 6.2 – Generated HTML documentation for the calculator class (basic layout)
+\includegraphics[width=0.7\textwidth]{content/2/chapter6/images/2.jpg}\\
+图6.2 为计算器类生成的HTML文档(基本布局)
 \end{center}
 
-In the preceding screenshot, we can see that Doxygen is aware that the calculator class inherits from calculator\_interface and draws an inheritance diagram for the calculator class.
+可以看到Doxygen知道计算器类继承自calculator\_interface，并为calculator类绘制了继承图。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Doxygen requires the dot tool to render diagrams. dot is available in the Graphviz software package.
+Doxygen需要dot工具来渲染图表，dot在Graphviz软件包中。
 \end{tcolorbox}
 
-Also, the generated diagrams contain function names and encapsulation symbols in UML style. Let's take a look at the detailed member function documentation shown in the following screenshot:
+此外，生成的图包含UML样式的函数名和封装符号。下图显示了详细的成员函数文档:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/2/chapter6/images/3.jpg}\\
-Figure 6.3 – Generated documentation for the div() function of the calculator class
+\includegraphics[width=0.6\textwidth]{content/2/chapter6/images/3.jpg}\\
+图6.3 为calculator类的div()函数生成的文档
 \end{center}
 
-As we can see in Figure 6.3, Doxygen did a pretty good job of putting the contents into a clear, readable layout. If you were reading this API documentation, you would be happy. Lastly, let's navigate to Files | File List | main.cpp to look into the documentation of main.cpp to illustrate what a dependency graph looks like. You can see a representation of the documentation page in the following screenshot:
+如图6.3所示，Doxygen在将内容放入清晰易读的布局方面做得很好。最后，导航到Files | File List | main.cpp，查看main.cpp的文档，以说明依赖关系图是什么样子的。可以在下面的截图中看到文档页面的表示形式:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/2/chapter6/images/4.jpg}\\
-Figure 6.4 – main.cpp documentation page
+\includegraphics[width=0.6\textwidth]{content/2/chapter6/images/4.jpg}\\
+图6.4  main.cpp文档页面
 \end{center}
 
-The dependency graph in the preceding screenshot shows that the main.cpp file directly depends on iostream and chapter6/ex06/calculator.hpp and indirectly depends on chapter6/ex06/calculator\_interface.hpp files. It is pretty useful to have dependency information available in the documentation. The consumers will know exactly what the file dependencies are without having to dive into the code. If you scroll down a bit more, you will see a call graph for the main() function as well, as can be seen in the following screenshot:
+从上图的依赖关系图可以看出，main.cpp文件直接依赖于iostream和chapter6/ex06/calculator.hpp文件，间接依赖于chapter6/ex06/calculator\_interface.hpp文件。文档中提供依赖性信息非常有用，使用者将确切地知道文件依赖关系是什么，而不必深入到代码中。若再向下滚动一点，也会看到main()函数的调用图，如下图所示:
 
 \begin{center}
-\includegraphics[width=0.8\textwidth]{content/2/chapter6/images/5.jpg}\\
-Figure 6.5 – main() function call graph
+\includegraphics[width=0.6\textwidth]{content/2/chapter6/images/5.jpg}\\
+图6.5  main()函数的调用图
 \end{center}
 
-Splendid! We have generated documentation with graphs for our code in two different formats with fewer than 20 lines of extra CMake code. How cool is that? Now, with that power in your hands, it is hard to find an excuse to avoid documentation. But our journey in this chapter is not over yet. The upcoming section will enrich our knowledge by teaching us how to embed custom UML diagrams into documentation. Let's go!
+我们用不到20行额外的CMake代码，为我们的代码生成了两种不同格式的图表文档。多酷啊！现在，有了这种能力，就很难找到借口来避免文档化，但这一章的旅程还没有结束。接下来的部分会将定制的UML图嵌入到文档中来丰富我们的知识。来一起看看吧!
  
-\subsubsubsection{6.2.3\hspace{0.2cm}Embedding custom UML diagrams into documentation}
+\subsubsubsection{6.2.3\hspace{0.2cm}将UML图嵌入到文档中}
 
-In the previous section, we learned how to utilize Doxygen to generate diagrams and documentation for our CMake project, but not every diagram is inferable from the code. We might want to draw custom diagrams to illustrate the elaborate relationships of an entity with an external system that is not available in the code context. To tackle this, the obvious choice would be somehow making this context available in the code or comments to utilize documentation generation again. Well, as could be expected, this too is possible with Doxygen. Doxygen allows the embedding of PlantUML diagrams into comments, which will enable us to draw any diagram that PlantUML supports. But before starting to put PlantUML code in Doxygen comments, there's a small thing that must be taken care of: enabling PlantUML support in Doxygen. We have got ourselves a starting point. Let's roll!
+前一节中，学习了如何利用Doxygen为CMake项目生成图表和文档，但是并不是每个图表都可以从代码中推断出来。我们可能需要绘制自定义图，来说明实体与代码上下文中不可用的外部系统之间的关系。要解决这个问题，需要在代码或注释中提供该上下文，以便再次使用文档生成。如预期的那样，这可以通过Doxygen实现。Doxygen允许将PlantUML图表嵌入到注释中，这使我们能够绘制PlantUML支持的任何图表。但在开始将PlantUML代码放入Doxygen注释前，有一件事必须注意:在Doxygen中需要启用PlantUML支持。
 
-Enabling PlantUML support in Doxygen is pretty easy. Doxygen requires a PLANTUML\_JAR\_PATH variable to be set to the location of the plantuml.jar file in the environment. So, we have to find out where that file is located. To do that, we will use the find\_path(...) CMake function. find\_path(...) is similar to find\_program(...), except it is designated for locating the path of files instead of program locations. So, that means we should be able to locate the path of plantuml.jar with find\_path(...), give this path to Doxygen, and ... profit! Let's put that theory to the test. We will be following Chapter 6 - Example 02 for this section. As ever, let's dive into the CMakeLists.txt file of the example code, located at the chapter\_6/ex02\_doxplantuml/CMakeLists.txt path. Let's start inspecting from the find\_path(...) call, as follows:
+在Doxygen中启用PlantUML支持非常简单。Doxygen需要将PLANTUML\_JAR\_PATH变量设置为PLANTUML.jar文件的位置，所以得找出那个文件的位置。可以使用\texttt{find\_path(…)}，\texttt{find\_path(…)}和\texttt{find\_program(…)}类似，指定用于定位文件的路径。使用本节第6章-例02，让我们深入到示例代码的CMakeLists文件中，它位于chapter\_6/ex02\_doxplantuml/CMakeLists.txt。让我们从\texttt{find\_path(…)}开始看:
 
 \begin{lstlisting}[style=styleCMake]
 find_path(PLANTUML_JAR_PATH NAMES plantuml.jar HINTS
@@ -326,7 +320,7 @@ set(DOXYGEN_PLANTUML_JAR_PATH "${PLANTUML_JAR_PATH}")
 set(DOXYGEN_QUIET YES)
 \end{lstlisting}
 
-In the find\_path(...) call here, PLANTUML\_JAR\_PATH is the name of the output variable. NAMES is the filenames that will be searched in the search locations. HINTS is extra paths in addition to the default search locations. These are useful for discovering stuff in non-standard locations. Lastly, the REQUIRED parameter is used to make finding plantuml.jar a requirement, so CMake will fail and exit when plantuml.jar cannot be located. The following Doxygen configuration section is exactly the same as our previous example, Chapter 6 - Example 01, except we are setting DOXYGEN\_PLANTUML\_JAR\_PATH to the PlantUML directory path we found with the find\_path(...) call. Also, variables that are not required for this example are omitted too. Doxygen should be able to use PlantUML right now. Let's test that with an example PlantUML graph, embedded into the src/main.cpp source file, as follows:
+\texttt{find\_path(…)}的输出为PLANTUML\_JAR\_PATH。NAMES是搜索位置中的文件名。HINTS是默认搜索位置之外的路径，这对于在非标准位置很有用。最后，REQUIRED参数用于使plantuml.jar必须找到，因此当无法找到plantuml.jar时，CMake将失败并退出。下面的Doxygen配置部分与我们之前的示例(第6章-示例01)完全相同，不同的是将DOXYGEN\_PLANTUML\_JAR\_PATH设置为找到的PlantUML目录路径。此外，本例中不需要的变量也会省略了。Doxygen现在应该可以使用PlantUML了。我们用一个PlantUML示例图进行测试，将其嵌入到src/main.cpp源文件中:
 
 \begin{lstlisting}[style=styleCXX]
 /**
@@ -350,7 +344,7 @@ int main(void) {
 }
 \end{lstlisting}
 
-The @startuml and @enduml Doxygen comment keywords are for indicating the beginning and the end of a PlantUML diagram, respectively. Regular PlantUML code can be placed inside of a @startuml - @enduml block. In our example, we have a simple system interaction diagram of the application. If everything goes as expected, we should see the embedded PlantUML diagram in the main() function's documentation. Let's generate documentation by building the example with the code shown here:
+@startuml和@enduml Doxygen注释关键字分别用于指示PlantUML图的开始和结束。普通的PlantUML代码可以放在@startuml - @enduml块中。我们的示例中，有一个简单的应用程序系统交互图。若一切按计划进行，应该在main()函数的文档中看到嵌入的PlantUML图。可以用下面所示的代码构建示例来生成文档:
  
 \begin{tcblisting}{commandshell={}}
 cd chapter_6/
@@ -358,22 +352,22 @@ cmake -S ./ -B build/
 cmake --build build/
 \end{tcblisting}
 
-The documentation for the second example should be built now. Open the generated build/ex02\_doxplantuml/docs/html/index.html HTML documentation with the browser of your choice, by running the following command:
+第二个示例的文档现在构建好了。使用浏览器打开生成的build/ex02\_doxplantuml/docs/html/index.html html文档，运行以下命令:
 
 \begin{tcblisting}{commandshell={}}
 google-chrome build/ex02_doxplantuml/docs/html/index.html
 \end{tcblisting}
 
-This gives you the following output:
+会有以下输出:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/2/chapter6/images/6.jpg}\\
-Figure 6.6 – Embedded PlantUML diagram in the main() function documentation
+图6.6  main()函数文档中嵌入PlantUML图
 \end{center}
 
-In Figure 6.6, we can see that Doxygen has generated a PlantUML diagram and embedded it into the documentation. With that, we're now able to embed custom diagrams into our generated documentation as well. This will allow us to explain complicated systems and relationships without having to interact with external graphing tools.
+图6.6中，可以看到Doxygen生成了PlantUML图，并将其嵌入到文档中。现在，就可以将自定义图嵌入到生成的文档中了，这允许我们解释复杂的系统和关系，而不必与外部绘图工具进行交互。
 
-Now, as we have the right tools for generating documentation, it's time to learn how to package and deliver them. In the next section, we will learn about ways of delivering documentation, together with the software involved.
+我们有了生成文档的正确工具，是时候学习如何打包和交付文档了。下一节中，我们将学习交付文档的方法以及所涉及的软件。
 
 
 

@@ -1,7 +1,7 @@
-In this chapter, we covered a general approach for finding files, libraries, and programs, along with the more complex search for CMake packages. You learned how to create an imported package definition if it cannot be found automatically by providing your own find module. We looked over source code-based dependencies with ExternalProject and FetchContent and how even non-CMake projects can be built using CMake.
+本章中，介绍了查找文件、库和程序的一般方法，以及查找CMake包更复杂的方法。学习了若无法通过提供自己的find模块自动找到导入的包定义，如何创建该包定义。我们研究了基于源代码的依赖关系与\texttt{ExternalProject}和\texttt{FetchContent}，以及如何使用CMake构建非CMake项目。
 
-Additionally, if you want to become even more sophisticated with your dependency management, we briefly introduced Conan and vcpkg as two package handlers that integrate very well with CMake.
+另外，若觉得依赖管理方面变得更加太复杂，这里简要介绍了Conan和vcpkg这两个包管理器，它们与CMake集成得非常好。
 
-Dependency management is a tough topic to cover and can be tedious at times. Nevertheless, it pays off to take the time to set it up correctly with the techniques described in this chapter. The versatility of CMake and its various ways of finding dependencies are its greatest strengths but also its greatest weaknesses. By using the various find\_ commands, FetchContent, ExternalProject, or integrating any of the available package managers with CMake, almost any dependency can be integrated into a project. However, with so many methods to choose from, finding the best one can be tough. Nevertheless, we recommend using find\_package whenever possible. The more popular CMake becomes, the better the chances are that other projects can be seamlessly integrated.
+依赖管理是一个很难讨论的话题，有时可能很乏味，但花时间用本章描述的技术正确地设置它是值得的。CMake的多功能性，及其查找依赖项的方法是其优点，也是其缺点。通过使用各种\texttt{find\_}指令、\texttt{FetchContent}、\texttt{ExternalProject}，或者将可用的包管理器与CMake集成，可以将依赖项集成到项目中。然而，有这么多的方法可以选择，找到最好的会很困难，但我们还是建议尽可能使用\texttt{find\_package}。CMake越受欢迎，其他项目就越有可能无缝集成。
 
-In the next chapter, you will learn how to automatically generate and package documentation for your code.
+在下一章中，将学习如何为代码自动生成和打包文档。

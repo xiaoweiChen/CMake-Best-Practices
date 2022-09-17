@@ -1,15 +1,17 @@
-In the previous sections, we have been covering the documentation and graphing of the software code, but in a large project, we may also need to document and visualize the CMake code as well. The relations between CMake targets may be complex, and this may render keeping track of all the dependencies hard. Fortunately, CMake can again help with this by providing a graph showing all dependencies between targets. By calling cmake -{}-graphviz=my-project.dot /path/to/build/dir, CMake will create files in the DOT language that contain how targets depend on each other.
 
-The DOT language is a description language for graphs and can be interpreted by a multitude of programs, the most famous one being the freely available Graphviz. DOT files can be converted to images or even Portable Document Format (PDF) files using the dot command-line utility from Graphviz, like this: dot -Tpng filename.dot -o out.png.
 
-Running these commands for the example project of this chapter will produce an output similar to this:
+我们已经讨论了软件代码的文档化和图形化，但在一个大型项目中，可能还需要文档化和可视化CMake代码。CMake目标之间的关系可能很复杂，这可能使跟踪所有依赖关系变得困难。CMake可以通过提供一个显示目标之间所有依赖关系的图表来帮助解决这个问题。通过cmake -{}-graphviz=my-project.dot /path/to/build/dir，CMake将用dot创建包含目标如何相互依赖的文件。
+
+DOT语言是一种用于图形的描述语言，可以由许多程序进行解释，其中最著名的是免费的Graphviz。DOT文件可以使用Graphviz中的DOT命令行实用程序转换为图像，甚至可移植文档格式(PDF)文件:dot -Tpng filename.dot -o out.png。
+
+为本章的示例项目运行这些命令将产生类似如下的输出:
 
 \begin{center}
 \includegraphics[width=0.9\textwidth]{content/2/chapter6/images/7.jpg}\\
-Figure 6.7 – The project structure of chapter3 visualized with the DOT language
+图6.7 用DOT语言可视化的第3章的项目结构
 \end{center}
 
-Behavior and options can be controlled by the variables provided in CMakeGraphVizOptions. When creating DOT graphs, CMake will look for a file called CMakeGraphVizOptions.cmake in the PROJECT\_SOURCE\_DIR and PROJECT\_BINARY\_DIR directories and, if found, will use the values provided within. An example of such a config file might look like this:
+行为和选项可以通过CMakeGraphVizOptions中提供的变量来控制。创建DOT图时，CMake将查找一个名为CMakeGraphVizOptions的文件。若在PROJECT\_SOURCE\_DIR和PROJECT\_BINARY\_DIR目录中找到，将使用其中提供的值。配置文件的例子:
 
 \begin{lstlisting}[style=styleCMake]
 set(GRAPHVIZ_GRAPH_NAME "CMake Best Practices")
@@ -17,7 +19,7 @@ set(GRAPHVIZ_GENERATE_PER_TARGET FALSE)
 set(GRAPHVIZ_GENERATE_DEPENDERS FALSE)
 \end{lstlisting}
 
-By default, CMake creates dependency graphs for all targets. Setting GRAPHVIZ\_GENERATE\_PER\_TARGET and GRAPHVIZ\_GENERATE\_DEPENDERS to FALSE will reduce the number of files generated. A full set of available options can be found in the CMake documentation at \url{https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html}.
+默认情况下，CMake为所有目标创建依赖关系图。将GRAPHVIZ\_GENERATE\_PER\_TARGET和GRAPHVIZ\_GENERATE\_DEPENDERS设置为FALSE将减少生成的文件数量。可以在CMake文档\url{https://cmake.org/cmake/help/latest/module/CMakeGraphVizOptions.html}中找到完整的选项集。
 
 
 
