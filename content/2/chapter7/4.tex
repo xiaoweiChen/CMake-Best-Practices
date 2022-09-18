@@ -1,52 +1,52 @@
-Today's compilers are often more than just programs to convert text to binary. They are complex software suites that have built-in functionality to ensure code quality. The focus on how much compilers are aware of code quality issues has drastically increased, especially with the advent of LLVM and Clang. These quality tools are commonly called sanitizers and are enabled by passing certain flags to the compiler and linker.
+今天的编译器通常不仅仅是将文本转换为二进制的程序，它们是复杂的软件套件，具有确保代码质量的内置功能。对于编译器对代码质量问题的了解程度的关注急剧增加，特别是随着LLVM和Clang的出现。这些质量工具通常称为消毒器，通过将某些标志传递给编译器和链接器来启用它们。
 
-Code sanitizers are a way to bring additional quality checks into the code by using the compiler to decorate the binary code with annotations and hooks to detect various runtime issues. When the code is executed, the annotations are checked and confirmed if any violations are reported. Sanitizers are relatively fast, but they obviously have an impact on the runtime behavior of any program. If the sanitizers are catching anything, programs are terminated with abort() and return with non-zero. This is particularly useful with testing because this means any test violating a sanitizer will be marked as failed.
+代码消毒器是一种将质量检查引入代码的方法，使用编译器用注释和钩子装饰二进制代码，以检测各种运行时问题。当执行代码时，检查并确认注释是否有任何违规行为。消毒程序相对较快，它们显然会对任何程序的运行时行为产生影响。若消毒程序进行了捕获，则会使用abort()终止程序并返回非零错误码。这在测试中特别有用，任何违反消毒器的测试都将标记为失败。
 
-The following are the most common types of sanitizers:
+以下是最常见的消毒器:
 
 \begin{itemize}
 \item 
-The address sanitizer (ASan) detects memory access errors such as out-of-bounds and use-after-free bugs.
+地址杀毒程序(ASan)检测内存访问错误，如越界和释放后使用错误。
 
 \item 
-The leak sanitizer (LSan), which is part of the ASan, can be used for detecting memory leaks.
+泄漏杀毒器(LSan)是ASan的一部分，可用于检测内存泄漏。
 
 \item 
-In GCC and Clang, there are a few specialized versions of the general ASan, such as the kernel address sanitizer (KASAN) for detecting memory errors in the Linux kernel.
+GCC和Clang中，有一些通用ASan的定制版本，例如用于检测Linux内核中的内存错误的内核地址杀毒程序(KASAN)。
 
 \item 
-On some platforms, the ASans can even be run with hardware assistance.
+某些平台上，ASans甚至可以在硬件辅助下运行。
 
 \item 
-The memory sanitizer (MSan) detects uninitialized memory reads.
+内存杀毒器(MSan)检测未初始化的内存读取。
 
 \item 
-The thread sanitizer (TSan) will report data races. Because of the way the TSan works, it cannot be run together with the ASan and LSan.
+线程杀毒器(TSan)将报告数据竞争。由于TSan的工作方式，不能与ASan和LSan一起运行。
 
 \item 
-The undefined behavior sanitizer (UBSan) detects and reports cases where the code results in undefined behavior. Using variables before initialization or ambiguity regarding operator precedence are common examples.
+未定义行为杀毒器(UBSan)检测并报告代码导致未定义行为的情况，初始化之前使用变量或操作符优先级不明确是常见的例子。
 \end{itemize}
 
-The Clang suite leads the field with the availability of sanitizers, with GCC being a close second. Microsoft is a bit slower in adapting the features but they have started to include sanitizers in their compiler. At the time of writing this book, MSVC version 16.9, which comes with Visual Studio 19, was the first version that contained support for the ASan. For details on what the respective sanitizers do and how to configure them in detail, the documentation of the various compilers is of great help. 
+Clang套件在消毒器可用性方面非常领先，GCC紧随其后。微软在适应这些特性方面有点慢，但他们已经开始在编译器中包括消毒程序。撰写本书时，Visual Studio 19附带的MSVC版本16.9是第一个包含对ASan的支持的版本。关于各自的杀毒器的作用以及如何详细配置它们的详细信息，各种编译器的文档非常有帮助。
 
-The sanitizers are enabled by passing various compiler flags that cause the compiler to add extra debugging information to the binaries. When the binaries are executed, the sanitizer code will perform its check and print out any errors to stderr. As the code needs to be executed for the sanitizers to find any potential bugs, having a high code coverage is essential to improve the reliability of the sanitizers.
+通过传递各种编译器标志来启用消毒器，这些标志导致编译器向二进制文件添加额外的调试信息。当执行二进制文件时，消毒程序代码将执行检查，并将错误信息输出到stderr。由于需要为消毒器执行代码，以查找任何潜在的错误，因此拥有较高的代码覆盖率会提高杀毒器的可靠性。
 
-To enable the ASan in GCC or Clang, the -fsanitize=<sanitizer> compiler flag has to be passed. For MSVC, the corresponding option is /fsanitize=<sanitizer>.
+要在GCC或Clang中启用ASan，必须传递-fsanitize=<sanitizer>编译器标志。对于MSVC，对应的选项是/fsanitize=<sanitize>。
 
-The compiler flags are passed into CMake with the CMAKE\_CXX\_FLAGS cache variable. So, calling CMake from the command line with a sanitizer enabled would look like this:
+编译器标志通过CMAKE\_CXX\_FLAGS缓存变量传入CMake。因此，在启用消毒器的情况下，从命令行调用CMake就像这样:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <sourceDir> -B <BuildDir> -DCMAKE_CXX_FLAGS=-
-	fsanitize=<sanitizer>
+  fsanitize=<sanitizer>
 \end{tcblisting}
 
-When using CMake presets, the cache variables to contain the compiler flags can also be defined there. Presets are covered in depth in Chapter 9, Creating Reproducible Build Environments. Setting the sanitizer option globally will also affect any projects included using FetchContent or ExternalProject after the flags are set, so act with caution there. For the ASan, use -fsanitizer=address on GCC and Clang, and /fsanitizer=address on MSVC. The MSan is enabled with -fsanitize=memory, the LSan with -fsanitize=leak, the TSan with -fsanitize=thread, and the UBSan is enabled with -fsanitize=undefined for GCC and Clang at the time of writing this book only. To get a more concise output for ASan, LSan, and MSan, tell the compiler to explicitly keep the frame pointer. This is done by setting -fno-omit-framepointer in GCC and Clang. MSVC only supports this for x86 builds with the /Oy- option.
+当使用CMake预设时，可以在那里定义包含编译器标志的缓存变量。全局设置消毒器选项也会影响在设置标志后使用\texttt{FetchContent}或\texttt{ExternalProject}包含的任何项目，所以在这里要谨慎。对于ASan，在GCC和Clang上使用-fsanitizer=address，在MSVC上使用/fsanitizer=address。MSan使用-fsanitize=memory，LSan使用-fsanitize=leak，TSan使用-fsanitize=thread，UBSan仅在编写本书时使用-fsanitize=undefined来启用GCC和Clang。要为ASan、LSan和MSan获得更简洁的输出，请告诉编译器显式地保留帧指针。这是通过在GCC和Clang中设置-fno-忽略-framepointer来实现的。MSVC只支持x86版本的/Oy-选项。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-Setting the CMAKE\_CXX\_FLAGS variable to enable sanitizers in CMakeLists.txt itself is discouraged because the sanitizers are neither built nor have any usage requirements to use any of the targets defined by a project. Additionally, setting the CMAKE\_CXX\_FLAGS variable in CMakeLists.txt might conflict with what the user might be passing from the command line.
+不建议在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量来启用消毒程序，因为杀毒程序既不是构建的，也没有使用项目定义目标。此外，在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量可能与用户可能从命令行传递的内容发生冲突。
 \end{tcolorbox}
 
-Sanitizers are a very powerful tool to increase code quality. Together with unit tests and the coverage report, they provide three of the four major concepts to ensure code quality. The fourth option for automatically ensuring code quality is using static code analyzers.
+消毒器是提高代码质量的一个非常强大的工具。与单元测试和覆盖率报告一起，提供了确保代码质量的四个主要概念中的三个。自动确保代码质量的第四个选项是使用静态代码分析器。
 
 
 

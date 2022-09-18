@@ -1,72 +1,72 @@
-Unit tests, sanitizers, and coverage reports all depend on the code being actually run to detect possible errors. Static code analysis analyzes the code without running it. The good thing about that is that all code that is compiled can be analyzed, not just the parts that are covered by tests. This, of course, also means that different kinds of glitches can be found. A downside of static code analysis is that it can take a very long time to run the tests.
+单元测试、消毒程序和覆盖率报告都依赖于实际运行的代码，以检测可能的错误。静态代码分析在不运行代码的情况下分析代码。这样，所有编译的代码都可以进行分析，而不仅仅是测试覆盖的部分。当然，这也意味着可以发现各种各样的问题。静态代码分析的一个缺点是运行测试需要很长时间。
 
-CMake supports several tools for static code analysis that are enabled either by setting a property or a global variable. All of the tools, except link what you use, are external programs that need to be installed and found in the path of the system. Link what you use uses the linker of the system, so no further installation is necessary. The tools supported by CMake are the following:
+CMake支持一些用于静态代码分析的工具，这些工具可以通过设置属性或全局变量来启用，除了你使用的链接，都是需要安装和在系统路径中找到的外部程序。使用的链接使用系统的链接器，因此不需要进一步安装。CMake支持的工具如下:
 
 \begin{itemize}
 \item 
-Clang-Tidy is a C++ linter tool covering a wide array of errors, including style violations and interface misuse. It is enabled with the <LANG>\_CLANG\_TIDY property or the CMAKE\_<LANG>\_CLANG\_TIDY variable.
+Clang-Tidy是一个C++ linter工具，包含了大量错误，包括样式违反和接口滥用。通过<LANG>\_CLANG\_TIDY属性或CMAKE\_<LANG>\_CLANG\_TIDY变量启用。
 
 \item 
-Cppcheck is another static code analysis tool for C++. It is enabled with the <LANG>\_CPPCHECK property or the CMAKE\_<LANG>\_CPPCHECK variable.
+Cppcheck是另一个用于C++的静态代码分析工具。通过<LANG>\_CPPCHECK属性或CMAKE\_<LANG>\_CPPCHECK变量启用。
 
 \item 
-cpplint is a style-checker for C++. It is enabled with the <LANG>\_CPPLINT property or the CMAKE\_<LANG>\_CPPLINT variable. cpplint was originally developed at Google and because of this, it has the Google C++ style hardcoded within.
+cpplint是C++的风格检查器。通过<LANG>\_CPPLINT属性或CMAKE\_<LANG>\_CPPLINT变量启用。cpplint最初是在谷歌开发的，正因为如此，在内部硬编码了谷歌的C++风格。
 
 \item 
-include what you use (iwyu) is a Python program that parses the C++ source files and determines which of the included files are really required. It is enabled with the <LANG>\_INCLUDE\_WHAT\_YOU\_USE property or the CMAKE\_<LANG>\_INCLUDE\_WHAT\_YOU\_USE variable.
+include what you use (iwyu)是一个Python程序，解析C++源文件并确定所包含的文件中哪些是真正需要的。通过<LANG>\_INCLUDE\_WHAT\_YOU\_USE属性或CMAKE\_<LANG>\_INCLUDE\_WHAT\_YOU\_USE变量启用。
 
 \item 
-link what you use (lwyu) is a built-in feature of CMake that prints out a warning if an executable is linking libraries that are not used. It is enabled with the LINK\_WHAT\_YOU\_USE property or the CMAKE\_LINK\_WHAT\_YOU\_USE variable. Note that this is not dependent on the language chosen.
+link what you use (lwyu)是CMake的一个内置特性，若一个可执行文件链接了未使用的库，会输出警告。通过LINK\_WHAT\_YOU\_USE属性或CMAKE\_LINK\_WHAT\_YOU\_USE变量启用。注意，这与所选的语言无关。
 \end{itemize}
 
-For all tools, <LANG> is either C or CXX. The properties contain a semicolon-separated list containing the respective executable and command-line arguments. As of CMake 3.21, automatic execution of the static code analyzers is only supported for the Ninja and Makefile generators. Visual Studio handles the static code analyzers over settings of the IDE, which CMake cannot control. lwyu is a special case because it uses special flags for the ldd or ld linker, and not a special tool. So, the LINK\_WHAT\_YOU\_USE property is just a Boolean value and not a command line. It also means that lwyu is only supported on ELF platforms. 
+对于所有工具，<LANG>不是C就是CXX。属性包含一个分号分隔的列表，其中包含各自的可执行参数和命令行参数。CMake 3.21中，静态代码分析器的自动执行只支持Ninja和Makefile生成器。Visual Studio在IDE的设置上处理静态代码分析器，这是CMake无法控制的。Lwyu是一个特例，因为它为LDD或ld链接器使用了特殊的标志，而不是一个特殊的工具。因此，LINK\_WHAT\_YOU\_USE属性只是一个布尔值，而不是一个命令行。这也意味着lwyu只在ELF平台上支持。
 
-Like the coverage reports and the sanitizers earlier in this chapter, the static code analysis tools are enabled by passing the command in the respective variable to CMake over the command line or by using a preset. If the variable is set, then the static code analyzers will be executed automatically when compiling the source files. Enabling clang-tidy for a build could look like this:
+就像本章前面的覆盖报告和消毒器一样，静态代码分析工具是通过通过命令行将各自变量中的命令传递给CMake或使用预设来启用的。若设置了该变量，则在编译源文件时将自动执行静态代码分析器。为构建启用clang-tidy可能如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <sourceDir> -B <buildDir>-DCMAKE_CXX_CLANG_
-	TIDY="clang-tidy;-checks=*;-header-filter=<sourceDir>/*"
+  TIDY="clang-tidy;-checks=*;-header-filter=<sourceDir>/*"
 \end{tcblisting}
 
-The command and the arguments are formatted as a semicolon-separated list. In the preceding example, all checks for clang-tidy are enabled with -checks=*, and a filter is added to only apply clang-tidy to the include files of the current project with -header-filter=<sourceDir/*>. The same patterns work when using Cppcheck, Cpplint and iwyu, as the following examples show:
+命令和参数格式化为一个分号分隔的列表。上面的例子中，所有对clangtidy的检查都是使用-checks=*启用的，并且添加了一个过滤器，只对当前项目的包含文件应用clangtidy，使用-header-filter=<sourceDir/*>。当使用Cppcheck、Cpplint和iwyu时，同样的模式也可以工作:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <sourceDir> -B <buildDir> -DCMAKE_CXX_
-	CPPCYHECK="cppcheck;--enable=warning;--inconclusive;--force;
-		--inline-support"
+  CPPCYHECK="cppcheck;--enable=warning;--inconclusive;--force;
+    --inline-support"
 cmake -S <sourceDir> -B <buildDir> -DCMAKE_CXX_CPPLINT="cpplint"
 cmake -S <sourceDir> -B <buildDir> -CMAKE_CXX_INCLUDE_WHAT_YOU_
-	USE="iwyu;-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args;--verbose=5"
+  USE="iwyu;-Xiwyu;any;-Xiwyu;iwyu;-Xiwyu;args;--verbose=5"
 \end{tcblisting}
 
-The static code analyzers will be run when compiling the files in a project. The output of any finding will be printed out with any normal compiler warnings or errors. By default, all non-critical findings of the analyzers will not cause the build to fail. For high-quality software where a zero-tolerance against warnings exists, the appropriate flags can be passed to Cppcheck and Clang-Tidy:
+静态代码分析器将在编译项目中的文件时运行，发现的输出都将与正常的编译器警告或错误一起打印出来。默认情况下，分析器的所有非关键发现都不会导致构建失败。对于零容忍警告的高质量软件，可以将适当的标志传递给Cppcheck和Clang-Tidy:
 
 \begin{itemize}
 \item 
-For Clang-Tidy, passing -{}-warnings-as-errors=* will cause compilation to fail on any issue found
+对于Clang-Tidy，传递-{}-warnings-as-errors=*将会编译在发现问题时失败
 
 \item 
-For Cppcheck, passing the --error-exitcode=1 parameter will cause Cppcheck to exit with 1 instead of 0 if an issue is found, and the build will fail.
+对于Cppcheck，若发现问题，传递-{}-error-exitcode=1参数将使Cppcheck以1退出，而不是0，构建失败。
 
-iwyu and cpplint, unfortunately, lack similar flags.
+但Iwyu和cpplint缺少类似的标志。
 \end{itemize}
 
-A very nice feature of Clang-Tidy is that it can automatically apply fixes to the source files. This can be done by additionally passing the -{}-fix and -{}-fix-error flags to Clang-Tidy.
+Clang-Tidy的一个非常好的特性是，可以自动将修复程序应用到源文件。这可以通过向Clang-Tidy传递-{}-fix和-{}-fix-error来实现。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Attention When Building Incrementally]
-All the static code analyzers work only if a file is actually compiled. To ensure that the static code analyzers catch all errors, they have to be run on a clean build.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=增量构建时的注意事项]
+所有的静态代码分析器只有在文件实际编译的情况下才能工作。为了确保静态代码分析器捕获所有错误，它们必须在一个干净的构建中运行。
 \end{tcolorbox}
 
-With the exception of lwyu, all the static code analyzers look at the source files to find any issues; on the other hand, lwyu will look at the binary files to find unused dependencies.
+除了lwyu之外，所有静态代码分析器都会查看源文件以查找问题;另一方面，lwyu将查看二进制文件以查找未使用的依赖项。
 
-The lwyu analyzer is intended to help speed up builds and reduce the complexity of the dependencies tree. The command for lwyu is defined in CMAKE\_LINK\_WHAT\_YOU\_USE\_CHECK. This variable is just a Boolean option, not a command for an external like the other tools. If set, it will pass the respective flags to the linker to output any unused direct dependencies. As of CMake version 3.21, this is defined as the ldd –u -r command. The usage of ldd means that this analyzer is only available for ELF platforms. lwyu can be enabled by passing a simple option, like this:
+lwyu分析器的目的是帮助加快构建并降低依赖关系树的复杂性，lwyu的命令定义在CMAKE\_LINK\_WHAT\_YOU\_USE\_CHECK中。这个变量只是一个布尔选项，若设置了将各自的标志传递给链接器，以输出任何未使用的直接依赖项。CMake 3.21版本中，这定义为ldd -u -r命令，ldd的使用说明该分析器只能用于ELF平台。Lwyu可以通过传递一个简单的选项来启用:
 
 \begin{tcblisting}{commandshell={}}
 cmake –S <sourceDir> -B <buildDir> -DCMAKE_LINK_WHAT_YOU_
-	USE=TRUE
+  USE=TRUE
 \end{tcblisting}
 
-The output of lwyu might be something like this:
+lwyu的输出可能是这样的:
 
 \begin{tcblisting}{commandshell={}}
 [100%] Linking CXX executable ch7_lwyu_example
@@ -75,9 +75,9 @@ Warning: Unused direct dependencies:
         /lib/x86_64-linux-gnu/libcrypto.so.1.1
 \end{tcblisting}
 
-In this example, it shows that libssl.so was linked but not used, even the ones indirectly linked by any dependencies.
+本例中，它显示libssl.so连接但没有使用，即使是通过依赖间接连接的。
 
-The combination of the various static code analyzers together with iwyu and lwyu helps to keep code bases small and free from common code smells. So far in this chapter, we have looked at how tests are defined, sanitizers, and static code analysis, which deal with checking that the code functions correctly. One of the problems that we've seen now is, however, that if the various combinations have to be enabled for all the single targets, CMakeLists.txt can become a bit cluttered, especially for large projects. A clean alternative is to provide a custom build type that enables the compile-time code analysis globally.
+将各种静态代码分析器与iwyu和lwyu结合在一起，有助于保持代码库较小。本章中，我们已经了解了如何定义测试、消毒和静态代码分析，它们处理检查代码是否正确运行。然而，现在看到的一个问题是，若必须为所有单个目标启用各种组合，CMakeLists.txt可能会变得混乱，特别是对于大型项目。一个干净的替代方案是提供一个自定义构建类型，以支持全局编译时的代码分析。
 
 
 

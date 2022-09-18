@@ -1,26 +1,26 @@
-Testing is the staple diet for any software engineer who takes pride in quality software. The number of frameworks for writing unit tests in the various languages is huge and, especially for C++, CMake includes modules to work with most of the more popular ones.
+测试是以软件质量为傲的软件工程师的主要方式。目前已有很多单元测试框架，特别是对于C++， CMake包含了可与大多数流行框架一起使用的模块。
 
-At very abstract levels, all unit testing frameworks do the following:
+总的来说，所有单元测试框架都做以下工作:
 
 \begin{itemize}
 \item 
-Allow the formulating and grouping of test cases.
+制定和分组测试用例。
 
 \item 
-Contain some form of assertion to check for various test conditions.
+包含某种形式的断言，以检查各种测试条件。
 
 \item 
-Discover and run the test cases, either altogether or a selection of them.
+发现并运行测试用例，可以是全部的，也可以是其中的一个选择。
 
 \item 
-Produce the test result in a variety of formats, such as plain text, JSON, XML, and possibly more.
+生成各种格式的测试结果，例如纯文本、JSON、XML，可能还有更多。
 \end{itemize}
 
-With the CTest utility, CMake includes a built-in way to execute almost any test. Any CMake project that has set enable\_testing() and added at least one test with add\_test() has testing support enabled. Any call to enable\_testing() will enable test discovery in the current directory and any directory below, so it is often a good idea to set it in the top-level CMakeLists.txt, before any calls to add\_subdirectory. The CTest module of CMake automatically sets enable\_testing if used with include(CTest), unless the BUILD\_TESTING option was set to OFF.
+通过CTest，CMake可以以内置的方法来执行任何测试。设置\texttt{enable\_testing()}，并使用\texttt{add\_test()}添加了测试的CMake项目都支持运行测试。\texttt{enable\_testing()}将在当前目录和其子目录中启用，并添加测试测试。因此在调用\texttt{add\_subdirectory}之前，通常将其设置在顶层的\texttt{CMakeLists.txt}中。若使用\texttt{include(CTest)}，CMake的CTest模块会自动设置enable\_testing，除非BUILD\_TESTING为OFF。
 
-It is good practice to disable building and running the tests depending on the BUILD\_TESTING option. A common pattern here is to put all parts of a project that concern testing into its own subfolder and only include the subfolder if BUILD\_TESTING is set to ON.
+根据BUILD\_TESTING选项禁用构建和运行测试也是一种很好的实践。这里的常用模式是将项目中与测试相关的所有部分放在其子文件夹中，并且只在BUILD\_TESTING设置为ON时包含子文件夹。
 
-The CTest module should generally be included only in the top-level CMakeLists.txt of a project. Since CMake version 3.21, the PROJECT\_IS\_TOP\_LEVEL variable can be used to test if the current CMakeLists.txt is the top level. This variable will be true for the top-level directory of a project and top-level directories of projects added with ExternalProject. For directories added with add\_subdirectory or FetchContent, the value is false. As such, CTest should be included like this:
+CTest模块通常应该只包含在项目的顶层CMakeLists.txt中。自从CMake版本3.21以来，PROJECT\_IS\_TOP\_LEVEL可以用来测试当前的CMakeLists.txt是否为顶层文件。对于项目的顶层目录和使用\texttt{ExternalProject}添加的项目顶层目录，此变量为true。对于使用\texttt{add\_subdirectory}或\texttt{FetchContent}添加的目录，该值为false。因此，CTest应该包括如下内容:
 
 \begin{lstlisting}[style=styleCMake]
 project(CMakeBestPractice)
@@ -30,9 +30,9 @@ include(CTest)
 endif()
 \end{lstlisting}
 
-nit tests are, in essence, small programs that run a list of assertions inside, and if any of the assertions fail, they return a non-zero return value. There are many frameworks and libraries that help with organizing tests and writing assertions, but from the outside, checking assertions and returning a corresponding value is the core functionality.
+单元测试本质上是在内部运行一系列断言的小程序，若断言失败，将返回一个非零返回值。有许多框架和库可以帮助组织测试和编写断言，但从外部来看，检查断言和返回相应的值是核心功能。
 
-Tests can be added to any CMakeLists.txt with the add\_test function:
+可以使用\texttt{add\_test}将测试添加到CMakeLists.txt中:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME <name> COMMAND <command> [<arg>...]
@@ -41,9 +41,9 @@ add_test(NAME <name> COMMAND <command> [<arg>...]
 	[COMMAND_EXPAND_LISTS])
 \end{lstlisting}
 
-COMMAND can be the name of an executable target defined in the project or a full path to an arbitrary executable. Any arguments needed for the test are also included. Using target names is the preferred way, as CMake will then substitute the path to the executable automatically. The CONFIGURATION option is used to tell CMake for which build configurations the test is valid. For most test cases, this is irrelevant, but for microbenchmarking, for instance, this can be quite useful. WORKING\_DIRECTORY should be an absolute path. By default, tests are executed in CMAKE\_CURRENT\_BINARY\_DIR. COMMAND\_EXPAND\_LISTS ensures that any lists passed as part of the COMMAND option are expanded.
+COMMAND可以是项目中定义的可执行目标，也可以是可执行文件的完整路径，测试所需的参数也包括在内。使用目标名称为首选，因为CMake会自动替换到可执行文件的路径。CONFIGURATION选项用于判断对哪个构建配置有效。对于大多数测试用例来说，这并不重要，但是对于微基准测试来说，就非常有用。WORKING\_DIRECTORY应该是一个绝对路径。默认情况下，测试在CMAKE\_CURRENT\_BINARY\_DIR中执行。COMMAND\_EXPAND\_LISTS确保传递给作为COMMAND选项的任何列表都会展开。
 
-A simple project including a test might look like this:
+包含测试的简单项目:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -54,32 +54,32 @@ target_sources(simple_test PRIVATE src/main.cpp)
 add_test(NAME example_test COMMAND simple_test)
 \end{lstlisting}
 
-In the example, an executable target called simple\_test is used as a test called example\_test.
+在本例中，一个名为simple\_test的可执行目标用作example\_test的测试。
 
-CTest will consume the information about the tests and execute them. The tests are executed by running the ctest command standalone or as a special target as part of the build step of CMake. Either of the two following commands will execute the tests:
+CTest将使用有关测试的信息并执行它们。通过独立运行ctest命令或作为CMake构建步骤的一部分，作为特殊目标来执行测试。以下两个命令之一将执行测试:
 
 \begin{tcblisting}{commandshell={}}
 ctest --test-dir <build_dir>
 cmake --build <build_dir> --target test
 \end{tcblisting}
 
-Invoking CTest as a target of the build has the advantage that CMake will check first whether all the needed targets are built and on the newest version, but CTest can do that as well, like this:
+调用CTest作为构建的目标有一个好处，CMake会首先检查所有需要的目标是否构建了，并且在最新的版本上CTest也可以这样做:
 
 \begin{tcblisting}{commandshell={}}
 ctest --build-and-test <source_dir> <build_dir>
 \end{tcblisting}
 
-The output of ctest might look something like this:
+ctest的输出看起来可能像这样:
 
 \begin{tcblisting}{commandshell={}}
 Test project /workspaces/CMake-Best-Practices/build
-	Start 1: example_test
+    Start 1: example_test
 1/3 Test #1: example_test .....................***Failed
 0.00 sec
-	Start 2: pass_fail_test
+    Start 2: pass_fail_test
 2/3 Test #2: pass_fail_test ................... Passed
 0.00 sec
-	Start 3: timeout_test
+    Start 3: timeout_test
 3/3 Test #3: timeout_test ..................... Passed
 0.50 sec
 
@@ -96,101 +96,95 @@ Use "--rerun-failed --output-on-failure" to re-run the failed
      cases verbosely.
 \end{tcblisting}
 
-Generally, the test suppresses all output to stdout. By passing the -V or -{}-verbose command-line argument, the output is always printed. However, usually, you're only interested in the output of the failed tests. So, the -{}-output-on-failure argument is often the better alternative. This way, only failed tests produce output. For very verbose tests, the output can be limited in size with the -{}-test-output-size-passed <size> and -{}-test-output-size-failed <size> options, where the size is the number of bytes.
+通常，测试抑制所有输出到标准输出。通过-V或-{}-verbose命令行参数，输出总是打印出来。但通常只对失败测试的输出感兴趣，-{}-output-on-failure参数通常是更好的选择。这样，只有失败的测试才会产生输出。对于非常详细的测试，可以使用-{}-test-output-size-passed <size>和-{}-test-output-size-failed <size>选项来限制输出的大小，其中大小是字节(byte)数。
 
-Having one or more calls to add\_test in the build tree will cause CMake to write out an input file for CTest in CMAKE\_CURRENT\_BINARY\_DIR. The input files for CTest are not necessarily located at the top level of the project, but where they are defined. To list all tests but not execute them, the -N option for CTest is used.
+构建树中有一个或多个add\_test将会在CMAKE\_CURRENT\_BINARY\_DIR中为CTest生成一个输入文件。CTest的输入文件不一定位于项目的顶层，而是在定义它们的地方。要列出所有测试但不执行它们，可以使用CTest的-N选项。
 
-A very useful feature of CTest is that it caches the states of the tests between runs. This allows you to only run tests that failed in the last run. For this, running ctest -{}-rerun-failed will just run the tests that failed in the last run.
+CTest的特性是，会在运行之间缓存测试的状态，可以只运行上次运行失败的测试。为此，运行ctest -{}-rerun-failed将只运行上次运行中失败的测试。
 
-Sometimes, you do not want to execute the full test set, for instance, if a single failing test is to be fixed. The -E and -R command-line options take regular expressions (regexes) that are matched against test names. The -E option excludes tests matching the pattern, and the -R option selects tests to be included. The options can be combined. The following command would run all tests that begin with FeatureX but exclude the test called FeatureX\_Test\_1:
+有时，若要修复单个失败的测试，则不希望执行完整的测试集。-E和-R命令行选项接受与测试名称匹配的正则表达式(正则表达式)。-E选项排除匹配模式的测试，-R选项选择要包含的测试。这些选项可以组合使用。以下命令将运行所有以FeatureX开头的测试，但不包括名为FeatureX\_Test\_1的测试:
 
 \begin{tcblisting}{commandshell={}}
 ctest -R ^FeatureX -E FeatureX_Test_1
 \end{tcblisting}
 
-Another way to selectively execute tests is to label them using the LABELS properties for tests and then select the labels to run with the -L option of CTest. A test can have multiple labels assigned separated by a semicolon, as shown in the following example:
+有选择地执行测试的另一种方法是使用测试的LABELS属性进行标记，然后使用CTest的-L选项选择要运行的标签。一个测试可以有多个用分号分隔的标签:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME labeled_test_1 COMMAND someTest)
 set_tests_properties(labeled_test PROPERTIES LABELS "example")
 
 add_test(NAME labeled_test_2 COMMAND anotherTest)
-set_tests_properties(labeled_test_2 PROPERTIES LABELS "will_
-	fail" )
+set_tests_properties(labeled_test_2 PROPERTIES LABELS "will_fail" )
 
 add_test(NAME labeled_test_3 COMMAND YetAnotherText)
-set_tests_properties(labeled_test_3 PROPERTIES LABELS
-	"example;will_fail")
+set_tests_properties(labeled_test_3 PROPERTIES LABELS "example;will_fail")
 \end{lstlisting}
 
-The -L command line option takes a regex to filter for the labels:
+-L命令行选项接受一个正则表达式来过滤标签:
 
 \begin{tcblisting}{commandshell={}}
 ctest -L example
 \end{tcblisting}
 
-This will only execute labeled\_test\_1 and labeled\_test\_3, as they both have the example label assigned, but not labeled\_test\_2 or any other tests that have no label assigned.
+这将只执行labeled\_test\_1和labeled\_test\_3，因为它们都分配了example标签，但labeled\_test\_2和任何其他没有分配example标签。
 
-By formulating the regex accordingly, multiple labels can be combined:
+通过制定相应的正则表达式，可以组合多个标签:
 
 \begin{tcblisting}{commandshell={}}
 ctest -L "example|will_fail"
 \end{tcblisting}
 
-This would execute all the tests from the example, but no other tests that have no label assigned.
+这将执行示例中的所有测试，但不会执行没有分配标签的测试。
 
-Using labels would be particularly useful to mark tests that are designed to fail or similar, or to mark tests that are only relevant in certain execution contexts.
+使用标签将有助于标记设计为失败或类似的测试，或标记仅与某些执行上下文中相关的测试。
 
-The last alternative to the regex or label-based test selection is to use the -I option, which takes the assigned test numbers. The argument for the -I option is somewhat complicated:
+对于基于正则表达式或标签的测试选择，最后一种选择是使用-I选项，它接受分配的测试编号。-I选项的参数有点复杂:
 
 \begin{tcblisting}{commandshell={}}
 ctest -I [Start,End,Stride,test#,test#,...|Test file]
 \end{tcblisting}
 
-With Start, End, and Stride, a range for the tests to be executed can be specified. The three numbers are for the range combined with explicit test numbers, test\#. Alternatively, a file containing the argument can be passed.
+通过Start、End和Stride，可以指定要执行的测试的范围。这三个数字是与显式测试数字test\#相结合的范围，或传递包含参数的文件。
 
-The following call would execute all odd tests from 1 to 10:
+下面的调用将执行从1到10的所有奇数测试:
 
 \begin{tcblisting}{commandshell={}}
 ctest -I 1,10,2
 \end{tcblisting}
 
-So, tests 1, 3, 5, 7, and 9 would be executed. The following command would execute only the tests and 8:
+因此，将执行测试1、3、5、7和9。以下命令将只执行测试和8:
 
 \begin{tcblisting}{commandshell={}}
 ctest -I ,0,,6,7
 \end{tcblisting}
 
-Note that in this call, End is set to 0 so no test range is executed. To combine the range and explicit test numbers, the following command will execute all odd tests from 1 to 10, and additionally test 6 and 8:
+这个调用中，End设置为0，因此没有执行。要合并范围和显式测试数，以下命令将执行从1到10的所有奇数测试，并额外执行测试6和8:
 
 \begin{tcblisting}{commandshell={}}
 ctest -I 1,10,2,6,8
 \end{tcblisting}
 
-The cumbersome handling of the -I option and the fact that adding new tests might reassign the numbers are two reasons why it is rarely used in practice. Usually, filtering either by labels or test names is preferred.
+-I选项处理繁琐，加上添加新测试可能会重新分配数字，这是它在实践中很少使用的两个原因。通常，根据标签或测试名称进行过滤是首选的方式。
 
-Another common pitfall when writing tests is that they are not independent enough. So, test 2 might accidentally depend on a previous execution of test 1. To harden against this accidental dependency, CTest has the ability to randomize test execution order with the -{}-schedule-random command-line argument. This will ensure that tests are executed in an arbitrary order.
+编写测试时的另一个常见问题是它们不够独立。因此，test 2可能会意外地依赖于test 1的前一次执行。为了避免这种依赖，CTest可使用-{}-schedule-random参数随机化测试执行顺序。这将确保测试以任意顺序执行。
 
-\subsubsubsection{7.2.1\hspace{0.2cm}Automatically discovering tests}
+\subsubsubsection{7.2.1\hspace{0.2cm}自动发现测试}
 
-Defining tests with add\_test is one way to expose them to CTest. One drawback is that this will register the whole executable as a single test. In most cases, however, a single executable will contain many unit tests and not just one, so when one of the tests inside the executable fails, it might be hard to figure out which test exactly failed.
+\texttt{add\_test}定义测试是向CTest添加测试的一种方法，缺点是这会将整个可执行文件注册为单个测试。然而，在大多数情况下，单个可执行文件将包含多个单元测试，而不仅仅是一个。当可执行文件中的一个测试失败时，可能很难确定到底哪个测试失败了。
 
-Consider a C++ file containing the following test code, and let's assume that the Fibonacci function contains a bug, so Fibonacci(0) will not return 1 as it should, but returns something else:
+以下测试代码的C++文件，假设Fibonacci函数包含一个错误，那么Fibonacci(0)将不会像它应该返回的那样返回1:
 
 \begin{lstlisting}[style=styleCXX]
-TEST_CASE("Fibonacci(0) returns 1"){ REQUIRE(Fibonacci(0) ==
-	1);}
-TEST_CASE("Fibonacci(1) returns 1"){ REQUIRE(Fibonacci(1) ==
-	1); }
-TEST_CASE("Fibonacci(2) returns 2"){ REQUIRE(Fibonacci(2) ==
-	2); }
-TEST_CASE("Fibonacci(5) returns 8"){ REQUIRE(Fibonacci(5) ==
-	8); }
+TEST_CASE("Fibonacci(0) returns 1"){ REQUIRE(Fibonacci(0) == 1);}
+TEST_CASE("Fibonacci(1) returns 1"){ REQUIRE(Fibonacci(1) == 1); }
+TEST_CASE("Fibonacci(2) returns 2"){ REQUIRE(Fibonacci(2) == 2); }
+TEST_CASE("Fibonacci(5) returns 8"){ REQUIRE(Fibonacci(5) == 8); }
 \end{lstlisting}
 
-If all these tests are compiled into the same executable called Fibonacci, then adding them with add\_test will only indicate that the executable failed, but not which of the scenarios seen in the previous code block.
+若所有这些测试都编译到同一个名为Fibonacci的可执行文件中，那么使用\texttt{add\_test}添加只会指示可执行文件失败，而不会指示前面代码块中看到的哪个场景失败。
 
-The result of the test will look something like this:
+测试结果看起来像这样:
 
 \begin{tcblisting}{commandshell={}}
 Test project /workspaces/CMake-Best-Practices/build
@@ -203,7 +197,7 @@ The following tests FAILED:
          5 - Fibonacci (Failed)
 \end{tcblisting}
 
-That is hardly helpful to figure out which of the test cases failed. Luckily, with Catch2 and GoogleTest, there is a way to expose the internal tests to CTest so they are executed as regular tests. For GoogleTest, the module to do so is provided by CMake itself; Catch2 provides this functionality in its own CMake integration. Discovering the tests with Catch2 is done with catch\_discover\_tests, while for GoogleTest, gtest\_discover\_tests is used. The following example will expose tests written in the Catch2 framework to CTest:
+这对找出哪个测试用例失败几乎没什么帮助，但在Catch2和GoogleTest中，有一种方法可以将内部测试公开给CTest，从而将它们作为常规测试执行。对于GoogleTest，这样做的模块是由CMake本身提供的;Catch2在自己的CMake集成中提供了这个功能。使用Catch2发现测试由\texttt{catch\_discover\_tests}完成，而对于GoogleTest，则使用\texttt{gtest\_discover\_tests}。以下示例在Catch2框架中编写的测试，并添加到CTest:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Catch2)
@@ -212,7 +206,7 @@ add_executable(Fibonacci)
 catch_discover_tests(Fibonacci)
 \end{lstlisting}
 
-Note that, in order to have the function available, the Catch module has to be included. For GoogleTest it works very similarly:
+为了使函数可用，必须包含Catch模块。对于GoogleTest，工作原理相似:
 
 \begin{lstlisting}[style=styleCMake]
 include(GoogleTest)
@@ -220,7 +214,7 @@ add_executable(Fibonacci)
 gtest_discover_tests(Fibonacci)
 \end{lstlisting}
 
-When using the discovery functions, each test case defined in a test executable will be treated as its own test by CTest. If tests are exposed like this, the result of a call to CTest might look as follows:
+使用发现功能时，测试可执行文件中定义的每个测试用例都将视为CTest自己的测试，CTest的结果可能如下所示:
 
 \begin{tcblisting}{commandshell={}}
     Start 5: Fibonacci(0) returns 1
@@ -238,9 +232,9 @@ The following tests FAILED:
          5 - Fibonacci(0) returns 1 (Failed)
 \end{tcblisting}
 
-Now, we see exactly which of the defined test cases failed. In this case, the Fibonacci(0) returns 1 test case did not behave as expected. This comes in especially handy when using an editor or IDE with integrated testing functionality. The discovery functions both work by running the specified executable with an option to only print out the test names to register them internally with CTest, so there is a slight overhead added to each build step. Discovering tests more granularly also has the advantage that the execution of them can be better parallelized by CMake, as described in the Running tests in parallel and managing test resources section of this chapter.
+现在，可以看到哪些定义的测试用例失败了。这种情况下，Fibonacci(0)返回1个测试用例没有像预期的那样运行。当使用带有集成测试功能的编辑器或IDE时，这尤其方便。这两个发现函数都通过运行指定的可执行文件来工作，该可执行文件有一个选项，即只打印测试名称以在CTest内部注册它们，因此每个构建步骤都会增加少量开销。更细粒度地发现测试还有一个好处，即CMake可以更好地并行执行测试，详见本章的“管理测试资源——并行运行测试”一节。
 
-Both gtest\_discover\_tests and catch\_discover\_tests can take various options, such as adding a prefix or suffix to the test names or a list of properties to add to the generated tests. The full documentation for the functions can be found here:
+\texttt{gtest\_discover\_tests}和\texttt{catch\_discover\_tests}也有丰富的选项，比如为测试名称添加前缀或后缀，或者为生成的测试添加一组属性。函数的完整文档可以在这里找到:
 
 \begin{itemize}
 \item 
@@ -250,13 +244,13 @@ Catch2: \url{https://github.com/catchorg/Catch2/blob/devel/docs/cmake-integratio
 GoogleTest: \url{https://cmake.org/cmake/help/v3.21/module/GoogleTest.html}
 \end{itemize}
 
-Catch2 and GoogleTest are just two of the many testing frameworks out there; there might be more test suites that bring this functionality with them that might be unknown to the authors. Now, let's move on from finding tests and have a closer look at how to control test behavior.
+Catch2和GoogleTest只是众多测试框架中的两个;可能有更多的测试套件自带这种功能，而这些功能可能是作者所不知道的。现在，让我们从寻找测试开始，进一步了解如何控制测试的行为。
 
-\subsubsubsection{7.2.2\hspace{0.2cm}Advanced ways to determine test success or failure}
+\subsubsubsection{7.2.2\hspace{0.2cm}确定测试成功或失败的高级方法}
  
-By default, CTest determines whether a test failed or passed based on the return value of the command. 0 means all tests were successful, anything other than 0 is interpreted as a failure.
+默认情况下，CTest根据命令的返回值确定测试是失败还是通过。0表示所有测试都成功，否则将解释为失败。
 
-Sometimes, the return value is not enough to determine whether a test passes or fails. If you need to check program output for a certain string, the FAIL\_REGULAR\_EXPRESSION and PASS\_REGULAR\_EXPRESSION test properties can be used,  as shown in the following example:
+有时，返回值不足以确定测试通过或失败。若需要检查某个字符串的程序输出，可以使用FAIL\_REGULAR\_EXPRESSION和PASS\_REGULAR\_EXPRESSION测试属性:
 
 \begin{lstlisting}[style=styleCMake]
 set_tests_properties(some_test PROPERTIES
@@ -264,72 +258,69 @@ set_tests_properties(some_test PROPERTIES
 					PASS_REGULAR_EXPRESSION "[S|s]uccess")
 \end{lstlisting}
 
-These properties would cause the some\_test test to fail if the output contains either "Warning" or "Error". If the "Success" string is found, the test is considered passed . If PASS\_REGULAR\_EXPRESSION is set, the test is considered passed only if thestring is present. In both cases, the return value will be ignored. If a certain return value of a test needs to be ignored, it can be passed with the SKIP\_RETURN\_CODE option.
+若输出包含“Warning”或“Error”，这些属性将导致some\_test测试失败。若有"Success"字符串，则认为测试通过。如果设置了PASS\_REGULAR\_EXPRESSION，则只有该字符串存在，测试才会认为通过。这两种情况下，将忽略返回值。若需要忽略测试的某个返回值，可以使用SKIP\_RETURN\_CODE选项。
 
-Sometimes, a test is expected to fail. In those, setting WILL\_FAIL to true will cause the test result to be inverted:
+有时，会需要测试失败，设置WILL\_FAIL为true将导致测试结果颠倒:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME SomeFailingTerst COMMAND SomeFailingTest)
 set_tests_properties(SomeFailingTest PROPERTIES WILL_FAIL True)
 \end{lstlisting}
 
-This is often better than disabling the test because the test will still be executed on each test run, and if the test unexpectedly starts to pass again, the developer is made aware of it. A special case of test failures is when tests fail to return or take too much time to complete. For this case, CTest provides the means of adding timeouts of tests and even retrying tests in the case of failure.
+这通常比禁用测试要好，因为测试在每次测试运行时仍然会执行，若测试意外地再次开始通过，开发人员会知道。测试失败的一种特殊情况，是当测试无法返回或需要花费太多时间才能完成。对于这种情况，CTest提供了添加测试超时的方法，甚至在失败的情况下重新尝试测试。
 
-\subsubsubsection{7.2.3\hspace{0.2cm}Handling timeouts and repeating tests}
+\subsubsubsection{7.2.3\hspace{0.2cm}处理超时和重复的测试}
 
-Sometimes, we're not just interested in the success or failure of a test, but also in how long it takes to complete. The TIMEOUT test property takes a number of seconds to determine a maximum runtime for a test. If the test exceeds the time, it is terminated and considered failed. The following command would limit the test execution of the test to 10 seconds:
+有时，不仅对测试的成功或失败感兴趣，还对完成测试需要多长时间感兴趣。TIMEOUT测试属性需要数秒来确定测试的最大运行时。若测试超过时间，则终止测试并认为测试失败。以下命令将限制测试的测试执行时间为10秒:
 
 \begin{lstlisting}[style=styleCMake]
 set_tests_properties(timeout_test PROPERTIES TIMEOUT 10)
 \end{lstlisting}
 
-The TIMEOUT property often comes in handy for tests that run the risk of falling into infinite loops or hanging forever for whatever reason.
+对于有陷入无限循环或由于某种原因永远挂起的风险的测试，TIMEOUT属性就很好用。
 
-Alternatively, CTest accepts the -{}-timeout argument to set a global timeout that is applied to all tests that have no TIMEOUT property specified. For those tests that have TIMEOUT defined, the timeout defined in CmakeLists.txt takes precedence over the timeout passed over the command line.
+或者，CTest接受-{}-timeout参数来设置一个全局超时时限，该超时应用于没有指定TIMEOUT 属性的所有测试。对于那些定义了TIMEOUT的测试，CMakeLists.txt中定义的超时优先于通过命令行传递的超时。
 
-To avoid long test execution, the CTest command line accepts the -{}-stop-time argument, which takes the real time of the day as a time limit for the complete set of tests. The following command would set a default timeout of 30 seconds for each test, and the tests would have to be completed before 23:59:
+为了避免长时间的测试执行，CTest命令行接受-{}-stop-time参数，该参数将当天的实时作为完整测试集的时间限制。下面的命令将为每个测试设置一个默认的30秒超时，并且测试必须在23:59之前完成:
 
 \begin{tcblisting}{commandshell={}}
 ctest --timeout 30 --stop-time 23:59
 \end{tcblisting}
 
-ometimes, it can be expected for a test to experience occasional timeouts due to factors outside of our control. Very common cases are tests that need some form of network communication or a resource that has some kind of bandwidth limitation. Sometimes, the only way to get the test to run is to try it again. For this, the -{}-repeat aftertimeout:n command-line argument can be passed to CTest, where n is a number.
+有时，由于我们无法控制的因素，测试可能会偶尔出现超时。常见的情况是，需要某种形式的网络通信或具有某种带宽限制的资源的测试，让测试运行的唯一方法是再次尝试。为此，-{}-repeat aftertimeout:n命令行参数可以传递给CTest，其中n是一个数字。
 
-The -{}-repeat argument actually has three options:
+-{}-repeat参数有三个选项:
 
 \begin{itemize}
 \item 
-after-timeout: This retries the test a number of times if a timeout occurred. Generally, the -{}-timeout option should be passed to CTest whenever repeating after timeouts.
+after-timeout: 若发生超时，这将重试测试多次。当超时后重复时，-{}-timeout选项应该传递给CTest。
 
 \item 
-until-pass: This reruns a test until it passes or until the number of retries is reached. Setting this as a general rule in a CI environment is a bad idea, as tests should generally always pass.
+until-pass: 这将重新运行测试，直到测试通过或达到重试次数为止，将此设置为CI环境中的规则并不是一个好主意。
 
 \item 
-until-fail: Tests are rerun a number of times or until they fail. This is often used if a test fails occasionally to find out how frequently this happens. The -{}-repeatuntil-fail argument works exactly like --repeat:until-fail:n. 
+until-fail: 测试将重新运行多次，直到它们失败。若测试偶尔失败，则经常使用此方法，以了解这种情况发生的频率。-{}-repeatuntil-fail参数的工作原理完全类似于-{}-repeat:until-fail:n。
 \end{itemize}
 
-As mentioned, the reason for failing tests might be the unavailability of resources that the test depends on. One common case for external resources being unavailable is that they are flooded with requests from tests. The Running tests in parallel and managing test resources section describes a few options to avoid such complications. Another common cause for timeouts when accessing external resources is that the resource is not yet available when the tests run. In the next section, we will see how to write test fixtures that can be used to ensure that resources are started before a test run.
+如前所述，测试失败的原因可能是测试所依赖的资源不可用。外部资源不可用的常见情况是它们被来自测试的请求淹没。“管理测试资源——并行运行测试和一节描述了避免这种复杂性的选项。访问外部资源时超时的另一个常见原因是，当测试运行时，该资源还不可用。下一节中，我们将了解如何编写用于确保在测试运行之前启动资源的测试固件。
 
-\subsubsubsection{7.2.4\hspace{0.2cm}Writing test fixtures}
+\subsubsubsection{7.2.4\hspace{0.2cm}编写测试固件}
 
-Tests should, in general, be independent of each other. There are cases where tests might depend on a precondition that is not controlled by the test itself. For instance, a test might require a server to be running in order to test a client. These dependencies can be expressed in CMake by defining them as test fixtures using the FIXTURE\_SETUP, FIXTURE\_CLEANUP, and FIXTURE\_REQUIRED test properties. All three properties take a list of strings to identify the fixture. A test might indicate that it needs a particular fixture by defining the FIXTURE\_REQUIRED property. This will ensure that the test named as fixture completes successfully before it is executed. Similarly, a test might declare it in FIXTURE\_CLEANUP to indicate that it must be run after the completion of the test requiring the fixture. The fixtures defined in the cleanup part are always run, regardless of whether a test succeeded or failed. Consider the following example:
+通常，测试应该彼此独立。有些情况下，测试可能依赖于不受测试本身控制的前提条件。例如，为了测试客户端，测试可能需要运行一个服务器。这些依赖关系可以通过使用FIXTURE\_SETUP、FIXTURE\_CLEANUP和FIXTURE\_REQUIRED测试属性将它们定义为测试固件来表示。所有三个属性都接受一个字符串列表来标识固件，测试可能通过定义FIXTURE\_REQUIRED属性来指定相应的固件。这将确保固件测试在执行之前成功完成。类似地，测试可以在FIXTURE\_CLEANUP中声明它，以表明必须在该固件测试完成后方可运行。无论测试是成功还是失败，清理部分中定义的固件总是会运行。看看下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME start_server COMMAND echo_server --start)
-set_tests_properties(start_server PROPERTIES FIXTURES_SETUP
-	server)
+set_tests_properties(start_server PROPERTIES FIXTURES_SETUP server)
 add_test(NAME stop_server COMMAND echo_server --stop)
-set_tests_properties(stop_server PROPERTIES FIXTURES_CLEANUP
-	server)
+set_tests_properties(stop_server PROPERTIES FIXTURES_CLEANUP server)
 
 add_test(NAME client_test COMMAND echo_client)
-set_tests_properties(client_test PROPERTIES FIXTURES_REQUIRED
-	server)
+set_tests_properties(client_test PROPERTIES FIXTURES_REQUIRED server)
 \end{lstlisting}
 
-In this example, a program called echo\_server is used as a fixture so that another program called echo\_client can use it. The execution of echo\_server with the -{}-start and -{}-stop arguments is formulated as tests with the names start\_server and stop\_server. The start\_server test is marked as the setup of the fixture with the name server. The stop\_server test is set up likewise but is marked as the cleanup routine of the fixture. In the end, the actual test called client\_test is set up and it gets passed the server fixture as a required precondition.
+本例中，名为echo\_server的程序当作固件，以便另一个echo\_client的程序可以使用它。带有-{}-start和-{}-stop参数的echo\_server的执行名称带有start\_server和stop\_server的测试。start\_server测试标记为带有名称server的固件设置。stop\_server测试也进行了类似的设置，但标记为固件清理例程。最后，将设置名为client\_test的实际测试，并将它作为服务器固件必需通过的先决条件。
 
-If, now, the client\_test test is run using CTest, the fixtures are automatically invoked with it. The fixture tests show up as regular tests in the output for CTest, as shown in the following example output:
+现在，若使用CTest运行client\_test测试，则会自动调用固件。固件测试在CTest的输出中显示为常规测试：
 
 \begin{tcblisting}{commandshell={}}
 ctest -R client
@@ -342,18 +333,18 @@ Test project CMake-Best-Practices:
 3/3 Test #10: stop_server ............... Passed 0.00 sec
 \end{tcblisting}
 
-Note that CTest was invoked with a regex filter that only matches the client test, but that CTest starts the fixture anyway. To not overwhelm test fixtures when tests are executed in parallel, they can be defined as resources, as shown in the next section.
+注意，CTest用只匹配客户端测试的正则表达式筛选器，但CTest还是会启动固件。为了在并行执行测试时，不使测试固件压力过重，可以将它们定义为资源，如下一节所示。
 
-\subsubsubsection{7.2.5\hspace{0.2cm}Running tests in parallel and managing test resources}
+\subsubsubsection{7.2.5\hspace{0.2cm}管理测试资源——并行运行测试}
 
-If a project has many tests, executing them in parallel will speed up the tests. By default, CTest runs the tests serially; by passing the -j option to the call to CTest, the tests can be run in parallel. Alternatively, the number of parallel threads can be defined in the CTEST\_PARALLEL\_LEVEL environment variable. By default, CTest assumes that each test will run on a single CPU. If a test requires multiple processors to run successfully, setting the PROCESSORS property for the test can be set to define the number of processors required:
+若项目有许多测试，那么并行执行它们将加快测试的速度。默认情况下，CTest按顺序运行测试，通过将-j选项传递给CTest调用，这些测试可以并行运行，或并行线程数量可以在CTEST\_PARALLEL\_LEVEL环境变量中定义。默认情况下，CTest假定每个测试将在单个CPU上运行。若测试需要多个处理器才能成功运行，可以设置测试的PROCESSORS属性来定义所需的处理器数量:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME concurrency_test COMMAND concurrency_tests)
 set_tests_properties(concurrency_test PROPERTIES PROCESSORS 2)
 \end{lstlisting}
 
-This will tell CTest that the concurrency\_test test requires two CPUs to run. When running tests parallel with -j 8, concurrency\_test will occupy two of the eight available "slots" for parallel execution. If, in this case, the PROCESSORS property is set to 8, this would mean that no other test can run parallel to concurrency\_test. When setting a value for PROCESSORS that is higher than the available number of parallel slots or CPUs that are available on the system, the test will be run as soon as the full pool is available. Sometimes, there are tests that do not just require a specific amount of processors, but that need to run exclusively without any other test running. To achieve this, the RUN\_SERIAL property can be set to true for a test. This might have a serious impact on the overall test performance, so use this with caution. A more granular way to control this is by using the RESOURCE\_LOCK property, which contains a list of strings. The strings have no particular meaning, except that CTest prevents two tests from running in parallel if they list the same strings. In this way, partial serialization can be achieved without halting the whole test execution. It also is a nice way to specify whether tests need a particular unique resource, such as a certain file, a database, or similar. Consider the following example:
+concurrency\_test测试需要两个CPU才能运行。当使用-j 8并行运行测试时，concurrency\_test将占用八个可用的并行执行“槽”中的两个。本例中，若PROCESSORS属性设置为8，则没有其他测试可以与concurrency\_test并行运行。当为PROCESSORS设置的值高于系统上可用的并行槽数或CPU数时，当有CPU可用，就会立即运行测试。有时，有些测试不仅需要特定数量的处理器，而且需要在不运行其他测试的情况下单独运行。为了实现这一点，RUN\_SERIAL属性可以在测试中设置为true。这会对整体测试性能产生严重影响，因此要谨慎使用。更细粒度的控制方法是使用RESOURCE\_LOCK属性，该属性包含一个字符串列表。字符串没有特殊含义，除非CTest阻止两个测试并列运行(若列出的字符串相同)。通过这种方式，可以在不停止整个测试执行的情况下实现部分序列化，这也是指定测试是否需要特定的唯一资源的好方法，例如对某个文件、数据库或类似的东西进行测试时。考虑下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 set_tests_properties(database_test_1 database_test_2 database_
@@ -364,28 +355,28 @@ set_tests_properties(yet_another_test PROPERTIES RESOURCE_LOCK
 	"database;fileX ")
 \end{lstlisting}
 
-In this example, the database\_test\_1, database\_test\_2, and database\_test\_3 tests would be prevented from running in parallel. The some\_other\_test test will not be affected by the database tests, but yet\_another\_test will not run together with any of the database tests and some\_other\_test.
+本例中，database\_test\_1、database\_test\_2和database\_test\_3测试将禁止并行运行。some\_other\_test测试将不受数据库测试的影响，但yet\_another\_test将不会与数据库测试和some\_other\_test一起运行。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Fixtures as Resources]
-While not technically required, if RESOURCE\_LOCK is used together with FIXTURE\_SETUP, FIXTURE\_CLEANUP, and FIXTURE\_REQUIRED, it is good practice to use the same identifiers for the same resources.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=固件为源]
+虽然技术上不需要，但若RESOURCE\_LOCK与FIXTURE\_SETUP、FIXTURE\_CLEANUP和FIXTURE\_REQUIRED一起使用，那么为相同的资源使用相同的标识符是一个很好的方式。
 \end{tcolorbox}
 
-Managing parallelism of tests with RESOURCE\_LOCK is very handy when tests need exclusive access to some resource. In most cases, it is entirely sufficient to manage the parallelism. Since CMake 3.16, this can be controlled on an even more granular level with the RESOURCE\_GROUPS property. Resource groups allow not just the specification of what resources are used, but how much of a resource is used. Common scenarios are defining the amount of memory a particular greedy operation might need or avoiding overrunning the connection limit of a certain service. Resource groups often come into play when working on projects that use the GPU for general-purpose computing, to define how many slots of a GPU each test needs.
+当测试需要独占访问某些资源时，使用RESOURCE\_LOCK管理测试的并行性非常方便。大多数情况下，管理并行性就完全足够了。从CMake 3.16开始，这可以通过RESOURCE\_GROUPS属性在更细粒度的级别上进行控制。资源组不仅允许指定使用什么资源，还允许指定使用多少资源。常见的场景是定义特定贪婪操作可能需要的内存量，或者避免超过特定服务的连接限制。开发使用GPU进行通用计算的项目时，资源组通常会发挥作用，以定义每个测试需要多少个GPU插槽。
 
-Resource groups are quite a step up in complexity compared to simple resource locks. To use them, CTest has to do the following things:
+与简单的资源锁相比，资源组的复杂性高了很多。要使用它们，CTest必须做以下事情:
 
 \begin{itemize}
 \item 
-Know which resources a test needs to run. This is defined by setting the test properties in the project.
+了解测试需要运行哪些资源。这是通过设置项目中的测试属性来定义的。
 
 \item 
-Know which resources a system has available. This is done from outside the project when running the tests.
+了解系统有哪些可用资源。这是在运行测试时从项目外部完成的。
 
 \item 
-Pass the information on which resources to use for the test. This is done by using environment variables.
+传递关于使用哪些资源进行测试的信息。这是通过使用环境变量来实现的。
 \end{itemize}
 
-Like resource locks, resource groups are arbitrary strings used to identify resources. The definition of the actual resource tied to the label is left to the user. The resource groups are defined as name:value pairs, which are separated by commas if there are multiple groups. A test can define what resources to use with the RESOURCE\_GROUPS property, like this:
+与资源锁一样，资源组是用于标识资源的字符串。绑定到标签的实际资源的定义留给用户。资源组定义为名称:值对，如果有多个组，则以逗号分隔。测试可以用RESOURCE\_GROUPS属性定义使用什么资源:
 
 \begin{lstlisting}[style=styleCMake]
 set_property(TEST SomeTest PROPERTY RESOURCE_GROUPS
@@ -396,13 +387,13 @@ set_property(TEST SomeTest PROPERTY RESOURCE_GROUPS
 )
 \end{lstlisting}
 
-In the preceding example, SomeTest states that it uses two CPUs and 500 MB of memory. It uses a total of six instances of a client-server pair, each pair having a number of servers and clients assigned. The first pair consists of one server instance and one client instance, the second pair requires one server but two client instances.
+前面的示例中，SomeTest表示它使用两个CPU和500 MB内存。它总共使用了一个客户机-服务器对的6个实例，每对都分配了一些服务器和客户机。第一对包含一个服务器实例和一个客户端实例，第二对需要一个服务器和两个客户端实例。
 
-The last line, 4, servers:1,clients:1, is shorthand to tell CTest to use four instances of the same pair, consisting of one servers resource and one clients resource. This means this test will not run unless a total of six servers and seven clients are available, in addition to the required CPUs and memory.
+最后一行，4,servers:1,clients:1，使用同一对的四个实例，由一个服务器资源和一个客户机资源组成。除了所需的CPU和内存外，除非总共有6个服务器和7个客户机可用，否则此测试将不会运行。
 
-The available system resources are specified in a JSON file that is passed to CTest, either by the ctest -{}-resource-spec-file command-line parameter or by setting the CTEST\_RESOURCE\_SPEC\_FILE variable when calling CMake. Setting the variable should be done by using cmake -D and not in CMakeLists.txt, as specifying the system resources should be done from outside the project.
+可用的系统资源在传递给CTest的JSON文件中指定，可以通过CTest -{}-resource-spec-file命令行参数指定，也可以通过调用CMake时设置CTEST\_RESOURCE\_SPEC\_FILE变量指定。设置变量应该通过使用cmake -D来完成，而不是在CMakeLists.txt中直接设置，指定系统资源应该从项目外部完成。
 
-A sample resource specification file for the preceding example could look like this:
+上面示例的资源指定文件如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -450,7 +441,7 @@ A sample resource specification file for the preceding example could look like t
 }
 \end{lstlisting}
 
-This file specifies a system with 4,096 MB of memory, eight CPUs, 2x4 server instances, and 2x8 client instances for a total of eight servers and 16 clients. If a resource request of a test cannot be satisfied with the available system resources, it fails to run with an error like this:
+该文件指定一个系统，共有4,096 MB内存、8个CPU、2x4服务器实例和2x8客户端实例，共包含8个服务器和16个客户端。若测试的资源请求不能满足可用的系统资源，将无法运行测试，会出现如下错误:
 
 \begin{tcblisting}{commandshell={}}
 ctest –j $(nproc) --resource-spec-file ../resources.json
@@ -472,21 +463,21 @@ Resource spec file:
   ../resources.json
 \end{tcblisting}
 
-The current example would be able to run with this specification, as it needs a total of six servers and seven clients. CTest has no way of ensuring that the specified resources are actually available or not; this is the task of the user or the CI system. For instance, a resource file might specify that there are eight CPUs available, while the hardware actually only contains four cores.
+当前示例将能够在此环境下运行，因为它总共需要6个服务器和7个客户机。CTest没有办法确保指定的资源是否实际可用;这是用户或CI系统的任务。例如，一个资源文件可能指定有八个可用的CPU，而硬件实际上只有四个核。
 
-The information about the assigned resource groups is passed to the test over environment variables. The CTEST\_RESOURCE\_GROUP\_COUNT environment variable specifies the total number of resource groups assigned to a test. If it is not set, this means that CTest was invoked without an environment file. Tests should check this and act accordingly. If a test cannot run without the resources, it should either fail or indicate that it did not run by returning the respective return code or string defined in the SKIP\_RETURN\_CODE or SKIP\_REGULAR\_EXPRESSION property. The resource groups assigned to the test are passed with pairs of environment variables:
+关于已分配资源组的信息通过环境变量传递给测试，CTEST\_RESOURCE\_GROUP\_COUNT环境变量指定分配给测试的资源组的总数。若没有设置，则在没有环境文件的情况下使用CTest。测试应该检查这一点并相应地采取行动，若一个测试在没有资源的情况下不能运行，要么失败，要么通过返回各自的返回代码或在SKIP\_RETURN\_CODE或SKIP\_REGULAR\_EXPRESSION属性中定义的字符串来指示它没有运行。分配给测试的资源组通过成对的环境变量指定:
 
 \begin{itemize}
 \item 
-CTEST\_RESOURCE\_GROUP\_<ID>, which will contain the type of the resource groups. In the example from earlier, this will be either "mem\_mb", "cpus", "clients", or "servers".
+CTEST\_RESOURCE\_GROUP\_<ID>将包含资源组的类型。前面的示例中，为"mem\_mb"、"cpus"、"clients"或"servers"。
 
 \item 
-CTEST\_RESOURCE\_GROUP\_<ID>\_<TYPE>, which will contain a pair of id:slots for the types.
+CTEST\_RESOURCE\_GROUP\_<ID>\_<TYPE>，将包含用于类型的一对id:slots。
 \end{itemize}
 
-It is up to the implementation of the test on how the resource groups are used and internally distributed.
+这取决于如何使用和内部分布资源组的测试实现。
 
-Writing and running tests is obviously one of the major boosters of code quality. However, another interesting metric is often how much of your code is actually covered by the tests. Surveying and reporting code coverage can give interesting hints, not just about how widely software is tested, but also about where the gaps lie.
+编写和运行测试显然是提高代码质量的主要因素。然而，另一个有趣的指标通常是测试实际覆盖了多少代码。调查和报告代码覆盖率可以提供有趣的提示，这不仅是关于软件测试的范围，还关乎于差异。
 
 
 

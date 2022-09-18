@@ -1,7 +1,7 @@
 
 
 
-The most generic way to add a custom task is by creating a custom target that executes an external task as a sequence of commands. Custom targets are handled like any other library or executable target, with the difference that they do not invoke the compiler and linker; instead, they do something defined by the user. Custom targets are defined using the add\_custom\_target command:
+添加自定义任务的最通用方法是创建自定义目标，该目标以命令序列的形式执行外部任务。自定义目标的处理方式与任何其他库或可执行目标相同，不同的是不调用编译器和链接器，它们执行由用户定义的操作。可以使用\texttt{add\_custom\_target}定义自定义目标:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(Name [ALL] [command1 [args1...]]
@@ -16,23 +16,23 @@ add_custom_target(Name [ALL] [command1 [args1...]]
 				[SOURCES src1 [src2...]])
 \end{lstlisting}
 
-The core of the add\_custom\_target command is the list of commands that are passed with the COMMAND option. Although the first command can be passed without this option, it is good practice to always add the COMMAND option to any add\_custom\_target call. By default, custom targets are only executed if they're explicitly requested unless the ALL option is specified. Custom targets are always considered to be out of date, so the commands that are specified internally are always run, regardless of whether they produce the same result over and over again. With the DEPENDS keyword, custom targets can be made to depend on the files and outputs of custom commands that have been defined with the add\_custom\_command function or by other targets. To make the custom target depend on another target, use the add\_dependencies function. The same works the other way round – any target may depend on a custom target. If the custom target creates files, these can be listed under the BYPRODUCTS option. Any file that's listed there will be marked with the GENERATED property, which is used by CMake to determine whether a build is out of date and to find out which files to clean. However, tasks that create files using add\_custom\_command might be better suited, as described later in this section.
+\texttt{add\_custom\_target}的核心是通过COMMAND选项传递的命令列表。虽然第一个命令可以不带这个选项传递，但最好在\texttt{add\_custom\_target}调用中添加COMMAND选项。默认情况下，定制目标只在显式请求时执行，除非指定了ALL选项。自定义目标总认为是过时的，因此总是运行指定的命令，而不管是否会反复产生相同的结果。使用DEPENDS关键字，可以使定制目标依赖于使用\texttt{add\_custom\_command}或其他目标定义的定制命令的文件和输出。要使自定义目标依赖于另一个目标，可以使用\texttt{add\_dependencies}。若使用自定义目标创建文件，可以在BYPRODUCTS选项下列出这些文件。列出的任何文件都将使用GENERATED属性标记，CMake使用该属性来确定构建是否过期，并找出需要清理的文件。但是，使用\texttt{add\_custom\_command}创建文件的任务可能更适合，如本节后面所述。
 
-By default, these commands are executed in the current binary directory, which is stored in the CMAKE\_CURRENT\_BINARY\_DIRECTORY cache variable. If needed, this can be changed with the WORKIN\_DIRECTORY option. This option can either be an absolute path or a relative path if it is a relative path to the current binary directory.
+默认情况下，命令在当前二进制目录中执行，该目录存储在CMAKE\_CURRENT\_BINARY\_DIRECTORY缓存变量中。若需要修改，这可以通过WORKIN\_DIRECTORY选项来更改。该选项可以是绝对路径，也可以是相对路径(是当前二进制目录的相对路径)。
 
-The COMMENT option is used to specify a message that is printed right before the command runs, which can come in handy if a command runs silently. Unfortunately, not all generators show these messages, so using this to display critical information is somewhat unreliable.
+COMMENT选项用于指定在命令运行之前打印的消息，若命令以静默方式运行，那么可以使用这个选项。但并不是所有的生成器都显示这些消息，因此使用它来显示关键信息不太可靠。
 
-The VERBATIM flag causes all the commands to be passed directly to the platform without further escaping or variable substitution by the underlying shell. CMake itself will still replace variables that are passed to the commands or the arguments. Whenever escaping might be an issue, passing the VERBATIM flag is recommended. It is also good practice to write custom tasks so that they are independent of the underlying platform. You can find more hints about how to create platform-independent commands later in this chapter in the Using CMake for platform-independent commands section.
+VERBATIM标志使所有命令直接传递到平台，而无需进一步转义或由底层shell替换变量。CMake本身仍然会替换传递给命令或参数的变量。当转义可能出现问题时，建议使用VERBATIM标志。编写自定义任务，使其独立于底层平台也是一种很好的方式。可以在本章后面的“与平台无关命令”一节中找到更多关于如何创建平台无关命令的提示。
 
-The USES\_TERMINAL option instructs CMake to give the command access to the terminal if possible. If the Ninja generator is used, this means that it runs in the terminal job pool. All the commands in this pool are executed serially.
+可能的话，USES\_TERMINAL选项指示CMake提供对终端的命令访问。若使用了Ninja生成器，则在终端作业池中运行。该池中的所有命令都是串行执行的。
 
-The JOB\_POOL option can be used when you're generating with Ninja to control the concurrency of the job. It is rarely used and cannot be used together with the USES\_TERMINAL flag. You will rarely need to interfere with Ninja's job pool and handling it is not trivial. If you wish to learn more, further information can be found in the official documentation for CMake's JOB\_POOLS property.
+在使用Ninja生成文件时，可以使用JOB\_POOL选项来控制作业的并发性。它很少使用，并不能与USES\_TERMINAL标志一起使用。但开发者很少需要干预Ninja的工作池，并且处理它也不是一件小事。若想了解更多信息，可以在CMake的JOB\_POOLS属性的官方文档中找到更多信息。
 
-The SOURCES properties take a list of source files that are associated with the custom target. The property does not affect the source files but can help make the files visible in some IDEs. If a command relies on files such as scripts that are delivered together with the project, these should be added here.
+SOURCES属性接受与自定义目标相关联的源文件列表。该属性不影响源文件，但可以帮助使文件在某些IDE中可见。若命令依赖于与项目一起交付的文件，如脚本，则应该在这里添加这些文件。
 
-The COMMAND\_EXPAND\_LISTS option tells CMake to expand lists before passing them to the command. This is sometimes necessary because, in CMake, lists are just strings separated by semicolons, which may lead to syntax errors. When you're passing the COMMAND\_EXPAND\_LISTS option, the semicolons are replaced with a suitable whitespace character, depending on the platform. The expansion includes lists that have been generated using the \$<JOIN: generator expression.
+COMMAND\_EXPAND\_LISTS选项将列表传递给命令之前展开列表。有时这是必要的，因为在CMake中，列表只是由分号分隔的字符串，这可能会导致语法错误。当使用COMMAND\_EXPAND\_LISTS选项时，分号将替换为适当的空白字符，具体取决于平台。扩展包括使用\$<JOIN:的生成器表达式生成的列表。
 
-The following is an example of a custom target that uses an external program called CreateHash to create a hash for the output of another target:
+下面是一个自定义目标的例子，使用一个叫做CreateHash的外部程序为另一个目标的输出哈希值:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(SomeExe)
@@ -40,25 +40,25 @@ add_custom_target(CreateHash ALL COMMAND Somehasher
 	$<TARGET_FILE:SomeExe>)
 \end{lstlisting}
 
-This example creates a custom target called CreateHash that invokes the external SomeHasher program with the binary file of the SomeExe target as an argument. Note that the binary file is retrieved using the \$<TARGET\_FILE:SomeExe> generator expression. This serves two purposes: it removes the need for the user to track the filename of the binary of the target and it adds an implicit dependency between the two targets. CMake will recognize these implicit dependencies and execute the targets in the correct order. If the target that produces the needed file hasn't been built yet, CMake will automatically build it. You can also use the \$<TARGET\_FILE: generator to directly execute an executable that's been created by another target. The following generator expressions cause implicit dependencies between targets:
+这个例子创建了一个名为CreateHash的自定义目标，它使用SomeExe目标的二进制文件作为参数调用外部SomeHasher程序。注意，二进制文件是使用\$<TARGET\_FILE:SomeExe>生成器表达式。这有两个目的:消除了用户跟踪目标二进制文件文件名的需要，并在两个目标之间添加了隐式依赖。CMake将识别这些隐式依赖关系，并按正确的顺序执行目标。若生成所需文件的目标还没有构建，CMake将自动构建。也可以使用\$<TARGET\_FILE:生成器直接执行由另一个目标创建的可执行文件。以下生成器表达式会导致目标之间的隐式依赖，生成器直接执行由另一个目标创建的可执行文件：
 
 \begin{itemize}
 \item 
-\$<TARGET\_FILE:target>: This contains the full path to the main binary file of the target, such as.exe, .so, or .dll.
+\$<TARGET\_FILE:target>: 包含目标的主二进制文件的完整路径，例如.exe、.so或.dll。
 
 \item 
-\$<TARGET\_LINKER\_FILE: target>: This contains the full path to the file that's used for linking against the target. This is usually the library file itself, except on Windows, where it will be the .lib file associated with the DLL.
+\$<TARGET\_LINKER\_FILE: target>: 包含用于链接到目标的文件的完整路径。这通常是库文件本身，除了在Windows上，它将是与DLL关联的.lib文件。
 
 \item 
-\$<TARGET\_SONAME\_FILE: target>: This contains the library file and its full name, including any number that's been set by the SOVERSION property, such as.so.3.
+\$<TARGET\_SONAME\_FILE: target>: 这包含库文件及其全名，包括SOVERSION属性设置的任何数字，例如.so.3。
 
 \item
-\$<TARGET\_PDB\_FILE: target>: This contains the full path to the generated program database file that's used for debugging. Creating custom targets is one way to execute external tasks during build time. Another way is to define custom commands. Custom commands can be used to add custom tasks to existing targets, including custom targets.
+\$<TARGET\_PDB\_FILE: target>: 这包含用于调试的生成的程序数据库文件的完整路径。创建自定义目标是在构建时执行外部任务的一种方法。另一种方法是定义自定义命令。自定义命令可用于向现有目标(包括自定义目标)添加自定义任务。
 \end{itemize}
 
-\subsubsubsection{8.3.1\hspace{0.2cm}Adding custom tasks to existing targets}
+\subsubsubsection{8.3.1\hspace{0.2cm}向现有目标添加自定义任务}
 
-Sometimes, you may need to perform an additional, external task when building a target. In CMake, you can achieve this with add\_custom\_command, which has two signatures. One is used to hook commands into existing targets, while the other is used to generate files. We will cover this later in this section. The signature for adding commands to an existing target looks like this:
+有时，在构建目标时可能需要执行外部任务。CMake中可以使用\texttt{add\_custom\_command}来实现这一点，它有两个签名。一个用于将命令与现有目标挂钩，而另一个用于生成文件。向现有目标添加命令的签名如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(TARGET <target>
@@ -72,22 +72,22 @@ add_custom_command(TARGET <target>
 					[COMMAND_EXPAND_LISTS])
 \end{lstlisting}
 
-Most of the options work similarly to those in add\_custom\_target, as described earlier. The TARGET property can be any target that is defined in the current directory, which is a limitation of the command, although it is rarely an issue. Commands can be hooked into the build at the following times:
+大多数选项的工作原理类似于\texttt{add\_custom\_target}中的选项。TARGET属性可以是当前目录中定义的任何目标，这是该命令的一个限制。可以在以下时段将命令连接到构建中:
 
 \begin{itemize}
 \item 
-PRE\_BUILD: In Visual Studio, this command is executed before any other build steps are executed. When you're using other generators, it will run just before the PRE\_LINK commands.
+PRE\_BUILD: 在Visual Studio中，此命令在执行任何其他构建步骤之前执行。当使用其他生成器时，会在PRE\_LINK命令之前运行。
 
 \item 
-PRE\_LINK: This command will be run after the sources have been compiled, but before the executable or the archiver tool has been linked to static libraries.
+PRE\_LINK: 此命令将在编译源代码之后运行，在可执行文件或存档工具链接到静态库之前运行。
 
 \item 
-POS\_BUILD: This runs the command after all the other build rules have been executed.
+POS\_BUILD: 这将在执行所有其他构建规则后运行该命令。
 \end{itemize}
 
-The most common way to execute custom steps is by using POST\_BUILD; the other two are rarely used either because of limited support or because they can neither influence the linking nor the build.
+执行自定义步骤最常见的方法是使用POST\_BUILD;其他两个选项很少使用，要么是因为支持有限，要么是因为它们既不能影响链接，也不能影响构建。
 
-Adding a custom command to an existing target is relatively straightforward. The following code adds a command that generates and stores the hash of a built file after each compilation:
+向现有目标添加自定义命令相对简单。下面的代码添加了一个命令，在每次编译后生成并存储构建文件的哈希码:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(MyExecutable)
@@ -100,13 +100,13 @@ add_custom_command(TARGET MyExecutable
 )
 \end{lstlisting}
 
-In this example, a custom executable called hasher is being used to generate the hash of the output file of the MyExectuable target.
+在这个例子中，一个名为hashher的自定义可执行文件用来生成myexecutable目标的输出文件的哈希码。
 
-Often, the reason you may need to execute something before a build is to change files or to generate additional information. For this, the second signature is often the better choice. Let's take a closer look.
+通常，需要在构建之前执行某些操作的原因是更改文件或生成信息。为此，第二个签名通常是更好的选择。
 
-\subsubsubsection{8.3.2\hspace{0.2cm}Generating files with custom tasks}
+\subsubsubsection{8.3.2\hspace{0.2cm}使用自定义任务生成文件}
 
-Typically, we want custom tasks to produce a specific output file. This can be done by defining custom targets and setting the necessary dependencies between the targets, or by hooking into the build steps, as described earlier. Unfortunately, the PRE\_BUILD hook is unreliable because only the Visual Studio generator supports it properly. So, a better way to do this is to create a custom command that creates the file by using the second signature of the add\_custom\_command function:
+通常，希望自定义任务产生特定的输出文件。这可以通过定义自定义目标，并在目标之间设置必要的依赖项来实现，或者通过与构建步骤挂钩。不幸的是，PRE\_BUILD不可靠，因为只有Visual Studio生成器正确地支持。因此，更好的方法是创建一个自定义命令，通过使用add\_custom\_command函数的第二个签名来创建文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT output1 [output2 ...]
@@ -125,13 +125,13 @@ add_custom_command(OUTPUT output1 [output2 ...]
 					[COMMAND_EXPAND_LISTS])
 \end{lstlisting}
 
-This signature of add\_custom\_command defines a command that generates a file specified in OUTPUT. Most of the options of the command are very similar to add\_custom\_target and the signature for hooking custom tasks into build steps. The DEPENDS option can be used to manually specify a dependency to either files or targets. Note that in comparison, the DEPENDS option of custom targets can only point to files. If any of the dependencies are updated by a build or by CMake, the custom command is run again. The MAIN\_DEPENDENCY option is closely related, which specifies the primary input file for the command. It works like the DEPENDS option does, except that it only takes one file. MAIN\_DEPENDENCY is mainly used to tell Visual Studio where to add the custom command.
+\texttt{add\_custom\_command}的这个签名定义了一个生成OUTPUT中指定的文件的命令。该命令的大多数选项都非常类似于\texttt{add\_custom\_target}和将自定义任务挂钩到构建步骤的签名。DEPENDS选项可用于手动指定文件或目标的依赖项。相比之下，自定义目标的DEPENDS选项只能指向文件。若构建或CMake更新了任何依赖项，则会再次运行自定义命令。MAIN\_DEPENDENCY选项与此密切相关，指定命令的主要输入文件，工作原理与DEPENDS选项类似，只不过它只接受一个文件。MAIN\_DEPENDENCY主要用来告诉Visual Studio在哪里添加自定义命令。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-If a source file is listed as MAIN\_DEPENDENCY, then the custom command replaces the normal compilation of the file listed, which can lead to linker errors.
+若源文件出现在MAIN\_DEPENDENCY中，那么自定义命令将取代所列文件的正常编译，这可能导致链接器错误。
 \end{tcolorbox}
 
-The other two dependency-related options, IMPLICIT\_DEPENDS and DEPFILE, are rarely used because their support is limited to the Makefile generator. IMPLICT\_DEPENDS tells CMake to use a C or C++ scanner to detect any compile-time dependencies of the files listed and create the dependencies from that. The other option, DEPFILE, can be used to point to a .d dependency file, which is generated by the Makefile project. The .d files originally stem from the GNU make project and can be powerful to use but are also complex and should not be manually managed for most projects. The following example illustrates how a custom command can be used to generate a source file before a regular target is run, based on another file that is being used for input:
+其他两个与依赖相关的选项IMPLICIT\_DEPENDS和DEPFILE很少使用，因为它们的支持仅限于Makefile生成器。IMPLICT\_DEPENDS告诉CMake使用C或C++扫描器来检测所列文件的任何编译时依赖项，并从中创建依赖项。另一个选项DEPFILE可以用来指向一个.d依赖文件，该文件是由Makefile项目生成的.d文件最初起源于GNU make项目，用起来很强大，但也很复杂，不应该对大多数项目进行手动管理。下面的例子说明了如何使用自定义命令在常规目标文件运行之前生成一个源文件，基于另一个用于输入的文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
@@ -148,11 +148,9 @@ add_executable(
 )
 \end{lstlisting}
 
-Several things are happening in this example. First, the custom command defines the main.cpp file in the current binary directive as an OUTPUT file. Then, the command that generates this file is defined – here, this is using an imaginary program called sourceFileGenerator – which converts a message file into a .cpp file. The DEPENDS part states that this command should be rerun every time the message.txt file changes.
+这个例子中发生了几件事。首先，自定义命令将当前二进制指令中的main.cpp文件定义为OUTPUT文件。然后，定义生成该文件的命令——这里使用一个名为sourceFileGenerator的程序——将消息文件转换为.cpp文件。DEPENDS部分说明，每次message.txt文件更改时都应该重新运行此命令。
 
-Later, the target for the executable is created. Since the executable is referencing the main.cpp file specified in the OUTPUT section of the custom command, CMake will implicitly add the necessary dependency between the command and the target. Using custom commands in this way is much more reliable and portable than using the PRE\_BUILD directive as it works with all generators. Sometimes, to create the desired output, more than one command is needed. If a previous
-
-command that produces the same output exists, commands can be chained by using the APPEND option. Custom commands that use APPEND may only define additional COMMAND and DEPENDS options; the other options are ignored. If two commands produce the same output file, CMake will print an error unless APPEND is specified. This is mainly useful if a command is only optionally executed. Consider the following example:
+稍后，为可执行文件创建目标。由于可执行文件引用自定义命令的OUTPUT部分中指定的main.cpp文件，CMake将隐式地在命令和目标之间添加必要的依赖关系。因为它适用于所有生成器，所以以这种方式使用自定义命令比使用PRE\_BUILD指令更加可靠和可移植。有时，为了创建所需的输出，需要多个命令。如果存在产生相同输出的前一个命令，则可以使用APPEND选项将命令链接起来。使用APPEND的自定义命令可能只定义额外的COMMAND和DEPENDS选项，其他选项被忽略。若两个命令产生相同的输出文件，CMake将输出错误，除非指定了APPEND。若命令只是可选执行，这很有用。看看下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT archive.tar.gz
@@ -170,7 +168,7 @@ add_custom_command(OUTPUT archive.tar.gz
 )
 \end{lstlisting}
 
-In this example, the output file of a target, MyTarget, has been added to a tar.gz archive; later, another file is added to the same archive. Note that the first command automatically depends on MyTarget because it uses the binary file that was created in the  command. However, it will not automatically be executed by a build. The second custom command lists the same output file as the first command but adds the compressed file as a second output. By specifying APPEND, the second command is automatically executed whenever the first command is executed. If the APPEND keyword is missing, CMake will print out an error, similar to the following:
+这个例子中，目标的输出文件MyTarget被添加到tar.gz文件中。之后，另一个文件添加到相同的文件中。注意，第一个命令自动依赖于MyTarget，因为其使用命令创建相应的二进制文件，但它不会由构建自动执行。第二个自定义命令列出与第一个命令相同的输出文件，但将压缩文件添加为第二个输出。通过指定APPEND，在执行第一个命令时自动执行第二个命令。若缺少APPEND关键字，CMake将输出类似于下面的错误:
 
 \begin{tcblisting}{commandshell={}}
 CMake Error at CMakeLists.txt:30 (add_custom_command):
@@ -179,7 +177,7 @@ CMake Error at CMakeLists.txt:30 (add_custom_command):
   which already has a custom rule.
 \end{tcblisting}
 
-As we mentioned previously, the custom commands in this example implicitly depend on MyTarget but they will not be executed automatically. To execute them, the recommended practice is to create a custom target that depends on the output file, which can be generated like so:
+正如前面提到的，本例中的定制命令隐式地依赖于MyTarget，但不会自动执行。要执行它们，建议创建一个依赖于输出文件的自定义目标:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(create_archive ALL DEPENDS
@@ -187,7 +185,7 @@ add_custom_target(create_archive ALL DEPENDS
 )
 \end{lstlisting}
 
-Here, a custom target called create\_archive has been created that is executed as part of the All build. Since it depends on the output of the custom commands, building the target will invoke the custom commands. The custom commands, in turn, depend on MyTarget, so building create\_archive will also trigger a build of MyTarget if it is not already up to date.
+这里，创建了一个名为create\_archive的自定义目标它作为All构建的一部分执行。因为它依赖于自定义命令的输出，所以构建目标将调用自定义命令，依赖于MyTarget。若压缩包不是新的，则构建create\_archive也会触发MyTarget的构建。
 
-Both the add\_custom\_command and add\_custom\_target custom tasks are executed during the build step of CMake. It is possible to add tasks at configuration time if necessary. We'll look at this in the next section.
+\texttt{add\_custom\_command}和\texttt{add\_custom\_target}自定义任务都在CMake的构建步骤中执行。若需要，可以在配置时添加任务。我们将在下一节中讨论这个问题。
 

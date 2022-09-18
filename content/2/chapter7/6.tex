@@ -1,16 +1,16 @@
-So far, we have only talked about build types such as Debug, Release, RelWithDebInfo, and MinSizeRel, which are provided by CMake by default. These build types can be extended with custom build types that pass global flags to all targets. For the code quality tools that rely on certain compiler flags, providing a custom build type can simplify CMakeLists.txt considerably, especially for large projects. Creating a custom build type is also much preferred to directly interfere with the global CMAKE\_<LANG>\_FLAGS.
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Do Not Override CMAKE\_<LANG>\_FLAGS]
-Setting the global compiler option is preferred over the generic CMAKE\_<LANG>\_FLAGS in your CMakeLists.txt. These flags are intended to be set outside the project, either by passing them over the command line or by supplying them with a toolchain file. Modifying them inside a project has a high chance of interfering with the cases where they are set from the outside.
+我们讨论了诸如Debug、Release、RelWithDebInfo和MinSizeRel等构建类型，这些都是由CMake默认提供的。这些构建类型可以通过将全局标志传递给所有目标的自定义构建类型进行扩展。对于依赖于某些编译器标志的代码质量工具，提供自定义构建类型可以大大简化CMakeLists.txt，特别是对于大型项目。创建自定义构建类型也可以直接影响全局CMAKE\_<LANG>\_FLAGS。
+
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=别覆盖CMAKE\_<LANG>\_FLAGS]
+设置全局编译器选项优先于CMakeLists.txt中的CMAKE\_<LANG>\_FLAGS。这些标志旨在在项目外部设置，可以通过命令行传递，也可以通过工具链文件提供。在项目内部修改很有可能会影响从外部设置的情况。
 \end{tcolorbox}
 
-For multi-configuration generators such as MSVC or Ninja Multi-Config, the available build types are stored in the CMAKE\_CONFIGURATION\_TYPES cache variable. For single configuration generators such as Make or Ninja, the current build type is stored in the CMAKE\_BUILD\_TYPE variable. Custom build types should be defined on the top-level project.
+对于多配置生成器，如MSVC或Ninja Multi-Config，可用的构建类型存储在CMAKE\_CONFIGURATION\_TYPES缓存变量中。对于单个配置生成器，如Make或Ninja，当前构建类型存储在CMAKE\_BUILD\_TYPE变量中。应该在顶级项目上定义自定义构建类型。
 
-A custom build type called Coverage could be added to CMakeLists.txt like this:
+Coverage的自定义构建类型可以像这样添加到CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
-get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_
-	MULTI)
+get_property(IS_MULTI_CONFIG GLOBAL PROPERTY GENERATOR_IS_MULTI)
 if(IS_MULTI_CONFIG_GENERATOR)
 	if(NOT "Coverage" IN_LIST CMAKE_CONFIGURATION_TYPES)
 		list(APPEND CMAKE_CONFIGURATION_TYPES Coverage)
@@ -22,28 +22,27 @@ set_property(CACHE CMAKE_BUILD_TYPE
 	PROPERTY STRINGS ${KNOWN_BUILD_TYPES}
 )
 if(NOT CMAKE_BUILD_TYPE IN_LIST KNOWN_BUILD_TYPES)
-	message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_
-		TYPE}")
+	message(FATAL_ERROR "Unknown build type: ${CMAKE_BUILD_TYPE}")
 endif()
 \end{lstlisting}
 
-Let's see what happens in the preceding example:
+看看在前面的例子中发生了什么:
 
 \begin{itemize}
 \item 
-First, it is determined whether the current Generator is a multi or single configuration generator. This is stored in the GENERATOR\_IS\_MULTI\_CONFIG global property. Since the property cannot be used directly in an if statement, the property is retrieved and stored in the IS\_MULTI\_CONFIG variable.
+首先，确定当前生成器是多配置，还是单配置，存储在GENERATOR\_IS\_MULTI\_CONFIG全局属性中。由于该属性不能直接在if语句中使用，因此该属性检索并存储在IS\_MULTI\_CONFIG变量中。
 
 \item 
-If the current generator is indeed a multi-configuration generator, the custom build configuration called Coverage is added to CMAKE\_CONFIGURATION\_TYPES and made available to the generator, but only if it does not yet exist.
+若当前生成器确实是多配置生成器，则将名为Coverage的自定义构建配置添加到CMAKE\_CONFIGURATION\_TYPES中，并使生成器可用，但只有在它还不存在的情况下可用。
 
 \item 
-If the generator is a single configuration generator, a hint that the Coverage build exists is added by setting the STRINGS property of the CMAKE\_BUILD\_TYPE cache variable. This will create a drop-down menu with the valid options in the CMake GUI. For convenience, the supported build types are stored in the KNOWN\_BUILD\_TYPES variable
+若生成器是单配置生成器，则通过设置CMAKE\_BUILD\_TYPE缓存变量的STRINGS属性来添加Coverage构建存在的提示。这将在CMake GUI中创建一个带有有效选项的下拉菜单。为方便起见，支持的构建类型存储在KNOWN\_BUILD\_TYPES变量中。
 
 \item 
-As the current build type is usually supplied from the outside for single configuration generators, it is prudent to check for unknown build types and abort the configuration if an unknown build type was specified. Printing a message as FATAL\_ERROR will cause CMake to stop the build.
+由于当前生成类型通常从外部提供给单个配置生成器，因此谨慎的做法是检查未知的生成类型，若指定了未知的生成类型，则中止配置。打印FATAL\_ERROR消息将使CMake停止构建。
 \end{itemize}
 
-With this, the Coverage build type is added to CMake, but the build type is not yet configured to add a custom compiler and linker flags to the build. To define the flags, two sets of cache variables are used:
+这样，Coverage构建类型就添加到CMake中了，但构建类型还没有配置为向构建中添加自定义编译器和链接器标志。要定义标志，需要使用两组缓存变量:
 
 \begin{itemize}
 \item 
@@ -53,7 +52,7 @@ CMAKE\_<LANG>\_FLAGS\_<CONFIGURATION>
 CMAKE\_<TARGET\_TYPE>\_LINKER\_FLAGS\_<CONFIGURATION>
 \end{itemize}
 
-<CONFIGURATION> is the name of the custom build type, <LANG> is the programming language, and <TARGET\_TYPE> for the linker flags are either executable or the various types of libraries. It can be useful to base the configuration for the custom build on existing build types to reuse any of the configuration options. The following example sets up the Coverage build type for a Clang or GCC compatible compiler based on the flags of the Debug build type:
+<CONFIGURATION>是自定义构建类型的名称，<LANG>是编程语言，而链接器标志的<TARGET\_TYPE>是可执行的或各种类型的库。将自定义构建的配置建立在现有构建类型的基础上，以便重用配置选项。以下示例基于Debug构建类型的标志为Clang或GCC兼容编译器设置Coverage构建类型:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_C_FLAGS_COVERAGE
@@ -71,7 +70,7 @@ set(CMAKE_SHARED_LINKER_FLAGS_COVERAGE
 )
 \end{lstlisting}
 
-The flags can also contain generator expressions to account for different compilers when setting the flags. Marking the flags as advanced will help prevent accidental changes to the variables by the user:
+这些标志还可以包含生成器表达式，以便在设置标志时考虑到不同的编译器。将标志标记为高级有助于防止用户对变量的意外更改:
 
 \begin{lstlisting}[style=styleCMake]
 mark_as_advanced(CMAKE_C_FLAGS_COVERAGE
@@ -83,16 +82,15 @@ mark_as_advanced(CMAKE_C_FLAGS_COVERAGE
 )
 \end{lstlisting}
 
-Sometimes the filename for libraries should reflect that they are created with a special build type. Setting CMAKE\_<CONFIGURATION>\_POSTFIX for the custom build type will achieve that. This is already common practice for debug builds so the files can be distinguished from the release build when packaged together. Related to this is the DEBUG\_CONFIGURATIONS global property, which contains the configurations that are considered non-optimized and are used for debugging. If the custom build is considered a non-release build, adding to the property, as follows, should be considered:
+有时库文件名应该反映它们是用特殊的构建类型创建的。为自定义构建类型设置CMAKE\_<CONFIGURATION>\_POSTFIX将实现此目的。这是Debug版本的常见方式，因此当打包在一起时，可以将文件与发布版本版本区分开来。与此相关的是DEBUG\_CONFIGURATIONS全局属性，包含认为是未优化的配置，并用于调试。若自定义构建视为非发布构建，则应考虑向属性中添加如下内容:
 
 \begin{lstlisting}[style=styleCMake]
-set_property(GLOBAL APPEND PROPERTY DEBUG_CONFIGURATIONS
-	Coverage)
+set_property(GLOBAL APPEND PROPERTY DEBUG_CONFIGURATIONS Coverage)
 \end{lstlisting}
 
-The DEBUG\_CONFIGURATION property should be set on the top-level project before any calls to target\_link\_libraries. The DEBUG\_CONFIGURATIONS property is currently only used by target\_link\_libraries where, for historical reasons, the libraries can be prefixed with debug or optimized to indicate that they should only be linked for the respective build configuration. Nowadays, this is rarely used, as generator expressions allow for more granular control of this.
+DEBUG\_CONFIGURATION属性应该在调用\texttt{target\_link\_libraries}之前在顶层项目中设置。DEBUG\_CONFIGURATIONS属性目前只有\texttt{target\_link\_libraries}使用，由于历史原因，这些库可以以DEBUG作为前缀，或者进行优化，以表明应该链接到各自的构建配置中。现在，这很少使用了，因为生成器表达式的控制粒度更细。
 
-With this, we conclude this chapter. We have covered the most common aspects of testing and quality tools, and hope that we can contribute to your journey towards excellent software quality.
+本章就到此结束。我们已经了解了测试和质量工具最常见的方面，并希望可以为您的卓越软件质量之旅做出贡献。
 
 
 

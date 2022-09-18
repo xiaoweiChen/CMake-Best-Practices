@@ -11,7 +11,7 @@ Whenever file operations must be performed by a custom task, use cmake –E .
 
 With cmake -E, you can get pretty far in most cases. Sometimes, however, more complex operations need to be done. For this, CMake can run in script mode, which executes CMake files.
 
-\subsubsubsection{8.6.1\hspace{0.2cm}Executing CMake files as scripts}
+\subsubsubsection{8.6.1\hspace{0.2cm}将CMake文件作为脚本执行}
 
 CMake's script mode is a very powerful feature when it comes to creating cross-platform scripts. It's powerful because it allows you to create scripts that are completely platformagnostic. By invoking cmake -P <script>.cmake, the specified CMake file is executed. The script files may not contain any commands that define a build target. Arguments may be passed as variables with the -D flag, but this must be done before the -P option. Alternatively, the arguments may just be appended after the script name so that they can be retrieved with the CMAKE\_ARGV[n] variables. The number of arguments is stored in the CMAKE\_ARGC variable. The following script, which generates the hash of a file and stores it in another, demonstrates how to use positional arguments: 
 
