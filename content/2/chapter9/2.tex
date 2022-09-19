@@ -1,16 +1,16 @@
-While building software on a multitude of configurations, compilers, and platforms is CMake's greatest strength, it is also one of its greatest weaknesses as this often makes it hard for a programmer to figure out which build setups have actually been tested and are working for a given piece of software. Since version 3.19, CMake has a feature called presets that lets us handle these scenarios in a reliable and convenient way. Earlier, developers had to rely on documentation and fuzzy conventions to figure out the preferred configuration of a CMake project. Presets can specify the build directory, generators to use, target architecture, host toolchain, cache variables, and environment variables to use with a project. Since CMake 3.20, there are additional presets that affect the build and test phases as well.
+虽然多配置、编译器和平台上构建软件是CMake的优势，但这也是其最大的弱点，因为这通常使开发者很难确定哪些构建设置进行过测试，并且适用于给定的软件。3.19版本起，CMake有了预设的特性，可以以可靠和方便的方式处理这些场景。以前，开发人员必须依靠文档和约定来确定CMake项目的首选配置。预设可以指定构建目录、要使用的生成器、目标体系结构、工具链、缓存变量和要与项目一起使用的环境变量。从CMake 3.20开始，就有了影响构建和测试阶段的预设。
 
-For using presets, the top directory of a project must contain a file named either CMakePresets.json or CMakeUserPresets.json. If both files are present, they will be internally combined by parsing CMakePresets.json first and then  CMakeUserPresets.json. Both files have the same format but serve slightly different use cases:
+为了使用预设，项目的顶层目录必须包含一个名为CMakePresets.json或CMakeUserPresets.json的文件。若两个文件都存在，将先解析CMakePresets.json，再解析CMakeUserPresets.json。这两个文件有相同的格式，但使用方式略有不同:
 
 \begin{itemize}
 \item 
-CMakePresets.json should be provided by the project itself and handle project-specific things, such as running CI builds or knowing which toolchains to use for cross-compilation if they are provided with the project itself. As CMakePresets.json is project-specific, it should not refer to any files or paths outside the project structure. Since these presets are tied in closely with the project, it is usually also kept under version control.
+CMakePresets.json由项目本身提供，并处理项目特定的事情，比如运行CI构建，或若项目本身需要哪些工具链，应该使用哪些工具链进行交叉编译。CMakePresets.json用于特定的项目，不应该引用项目结构外的文件或路径。由于这些预设与项目紧密相连，通常也处于版本控制中。
 
 \item 
-CMakeUserPresets.json, on the other hand, is usually defined by the developer for use on their own machine or build environment. CMakeUserPresets.json can be as specific as possible and contain paths outside the project or those that are unique to a particular system setup. As such, projects should not provide this file and also not put it under version control.
+CMakeUserPresets.json通常由开发人员定义，以便在自己的机器或构建环境中使用。CMakeUserPresets.json可以尽可能的具体，包含项目之外的路径或特定系统设置特有的路径。因此，项目不应提供此文件，也不应将其置于版本控制中。
 \end{itemize}
 
-Presets are a great way of moving cache variables, compiler flags, and so on out of CMakeLists.txt files while still keeping the information available in a way that can be used with CMake and thus improve the portability of projects. If presets are available, they can be listed from the source directory by calling the following cmake -{}-listpresets, which will produce an output similar to this:
+预设是将缓存变量、编译器标志等移出CMakeLists.txt文件的一种很好的方法，同时以一种可以在CMake中使用的方式保持可用的信息，从而提高项目的可移植性。若预置可用，可以通过调用以下cmake -{}-listpresets从源目录中列出，将产生如下输出:
 
 \begin{tcblisting}{commandshell={}}
 Available configure presets:
@@ -19,22 +19,22 @@ Available configure presets:
   "ninja-release" - Ninja (Release)
 \end{tcblisting}
 
-This will list the name of the preset in quotes and the displayName property if set. To use properties from the command line, the name in quotes is used.
+将以引号的形式列出预设的名称，若设置了displayName属性。需要从命令行使用属性，需要使用带引号的名称。
 
-The CMake GUI will show all available presets in a source directory like this:
+CMake GUI将在源目录中显示所有可用的预设，如下所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/2/chapter9/images/2.jpg}\\
-Figure 9.1 – Listing available presets in the CMake GUI
+图9.1 CMake GUI中列出可用的预设
 \end{center}
 
-As of version 3.21 of CMake, the ccmake command-line configuration tool does not support presets. Configure presets can be selected from the top-level directory by calling the following:
+CMake的3.21版本，ccmake命令行配置工具不支持预设。需要通过以下命令使用预设，可以从顶层目录中选择配置预设:
 
 \begin{tcblisting}{commandshell={}}
 cmake --preset=name
 \end{tcblisting}
 
-The overall structure of CMakePresets.json and CMakeUserPresets.json is like this:
+CMakePresets.json和CMakeUserPresets.json的整体结构是这样的:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -51,15 +51,15 @@ The overall structure of CMakePresets.json and CMakeUserPresets.json is like thi
 }
 \end{lstlisting}
 
-The version field specifies the JSON schema to use. Version 1 is the first release from CMake 3.19 and only supports configurePresets. Version 2 adds buildPresets and testPresets and is available from CMake 3.20 and the version 3 adds more options and is available from CMake 3.21.
+version字段指定要使用的JSON模式。版本1是CMake 3.19的第一个版本，只支持configurePresets。版本2增加了buildPresets和testPresets，CMake 3.20开始支持;版本3增加了更多选项，CMake 3.21开始支持。
 
-The optional cmakeMinimumRequired field may be used to define the minimum version of CMake needed to build this project. As the minimum requirement is usually also stated in the CMakeLists.txt files, this is often omitted.
+可选的cmakeMinimumRequired字段可以用来定义构建此项目所需的CMake的最小版本。由于最低要求通常也在CMakeLists.txt文件中说明，这通常会省略。
 
-The three lists, configurePresets, buildPresets, and testPresets, each contain a list of configurations for configuring, building, and testing the project. The presets for building and testing require the presence of at least one configuration preset, as we will see later in this section.
+这三个列表:configurePresets、buildPresets和testPresets，每个列表都包含了用于配置、构建和测试项目的配置。构建和测试的预置要求至少有一个配置预置，将在本节后面看到。
 
-The vendor field contains an optional map of vendor- or IDE-specific information. CMake does not interpret the contents of this field except to verify the JSON format. The keys for the map should be the vendor-specific domain separated by slashes. In the previous example, the key for the vender presets is microsoft.com/VisualStudioSettings/CMake/1.9. The values inside the vendor fields can be of any valid JSON format.
+vendor字段包含特定于供应商或IDE信息的可选映射。CMake不解释该字段的内容，除非验证JSON格式。映射的键应该是由斜线分隔的特定于供应商。前面的示例中，供应商预置的键是microsoft.com/VisualStudioSettings/CMake/1.9。供应商字段中的值可以是任何有效的JSON格式。
 
-To use presets, at least one configure preset that defines an environment for CMake to configure the build system has to be present. They should at least specify the build path and the generator to use when configuring. Often, a configure preset also sets common cache variables such as CMAKE\_BUILD\_TYPE for single-configuration generators. A preset containing a configure preset to build a project with the Ninja generator in debug mode might look like this:
+要使用预置，至少有一个配置预置，定义了CMake配置生成系统的环境。至少应该指定在配置时要使用的构建路径和生成器。通常，配置预设还可为单配置生成器设置常用的缓存变量，如CMAKE\_BUILD\_TYPE。包含配置预设的预设，在Debug模式下用Ninja生成器构建:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -78,16 +78,15 @@ To use presets, at least one configure preset that defines an environment for CM
 }
 \end{lstlisting}
 
-All presets must have a name that is unique within the preset block. As some GUI applications only show presets that have a displayName field assigned, setting this field is highly recommended.
+所有预设都必须在预设块内有唯一的名称。由于一些GUI应用程序只显示分配了displayName字段的预设值，因此强烈建议设置这个字段。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Naming Conventions for Presets]
-It is good practice to name presets that are defined by the project in a
-CMakePresets.json file in a way that they do not clash with names the developer might define in CMakeUserPresets.json. A common convention is to prefix project-defined presets with ci- to mark them as used by the CI environment.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=预设的命名约定]
+CMakePresets.json中命名由项目定义的预设是一个很好的方式，以一种不与开发人员在CMakeUserPresets.json中定义名称冲突的方式。常见的约定是在项目定义的预设前加上ci-，以标记其为CI环境所设置。
 \end{tcolorbox}
 
-In versions 1 and 2 of the presets, the binaryDir and generator fields were mandatory; with version 3, they became optional. If either of the fields is not set, the behavior in this regard is the same as when CMake is used without presets. The command-line options for the CMake command will override the values specified in the presets where relevant. So, if binaryDir is set, it is automatically created when cmake -{}-preset= is called, although the value of it would be overridden if the -B option is passed to CMake.
+预置的版本1和2中，binaryDir和generator字段是强制的;版本3中，变成了可选的。若没有设置任何一个字段，在这方面的行为与不设置预设的行为相同。CMake的命令行选项将覆盖在预置中指定的相关值。因此，若设置了binaryDir，则会在调用cmake -{}-preset=时自动创建(将覆盖-B选项传递的值)。
 
-Cache variables can either be defined as key:value pairs, as shown in the preceding example, or as a JSON object, which allows specifying the variable type. A file path could be specified like this:
+缓存变量既可以定义为“键:值”对，如前面的例子所示，也可以定义为JSON对象，这允许指定变量类型。文件路径可以这样指定:
 
 \begin{lstlisting}[style=styleCMake]
 "cacheVariables": {
@@ -98,33 +97,31 @@ Cache variables can either be defined as key:value pairs, as shown in the preced
 }
 \end{lstlisting}
 
-If used in the key:value form, the type is treated as STRING unless it is true or false (without quotes), in which case, it is interpreted as BOOL. Note \$\{sourceDir\} in the example, which is a macro that is expanded when the preset is used.
+若使用key:value形式，该类型将视为STRING，除非是true或false(没有引号)，将被解释为BOOL。注意示例中的\$\{sourceDir\}，它是一个宏，在使用预设时展开。
 
-Here are a few well-known macros:
+以下是一些常用宏:
 
 \begin{itemize}
 \item 
-\$\{sourceDir\}: This points to the project source directory and \$\{sourceParentDir\} points to the parent directory of the source directory. The directory name without the path of the source directory can be obtained with \$\{sourceDirName\}. For example, if \$\{sourceDir\} is /home/sandy/MyProject, \$\{sourceDirName\} would be MyProject and \$\{sourceParentDir\} would be /home/sandy/.
+\$\{sourceDir\}: 指向项目源目录，\$\{sourceParentDir\}指向源目录的父目录。不带源目录路径的目录名可以通过\$\{sourceDirName\}获得。若\$\{sourceDir\}是/home/sandy/MyProject，\$\{sourceDirName\}将是MyProject， \$\{sourceParentDir\}将是/home/sandy/。
 
 \item 
-\$\{generator\}: This contains the generator as specified by the current preset used. For build and test presets, this contains the generator of the configure preset used.
+\$\{generator\}: 这包含由所使用的当前预设指定的生成器。对于构建和测试预设，包含配置预设的生成器。
 
 \item 
-\$\{hostSystemName\}: The system name of the host operating system, which is the same as the CMAKE\_HOST\_SYSTEM variable. The value is either the result of uname -s or Linux, Windows, or Darwin (for macOS).
+\$\{hostSystemName\}: 主机操作系统的系统名称，与CMAKE\_HOST\_SYSTEM相同。该值可以是uname -s或Linux、Windows或Darwin(用于macOS)的结果。
 
 \item
-\$env\{<variable-name>\}: This contains the environment variable with the name <variable-name>. If the variable is defined in the preset with the environment field, this value is used instead of the value from the parent or system environment. Using \$penv\{<variable-name>\} works similarly, but the value is always taken from the parent environment and not from the environment field, even if it is defined. This allows prepending or appending values to existing environment variables. Appending or prepending variables is not possible with \$env\{...\} because it does not allow circular references. Note that while in a Windows environment, variables are case-insensitive; variables used in the presets are still case-sensitive. Because of this, it is recommended to keep the casing of environment variables consistent.
+\$env\{<variable-name>\}: 包含名为<variable-name>的环境变量。若在预置中使用环境字段定义变量，则使用此值。使用\$penv\{<variable-name>\}的工作原理类似，但是该值总是取自父环境，即使它定义了，这允许在现有的环境变量中添加或添加值。不能使用\$env\{…\}，因为其不允许循环引用。注意，在Windows环境中，变量是不区分大小写的;在预设中使用的变量仍然区分大小写。因此，建议与环境变量的shell环境保持一致。
 
 \item
-\$vendor\{<macro-name>\}: This is an extension point for vendors of IDEs to
-insert their own macros. Since CMake is not able to interpret these macros, presets
-using \$vendor\{…\} macros will be ignored.
+\$vendor\{<macro-name>\}: 这是IDE供应商插入自己宏的扩展点。由于CMake不能解释这些宏，使用\$vendor\{…\}宏的预设将会忽略。
 
 \item
-\$\{dollar\}: This is a placeholder for the literal dollar sign, \$.
+\$\{dollar\}: 这是字面美元符号\$的占位符。
 \end{itemize}
 
-Modifying the environment for a preset works similarly to setting cache variables: by setting the environment field, which contains a map of key:value pairs. Environment variables are always set, even when the value is empty or null. Environment variables may reference each other as long as they do not contain circular references. Consider the following example:
+修改预置环境的工作原理类似于设置缓存变量:通过设置环境字段，该字段包含“键:值”对的映射。即使值为空，也始终设置环境变量。环境变量可以相互引用，只要它们不包含循环引用。考虑下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -143,11 +140,11 @@ Modifying the environment for a preset works similarly to setting cache variable
 }
 \end{lstlisting}
 
-In this example, the PATH environment variable is modified by prepending a path from inside the project structure. Using the \$penv\{PATH\} macro ensures that the value is taken from outside the preset. The LOCAL\_PATH variable then references the modified PATH environment variable by using the \$env\{PATH\} macro. This reference is fine as long as the PATH environment variable does not contain \$env\{LOCAL\_PATH\}, which would create a circular reference. The EMPTY environment variable is unset by passing null. Note that null is not quoted. Unless a build preset or a test preset is used, the environment is not forwarded to the respective steps. If a build preset or a test preset is used, but the environment from the configure preset should not be applied, this can be explicitly stated when the inheritConfigureEnvironment field is set to false.
+本例中，PATH环境变量通过从项目结构中添加路径来修改。使用\$penv\{PATH\}宏可以确保该值来自预设值外。然后LOCAL\_PATH变量通过使用\$env\{PATH\}宏引用修改过的PATH环境变量。只要PATH环境变量不包含会创建循环引用的\$env\{LOCAL\_PATH\}，这个引用就没问题。通过传递null来取消设置EMPTY环境变量。注意，null没有加引号。除非使用构建预设或测试预设，否则环境不会转发至相应的步骤。若使用了构建或测试预设，但不应用来自配置预设的环境，则可以在将inheritConfigureEnvironment字段设置为false，显式地进行声明。
 
 \subsubsubsection{9.2.1\hspace{0.2cm}继承预设}
 
-Presets may inherit from other presets of the same type with the inherits field, which may contain either a single preset or a list of presets. When inheriting fields from the parent, a preset can be overridden or additional fields added. This is useful to avoid duplicating code for common building blocks. In combination with the hidden field, this can make a CMakePreset.json file smaller. Consider the following example:
+预置可以从与inherited字段的相同类型的其他预置继承，该字段可以包含单个预置或预置列表。从父字段继承字段时，可以覆盖预置或添加其他字段。这有助于避免通用构建块的代码重复。结合隐藏字段，这可以减少CMakePreset.json文件的大小。考虑下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -177,9 +174,9 @@ Presets may inherit from other presets of the same type with the inherits field,
 }
 \end{lstlisting}
 
-In the example, the ci-ninja-debug and ci-ninja-release presets both inherit from the hidden ci-ninja build preset and additionally set the CMAKE\_BUILD\_TYPE cache variable to the respective configuration. Hidden presets can still be used but will not show up when cmake -{}-list-presets is invoked. Presets defined in CMakeUserPreset.json may inherit from CMakePreset.json but not the other way around.
+本例中，ci-ninja-debug和ci-ninja-release预置都继承自隐藏的ci-ninja构建预置，并将CMAKE\_BUILD\_TYPE缓存变量设置为各自的配置。仍然可以使用隐藏的预设，但在调用cmake -{}-list-presets时不会显示。CMakeUserPreset.json中定义的预设可能继承自CMakePreset.json。
 
-In the preceding example, the preset inherits from a single parent, but presets can also inherit from multiple parents. The following example shows how CMakeUserPreset. json working with CMakePreset.json from the previous example might look:
+前面的例子中，预设从一个父级继承，但也可以从多个父级继承。下面的例子展示了CMakeUserPreset.json如何与前面例子中的CMakePreset.json一起工作:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -202,11 +199,11 @@ In the preceding example, the preset inherits from a single parent, but presets 
 }
 \end{lstlisting}
 
-Here, the user supplies a preset that explicitly selects GCC 11 as a compiler named gcc-11. Later, the ninja-debug-gcc preset inherits the values from the ninja-debug preset that is defined in CMakePreset.json supplied by the project and combines it with the user-supplied gcc-11 preset. If two parent presets define different values for the same field, the value from the one first appearing in the inherits list takes precedence.
+这里，用户提供了一个预设，它显式选择GCC 11作为名为gcc-11的编译器。之后，ninja-debug-gcc预设从CMakePreset.json中定义的ninja-debug预设继承值，并将其与用户提供的gcc-11预置相结合。若两个父预设为同一字段定义不同的值，则继承列表中第一个出现的值优先。
 
 \subsubsubsection{9.2.2\hspace{0.2cm}预设的条件}
 
-Sometimes presets only make sense under certain conditions, such as for a certain build platform. For instance, a configure preset that uses the Visual Studio generator would only be useful in a Windows environment. For these cases, presets can be disabled if the conditions are not met with the condition option. Any conditions defined in a parent preset are inherited. Conditions can be constants, string comparisons, or a check of whether a list contains a value. They are available from version 3 of the presets. The following configure preset would only be enabled if working on Windows:
+有时，预设只在特定的条件下才有意义，例如：对于特定的构建平台。使用Visual Studio生成器的配置预设只在Windows环境中有用。对于这些情况，若条件选项不满足条件，则可以禁用预设。继承父预设中定义的条件。条件可以是常量、字符串比较或检查列表是否包含值，可以从预设的版本3中获得。以下配置预设只会在Windows上启用:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -221,9 +218,9 @@ Sometimes presets only make sense under certain conditions, such as for a certai
 }
 \end{lstlisting}
 
-In the preceding example, the build preset is enabled if the name of the host system is retrieved using the \$\{hostSystemName\} macro and then compared to the Windows string. If \$\{hostSystemName\} matches, then the preset is enabled, else it is disabled and trying to use it will result in an error. When comparing strings, casing matters: for case-insensitive tests, the matches or notMatches type, which takes a regex, could be used.
+前面的示例中，若使用\$\{hostSystemName\}宏检索主机系统的名称，然后将其与Windows字符串进行比较，则构建预设是启用的。若\$\{hostSystemName\}匹配，则启用预设，否则禁用预设，尝试使用它将导致错误。比较字符串时，大小写很重要:对于不区分大小写的测试，可以使用接受正则表达式的matches或notMatches类型。
 
-For more complex conditions, support nesting with Boolean logic with the allOf, anyOf, and not operators. For example, if a configure preset should only be enabled for Windows and Linux but not for macOS, the preset and the condition could look like this:
+对于更复杂的条件，支持使用allOf、anyOf和not操作符的布尔逻辑嵌套。若配置预置只在Windows和Linux中启用，而在macOS中不启用，则预置和条件可以如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -245,11 +242,11 @@ For more complex conditions, support nesting with Boolean logic with the allOf, 
 	}
 \end{lstlisting}
 
-Each of the conditions could also contain further nested conditions if needed, although doing so will quickly increase the complexity of the presets.
+若需要，每个条件还可以包含更多的嵌套条件，尽管这样做会增加预设的复杂性。
 
-So far, we have only seen configure presets in the examples, but as mentioned at the beginning of the chapter, there are also build presets and test presets. The syntax for build and test presets is very similar to configure presets and a lot of fields, such as name, displayName, and inherit, and conditions work the same as with configure presets.
+目前为止，我们只在示例中看到了配置预置，但是正如本章开头所提到的，还有构建预置和测试预置。构建和测试预置的语法非常类似于配置预置和许多字段，如name、displayName和inherit，条件的工作原理与配置预置相同。
 
-Build presets have to specify a configure preset in the configurePreset field or inherit from another build preset that specifies the configure preset. The build directory is determined by the configure preset and the environment from the configure preset is inherited unless the inheritConfigureEnvironment field is set to false. Optionally, build presets can specify a list of targets to build. An example of a build preset could look like this:
+生成预设必须在configure预设字段中指定一个配置预设，或者从指定配置预设的另一个生成预设继承。构建目录由配置预设确定，并且继承来自配置预设的环境，除非将inheritConfigureEnvironment字段设置为false。构建预设可以指定要构建的目标列表。一个构建预设的例子:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -286,9 +283,9 @@ Build presets have to specify a configure preset in the configurePreset field or
 }
 \end{lstlisting}
 
-In the preceding example, three build presets are defined. Two are used to specify the build configuration for Visual Studio and the third one lists the api-doc and doc targets as part of the documentation build. Invoking any of the ci-msvc build presets will build the "all" target, while ci-documentation will only build the listed targets. The list of available build presets can be retrieved with cmake -{}-build -{}-list-presets.
+前面的示例中，定义了三个构建预置。其中两个用于指定Visual Studio的构建配置，第三个列出了作为文档构建的一部分的api-doc和文档目标。调用ci-msvc构建预设将构建“all”目标，而ci-documentation将只构建列出的目标。可用的构建预设列表可以用cmake -{}-build -{}-list-presets来检索。
 
-Test presets work very similar to build presets, except that they are used with CTest. Similarly, a call to ctest -{}-list-presets on the project root will list the available test presets. Test presets can be used to select or exclude certain tests, specify fixture options, or control the output of the tests. Most of the options for tests described in Chapter 7, Seamlessly Integrating Code Quality Tools with CMake, can be controlled from the test presets. An example of test presets could look like this:
+测试预设的工作原理与构建预设相似，不同的是它们与CTest一起使用。类似地，在项目根目录上调用ctest -{}-list-presets将列出可用的测试预置。测试预设可用于选择或排除某些测试、指定固件选项或控制测试的输出。在第7章中描述的大多数测试选项都可以从测试预置中控制。测试预设的一个例子:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -315,13 +312,13 @@ Test presets work very similar to build presets, except that they are used with 
 }
 \end{lstlisting}
 
-In the previous example, a test preset is added that filters the tests for any that include feature-X but excludes any tests that were labeled as integration. This is equivalent to invoking the following command from the build directory:
+前面的示例中，添加了一个测试预置，过滤包含feature-X测试，但排除标记为集成的测试。这相当于在构建目录下使用以下命令:
 
 \begin{tcblisting}{commandshell={}}
 ctest --tests-regex feature-X --label-exclude integration
 \end{tcblisting}
 
-CMake presets are arguably one of the few features that changed how CMake is used the most since the introduction of targets. They are a good compromise to deliver common configuration and build options together with the projects while still keeping the CMakeLists.txt file platform-agnostic. However, sometimes providing the necessary settings is not enough and you also want to share a build environment in which you are sure that the software compiles. One option to do this is by defining a build container that contains CMake and the necessary libraries.
+自引入目标以来，CMake预设可以说是少数几个改变CMake使用方式的特性。它们是一个折衷方案，可以在交付公共配置和与项目一起构建选项的同时，仍然保持CMakeLists.txt文件与平台无关。然而，有时提供必要的设置是不够的，还会希望共享一个构建环境，在该环境中可以确定软件可以编译。一种选择是定义一个包含CMake和必要库的容器。
 
 
 
