@@ -1,19 +1,19 @@
 
-One of the keystones for the success of CMake is that it allows you to build the same software on a multitude of platforms. On the other hand, this means that CMakeLists. txt must be written in a way that does not assume a certain platform or compiler must be used. This can be challenging, especially when you're working with custom tasks. A big help here is that the cmake command-line utility supports the -E flag, which can be used to perform common tasks such as file operations and creating hashes. Most of the cmake -E commands are for file-related operations such as creating, copying, renaming, and deleting files, as well as creating directories. On systems that support filesystem links, CMake can also create symbolic links or hard links between files. Additionally, CMake can create file archives using the tar command and concatenate text files with the cat command. It can also be used to create various hashes for files.
+CMake成功的关键是它允许在多种平台上构建相同的软件。另一方面，这意味着CMakeLists.txt必须以一种不假定使用平台或编译器的方式编写。这很有挑战性，特别是在处理自定义任务时。cmake命令行程序支持-E标志，可以用于执行常见任务，如文件操作和创建哈希值。大多数cmake -E命令用于与文件相关的操作，如创建、复制、重命名和删除文件，以及创建目录。支持文件系统链接的系统，CMake还可以在文件之间创建符号链接或硬链接。此外，CMake可以使用tar命令创建文件包，并使用cat命令连接文本文件，还可以用于为文件创建各种哈希值。
 
-There are also a few operations that provide information about the current system. The capabilities operation will print out CMake's capabilities, such as knowing which generators are supported and the version that CMake is currently running. The environment command will print a list of environment variables that have been set.
+还有一些操作可以提供关于当前系统的信息。功能操作将打印出CMake的功能，例如：支持哪些生成器，以及CMake当前运行的版本。environment命令将打印已设置的环境变量的列表。
 
-You can get a full reference to the command-line options by running cmake -E without any other arguments. The online documentation for CMake can be found at \url{https://cmake.org/cmake/help/v3.21/manual/cmake.1.html#run-a-commandline-tool}.
+通过不带参数的运行cmake -E，可以获得对命令行选项的完整信息。CMake的在线文档可参见\url{https://cmake.org/cmake/help/v3.21/manual/cmake.1.html#run-a-commandline-tool}。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Platform-Agnostic File Operations]
-Whenever file operations must be performed by a custom task, use cmake –E .
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=平台无关的文件操作]
+当文件操作必须由自定义任务执行时，可以使用cmake -E。
 \end{tcolorbox}
 
-With cmake -E, you can get pretty far in most cases. Sometimes, however, more complex operations need to be done. For this, CMake can run in script mode, which executes CMake files.
+在大多数情况下，可以用cmake -E。然而，有时需要进行更复杂的操作。为此，CMake可以以脚本模式运行。
 
 \subsubsubsection{8.6.1\hspace{0.2cm}将CMake文件作为脚本执行}
 
-CMake's script mode is a very powerful feature when it comes to creating cross-platform scripts. It's powerful because it allows you to create scripts that are completely platformagnostic. By invoking cmake -P <script>.cmake, the specified CMake file is executed. The script files may not contain any commands that define a build target. Arguments may be passed as variables with the -D flag, but this must be done before the -P option. Alternatively, the arguments may just be appended after the script name so that they can be retrieved with the CMAKE\_ARGV[n] variables. The number of arguments is stored in the CMAKE\_ARGC variable. The following script, which generates the hash of a file and stores it in another, demonstrates how to use positional arguments: 
+创建跨平台脚本时，CMake的脚本模式是非常强大的特性，因为它允许创建完全与平台无关的脚本。通过调用cmake -P <script>.cmake，则执行指定的CMake文件。脚本文件可能不包含定义构建目标的命令。参数可以作为带有-D标志的变量传递，但这必须在-P选项之前完成。或者，参数可能只是附加在脚本名称之后，这样就可以使用CMAKE\_ARGV[n]变量检索它们。参数的数量存储在CMAKE\_ARGC变量中。下面的脚本生成一个文件的散列并将其存储在另一个文件中，演示了如何使用位置参数:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -29,7 +29,7 @@ file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
 file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
 \end{lstlisting}
 
-This script can be invoked with cmake -P CreateSha256.cmake <input\_file> <output\_file>. Note that the first three arguments are occupied with cmake, -P, and the name of the script (CreateSha256.cmake). Although not strictly required, script files should always contain a cmake\_minimum\_required statement at the beginning. An alternative way to define the script without positional arguments would be as follows:
+这个脚本的使用方式为cmake -P CreateSha256.cmake <input\_file> <output\_file>。注意，前三个参数是cmake、-P和脚本的名称(CreateSha256.cmake)。尽管不是严格要求的，脚本文件应该总是在开头包含\texttt{cmake\_minimum\_required}。另一种不带位置参数定义脚本的方法如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -43,14 +43,14 @@ file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
 file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
 \end{lstlisting}
 
-In this case, the script would have to be invoked with the variables passed explicitly, like so:
+这种情况下，必须使用显式传递的变量调用脚本，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake –DFILE_TO_HASH=<input>
       -DTARGET_FILE=<target> -P CreateSha256.cmake
 \end{tcblisting}
 
-These two approaches can also be combined. A common pattern is to expect all simple mandatory arguments as positional arguments and any optional or more complex arguments as defined variables. Combining the script mode with add\_custom\_command, add\_custom\_target, or execute\_process is a good way to create platform-independent build instructions. An example of generating hashes from the earlier sections could look like this:
+这两种方法也可以结合使用。一种常见的模式是期望所有简单的强制参数作为位置参数，可选或更复杂的参数作为已定义变量。将脚本模式与\texttt{add\_custom\_command}、\texttt{add\_custom\_target}或\texttt{execute\_process}相结合，可以创建独立于平台的构建指令。从前面生成哈希值的示例如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(Create_hash_target ALL
@@ -67,7 +67,7 @@ COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 )
 \end{lstlisting}
 
-Combining the script mode of CMake with the various ways to execute custom commands during the configuration or build phase of a project provides a lot of freedom when you're defining build processes, even for different platforms. However, one word of warning is that adding too much logic to a build process may make it harder to maintain than it should be. Whenever you need to write a script or add a custom command to a CMakeLists.txt file, it pays to take a quick break and consider whether this step belongs to the build process or whether it is something better left to the user when they're setting up the development environment.
+将CMake的脚本模式，与在项目的配置或构建阶段执行定制命令的各种方法相结合，可以在定义构建过程时提供很大的自由度，甚至可以针对不同的平台。然而，需要注意的是，在构建过程中添加太多的逻辑可能会使其难于维护。当需要编写脚本或向CMakeLists.txt文件添加自定义命令时，最好是考虑一下，并考虑这一步是否属于构建过程，还是最好在用户设置开发环境时让他们设置。
 
 
 

@@ -1,6 +1,7 @@
-To execute custom tasks at configuration time, you can use the execute\_process function. Common needs for this are if the build requires additional information before a build, or if files need to be updated for any rerun of CMake. Another common case is when either the CMakeLists.txt file or other input files are generated during the configuration step, although this can also be achieved with the specialized configure\_file command, as shown later in this chapter.
 
-The execute\_process function works very similarly to the add\_custom\_target and add\_custom\_command functions we saw earlier. However, one distinction is that execute\_process can capture output to stdout and stderr in a variable or files. The signature of execute\_process is as follows:
+要在配置时执行自定义任务，可以使用\texttt{execute\_process}。这方面的需求是:构建在构建之前需要额外的信息，或者需要更新文件以重新运行CMake。另一个情况是在配置步骤中生成CMakeLists.txt文件或其他输入文件，这也可以通过\texttt{configure\_file}实现。
+
+\texttt{execute\_process}的工作原理与前面看到的\texttt{add\_custom\_target}和\texttt{add\_custom\_command}非常相似。然而，区别是\texttt{execute\_process}可以在变量或文件中捕获到stdout和stderr的输出。\texttt{execute\_process}的签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 execute_process(COMMAND <cmd1> [<arguments>]
@@ -25,7 +26,7 @@ execute_process(COMMAND <cmd1> [<arguments>]
 				[COMMAND_ERROR_IS_FATAL <ANY|LAST>])
 \end{lstlisting}
 
-The execute\_process function takes a list of COMMAND properties to be executed in WORKING\_DIRECTORY. The return codes of the last command to be executed can be stored in the variable defined with RESULT\_VARIABLE. Alternatively, a semicolonseparated list of variables can be passed to RESULTS\_VARIABLE. If you're using the list version, the commands will store the return codes of the commands in the same order as the variables that have been defined. If fewer variables have been defined than commands, any surplus return codes will be ignored. If a TIMEOUT value was defined and any of the child processes failed to return, the result variables will contain timeout. Since CMake version 3.19, the convenient COMMAND\_ERROR\_IS\_FATAL option is available, which tells CMake to abort execution if any (or just the last) of the processes fails. This is much more convenient than retrieving all the return codes and then checking them individually after their execution. In the following example, if any of the commands return a non-zero value, the configuration step of CMake will fail with an error:
+\texttt{execute\_process}接受要在WORKING\_DIRECTORY中执行的COMMAND列表。最后一个要执行的命令的返回代码可以存储在RESULT\_VARIABLE定义的变量中，或可以将使用分号分隔的变量列表传递给RESULTS\_VARIABLE。若使用的是列表，则命令将按与已定义的变量相同的顺序存储命令的返回代码。若定义的变量比命令少，那么多余的返回代码都将忽略。若定义了TIMEOUT，并且若有子进程都无法结束，则结果变量将包含超时。自CMake版本3.19以来，COMMAND\_ERROR\_IS\_FATAL选项可用，任何进程失败(或是最后一个)时中止执行。这比检索所有返回代码后，分别检查要方便得多。下面的例子中，若命令返回非零值，CMake的配置步骤将失败并出现错误:
 
 \begin{lstlisting}[style=styleCMake]
 execute_process(
@@ -35,48 +36,48 @@ execute_process(
 )
 \end{lstlisting}
 
-Any output to stdout or stderr can be captured using the OUTPUT\_VARIABLE or ERROR\_VARIABLE variable, respectively. As an alternative, they can be redirected to files by using OUTPUT\_FILE or ERROR\_FILE or can be completely ignored by passing OUTPUT\_QUIET or ERROR\_QUIET. Capturing the output in both a variable and a file is not possible and will result in either of the two being empty. Which one is kept and which is discarded depends on the platform. If not, the OUTPUT\_* option specifies that the output is sent to the CMake process itself.
+stdout或stderr的输出可以分别使用OUTPUT\_VARIABLE或ERROR\_VARIABLE捕获。一种替代方案是，可以通过使用OUTPUT\_FILE或ERROR\_FILE重定向到文件，也可以通过传递OUTPUT\_QUIET或ERROR\_QUIET忽略。在变量和文件中不可能捕获输出，这将导致两者中的一个为空。哪些保留，哪些丢弃取决于平台。若不重定向，OUTPUT\_*选项可以将指定输出发送给CMake进程。
 
-If the output is captured in a variable but can still be displayed, ECHO\_<STREAM>\_VARIABLE can be added. CMake can also be told to output the command itself by passing STDOUT, STDERR, or NONE to the COMMAND\_ECHO option. However, if the output is captured in files, this will have no effect. If the same variable or file is specified for both stdout and stderr, then the results will be merged. If necessary, the input stream of the first command can be controlled by passing a file to the INPUT\_FILE option.
+若使用变量捕获输出，但仍然需要显示，可以添加ECHO\_<STREAM>\_VARIABLE。CMake还可以通过向COMMAND\_ECHO选项传递STDOUT、STDERR或NONE来输出命令。但若输出在文件中捕获，这将没有任何效果。若为stdout和stderr指定了相同的变量或文件，则将合并结果。若有必要，可以通过INPUT\_FILE选项传递一个文件来控制第一个命令的输入流。
 
-The output to variables can be controlled in a limited way by using the <STREAM>\_STRIP\_TRAILING\_WHITESPACE option, which will trim any white spaces at the end of the output. When you're redirecting output to files, this has no effect. On Windows, the ENCODING option can be used to control the output. It takes the following values:
+变量的输出可以使用<STREAM>\_STRIP\_TRAILING\_WHITESPACE选项的方式控制，该选项将消除输出末尾的空白。当将输出重定向到文件时，这个选项无效。Windows上，ENCODING选项可用于控制输出，并接受以下值:
 
 \begin{itemize}
 \item 
-NONE: Performs no reencoding. This will keep CMake's internal encoding, which is UTF-8.
+NONE: 不执行重新编码。这将保持CMake的内部编码，即UTF-8。
 
 \item 
-AUTO: Uses the current console's encoding. If this is not available, it uses ANSI.
+AUTO: 使用当前控制台的编码。若不可用，将使用ANSI。
 
 \item 
-ANSI: Uses the ANSI code page for encoding.
+ANSI: 使用ANSI进行编码。
 
 \item 
-OEM: Uses the code page defined by the platform.
+OEM: 使用平台定义的编码。
 
 \item 
-UTF8 or UTF-8: Forced to use the UTF-8 encoding.
+UTF8或UTF-8: 强制使用UTF-8编码。
 \end{itemize}
 
-A common reason for using execute\_process is gathering information that is needed for a build and then passing it to the project. Consider an example where we would like to compile the Git revision into an executable by passing it as a preprocessor definition. The downside of this approach is that for the custom tasks to be executed, CMake has to be invoked, not just the build system. So, using add\_custom\_command with an OUTPUT parameter would probably be the more realistic solution here, but for illustrative purposes, this example should serve well enough. The following is an example where the Git hash is read out at configuration time and passed as a compile definition to a target:
+使用\texttt{execute\_process}的原因是收集构建所需的信息，然后将其传递给项目。假设希望通过传递预处理器定义来将Git修订编译为可执行文件。这种方法的缺点是，对于要执行的定制任务，必须调用CMake，而不仅仅是构建系统。因此，使用带OUTPUT参数的使用\texttt{add\_custom\_command}可能是更现实的解决方案，但出于演示目的，这个示例应该足够了。以下是在配置时读取Git哈希码，并将其作为编译定义传递给目标的示例:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Git REQUIRED)
 execute_process(COMMAND ${GIT_EXECUTABLE} "rev-parse" "--short"
 	"HEAD"
-OUTPUT_VARIABLE GIT_REVISION
-OUTPUT_STRIP_TRAILING_WHITESPACE
-COMMAND_ERROR_IS_FATAL ANY
-WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
+	OUTPUT_VARIABLE GIT_REVISION
+	OUTPUT_STRIP_TRAILING_WHITESPACE
+	COMMAND_ERROR_IS_FATAL ANY
+	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(SomeExe src/main.cpp)
 target_compile_definitions(SomeExe PRIVATE VERSION=
 	\"${GIT_REVISION}\")
 \end{lstlisting}
 
-In this example, the git command that's passed to execute\_process is executed in the directory containing the CMakeLists.txt file, which is currently being executed. The resulting hash is stored in the GIT\_REVISION variable and if the command fails for any reason, the configuration process is halted with an error.
+这个例子中，传递给\texttt{execute\_process}的git命令将在当前执行CMakeLists.txt文件的目录中执行。生成的哈希存储在GIT\_REVISION变量中，若命令因任何原因失败，配置过程将停止并出现错误。
 
-Passing the information from execute\_process into the compiler by using a preprocessor definition is far from optimal. A much nicer solution would be if we could generate a header file to be included that contains this information. CMake has another feature called configure\_file that can be used for this purpose, as we will see in the next section.
+通过使用预处理器定义将信息从\texttt{execute\_process}传递到编译器，并不是最优的方式。更好的解决方案是，可以生成一个包含此信息的头文件。CMake还有另一个\texttt{configure\_file}指令可以用于此目的，我们将在下一节中看到。
 
 
 

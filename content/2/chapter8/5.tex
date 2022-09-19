@@ -1,4 +1,4 @@
-A relatively common task when building software is that some files must be copied to a specific location or modified before the build. In the Executing custom tasks at configuration time section, we saw an example where the Git revision was retrieved and passed to the compiler as a preprocessor definition. A much nicer way to do this would be to generate a header file containing the necessary information. While just echoing the code snippet and writing it into a file would be possible, it is dangerous as it may lead to platform-specific code. CMake's solution to this is the configure\_file command, which can copy files from one location to another and modify their content while doing so. The signature of configure\_file is as follows:
+构建软件时，常见的任务是在构建之前必须将一些文件复制到特定位置或进行修改。在配置时执行自定义任务一节中，看到了一个示例，其中检索Git提交，并将其作为预处理器定义传递给编译器。一种更好的方法是生成一个包含必要信息的头文件。虽然只是回显代码片段，并将其写入文件是可能的，但这可能导致特定于平台的代码，因此很危险。CMake对此的解决方案是使用\texttt{configure\_file}指令，可以将文件从一个位置复制到另一个位置，并在此过程中修改其内容，其签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 configure_file(<input> <output>
@@ -8,15 +8,15 @@ configure_file(<input> <output>
 				[NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 \end{lstlisting}
 
-The configure\_file function will copy the <input> file to the <output> file. If necessary, the path to the output file will be created, and paths can be relative or absolute. If you're using relative paths, the input file will be searched from the current source directory but the path of the output file will be relative to the current build directory. If the output file cannot be written, the command will fail and the configuration will be halted. By default, the output file has the same permissions as the target file, although ownership may change if the current user is a different one than the one that the input file belongs to. If NO\_SOURCE\_PERMISSION is added, the permissions are not transferred and the output file gets the default rw-r-{}-r-{}- value. Alternatively, the permissions can be manually specified with the FILE\_PERMISSIONS option, which takes a three-digit number as an argument. USE\_SOURCE\_PERMISSION is already the default and the option is only there to state the intent more explicitly.
+\texttt{configure\_file}将<input>文件复制到<output>文件。若需要，将创建到输出文件的路径，路径可以是相对路径或绝对路径。若使用相对路径，则将从当前源目录搜索输入文件，但输出文件的路径将相对于当前构建目录。若不能写入输出文件，命令将失败，配置停止。默认情况下，输出文件与目标文件具有相同的权限，若当前用户与输入文件所属的用户不同，所有权可能会发生变化。若添加了NO\_SOURCE\_PERMISSION，则权限不会转移，输出文件将获得默认权限：rw-r-{}-r-{}-。也可以使用FILE\_PERMISSIONS选项手动指定权限，该选项接受一个三位数的数字作为参数。USE\_SOURCE\_PERMISSION已经是默认选项，这个选项只是为了更明确地进行说明。
 
-As we mentioned earlier, configure\_file will also replace parts of the input file when you're copying to the output path unless COPYONLY is passed. By default, configure\_file will replace all the variables referenced as \$\{SOME\_VARIABLE\} or @SOME\_VARIABLE@ with the value of any variable of the same name. If a variable is defined in CMakeLists.txt, when configure\_file is called, the respective value is written into the output file. If a variable is not specified, the output file will contain an empty string in the respective place. Consider a hello.txt.in file that contains the following information:
+除非传递COPYONLY，否则\texttt{configure\_file}也会在复制到输出路径时替换输入文件的部分内容。默认情况下，\texttt{configure\_file}将用同名变量的值替换所有引用为\$\{SOME\_VARIABLE\}或@SOME\_VARIABLE@的变量。若在CMakeLists.txt中定义了一个变量，当使用\texttt{configure\_file}时，相应的值会写入输出文件。若未指定变量，则输出文件将在相应的位置包含一个空字符串。若有一个hello.txt.in文件，包含以下信息:
 
 \begin{lstlisting}[style=styleCMake]
 Hello ${GUEST} from @GREETER@
 \end{lstlisting}
 
-In a CMakeLists.txt file, the configure\_file function is used to configure the hello.txt.in file:
+CMakeLists.txt文件中，\texttt{configure\_file}可用来配置hello.txt.in文件:
 
 \begin{lstlisting}[style=styleCMake]
 set(GUEST "World")
@@ -24,9 +24,9 @@ set(GREETER "The Universe")
 configure_file(hello.txt.in hello.txt)
 \end{lstlisting}
 
-In this example, the resulting hello.txt file will contain Hello World from The Universe. If the @ONLY option is passed to configure\_file, only @GREETER@ would be replaced and the resulting content would be Hello \$\{GUEST\} from The Universe. Using @ONLY is useful when you're transforming CMake files that may contain brace-enclosed variables that should not be replaced. ESCAPE\_QUOTES will escape any quotes in the target file with a backslash. By default, configure\_file will transform the newline character so that the target file matches the current platform. The default behavior can be changed by setting NEWLINE\_STYLE. UNIX or LF will use \verb|\|n for newlines, while DOS, WIN32, and CRLF will use \verb|\|r\verb|\|n. Setting the NEWLINE\_STYLE and COPYONLY options together will cause an error. Note that setting COPYONLY will not affect the newline style.
+生成的hello.txt文件将包含来自the Universe的Hello World。若@ONLY选项传递给\texttt{configure\_file}，则只替换@GREETER@，结果内容将是Hello \$\{GUEST\}。转换CMake文件时，@ONLY很有用，因为CMake文件可能包含不应该被括号括起来的变量。ESCAPE\_QUOTES将用反斜杠转义目标文件中的引号。默认情况下，\texttt{configure\_file}将转换换行符，以便目标文件与当前平台匹配。默认的行为可以通过NEWLINE\_STYLE来改变。UNIX或LF将使用\verb|\|n作为换行符，而DOS、WIN32和CRLF将使用\verb|\|r\verb|\|n。同时设置NEWLINE\_STYLE和COPYONLY选项会导致错误，而设置COPYONLY不会影响换行符的样式。
 
-Let's go back to the example where we want to compile the Git revision into an executable. Here, we would write a header file as input. It may contain a line that looks like this:
+回到使用Git提交编译为可执行文件的示例。这里，我们将写一个头文件作为输入:
 
 \begin{lstlisting}[style=styleCMake]
 #define CMAKE_BEST_PRACTICES_VERSION "@GIT_REVISION@"
@@ -42,18 +42,18 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src
 	/version.h @ONLY)
 \end{lstlisting}
 
-As shown in the example in the previous section, where the version information was passed as a compile definition, the Git revision is first retrieved with execute\_process. Later, the file is copied using configure\_file, and @GIT\_REVISION@ is replaced with the short hash of the current commit.
+如上一节示例所示，版本信息作为编译定义传递，Git提交首先使用\texttt{execute\_process}进行检索。之后，\texttt{configure\_file}复制文件，@GIT\_REVISION@会替换为当前提交的短哈希值。
 
-When you're working with preprocessor definitions, configure\_file will replace any lines in the form of \#cmakedefine VAR ... with either \#define VAR or /* undef VAR */, depending on whether VAR contains a value that CMake interprets as true or false.
+使用预处理器定义时，\texttt{configure\_file}将替换所有以\#cmakedefine VAR…形式出现的行。使用\#define VAR或/* undef VAR */，这取决于VAR是否包含解释为true或false的值。
 
-Consider a file called version.in.h that contains the following two lines:
+有一个名为version.in.h的文件，包含以下两行:
 
 \begin{lstlisting}[style=styleCMake]
 #cmakedefine GIT_VERSION_ENABLE
 #cmakedefine GIT_VERSION "@GIT_REVISION@"
 \end{lstlisting}
 
-The accompanying CMakeLists.txt file may look like this:
+附带的CMakeLists.txt文件看起来像这样:
 
 \begin{lstlisting}[style=styleCMake]
 option(GIT_VERSION_ENABLE "Define revision in a header file"
@@ -70,22 +70,21 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/
 	version.h @ONLY)
 \end{lstlisting}
 
-Once the configuration has been run, if GIT\_REVISION\_ENABLE is on, the resulting file will contain the following output:
+配置结束后，若GIT\_REVISION\_ENABLE处于启用状态，结果文件将包含以下内容:
 
 \begin{lstlisting}[style=styleCXX]
 #define GIT_VERSION_ENABLE
 #define CMAKE_BEST_PRACTICES_VERSION "c030d83"
 \end{lstlisting}
 
-If GIT\_REVISION\_ENABLE is off, the resulting file will contain the following output:
+若关闭GIT\_REVISION\_ENABLE，生成的文件将包含以下内容:
 
 \begin{lstlisting}[style=styleCXX]
 /* #undef GIT_VERSION_ENABLE */
 /* #undef GIT_REVISION */
 \end{lstlisting}
 
-All in all, the configure\_file command is quite useful for preparing input for a build. Apart from generating source files, it is often used to generate CMake files that are then included in a CMakeLists.txt file. One of the strengths of this is that it allows for the platform-independent copying and modification of files, which is a major advantage when you're working cross-platform. Since configure\_file and execute\_process often go hand in hand, ensure that the commands that are executed are also platformindependent. In the next section, you will learn how CMake can be used to define platform-agnostic commands and scripts.
-
+总之，\texttt{configure\_file}对于为构建准备输入非常有用。除了生成源文件外，还经常用于生成CMake文件，然后将这些文件包含在CMakeLists.txt文件中。这样做的优点是允许独立于平台的文件复制和修改，这在跨平台工作时很重要。因为\texttt{configure\_file}和\texttt{execute\_process}通常同时进行，所以要确保执行的命令也是平台相关的。下一节中，将了解如何使用CMake定义与平台无关的命令和脚本。
 
 
 

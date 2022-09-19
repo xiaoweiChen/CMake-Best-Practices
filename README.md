@@ -74,6 +74,8 @@ CMake是一个强大的工具，用于执行各种各样的任务，所以很难
 
 * github地址：https://github.com/xiaoweiChen/CMake-Best-Practices
 * 译文的LaTeX 环境配置：https://www.cnblogs.com/1625--H/p/11524968.html 
+  * 禁用拼写检查：https://blog.csdn.net/weixin_39278265/article/details/87931348
+
 * vscode中配置latex：https://blog.csdn.net/Ruins_LEE/article/details/123555016
 * 原书示例：https://github.com/PacktPublishing/CMake-Best-Practices
 

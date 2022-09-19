@@ -145,7 +145,7 @@ Modifying the environment for a preset works similarly to setting cache variable
 
 In this example, the PATH environment variable is modified by prepending a path from inside the project structure. Using the \$penv\{PATH\} macro ensures that the value is taken from outside the preset. The LOCAL\_PATH variable then references the modified PATH environment variable by using the \$env\{PATH\} macro. This reference is fine as long as the PATH environment variable does not contain \$env\{LOCAL\_PATH\}, which would create a circular reference. The EMPTY environment variable is unset by passing null. Note that null is not quoted. Unless a build preset or a test preset is used, the environment is not forwarded to the respective steps. If a build preset or a test preset is used, but the environment from the configure preset should not be applied, this can be explicitly stated when the inheritConfigureEnvironment field is set to false.
 
-\subsubsubsection{9.2.1\hspace{0.2cm}Inheriting from presets}
+\subsubsubsection{9.2.1\hspace{0.2cm}继承预设}
 
 Presets may inherit from other presets of the same type with the inherits field, which may contain either a single preset or a list of presets. When inheriting fields from the parent, a preset can be overridden or additional fields added. This is useful to avoid duplicating code for common building blocks. In combination with the hidden field, this can make a CMakePreset.json file smaller. Consider the following example:
 
@@ -204,7 +204,7 @@ In the preceding example, the preset inherits from a single parent, but presets 
 
 Here, the user supplies a preset that explicitly selects GCC 11 as a compiler named gcc-11. Later, the ninja-debug-gcc preset inherits the values from the ninja-debug preset that is defined in CMakePreset.json supplied by the project and combines it with the user-supplied gcc-11 preset. If two parent presets define different values for the same field, the value from the one first appearing in the inherits list takes precedence.
 
-\subsubsubsection{9.2.2\hspace{0.2cm}Conditions for presets}
+\subsubsubsection{9.2.2\hspace{0.2cm}预设的条件}
 
 Sometimes presets only make sense under certain conditions, such as for a certain build platform. For instance, a configure preset that uses the Visual Studio generator would only be useful in a Windows environment. For these cases, presets can be disabled if the conditions are not met with the condition option. Any conditions defined in a parent preset are inherited. Conditions can be constants, string comparisons, or a check of whether a list contains a value. They are available from version 3 of the presets. The following configure preset would only be enabled if working on Windows:
 
