@@ -1,15 +1,15 @@
-In a nutshell, a system root, or just sysroot, is a directory that a build system considers to be the root directory from which to locate headers and libraries. In brief, they contain a stripped-down version of the root filesystem for the platform for which software is being compiled. They are often used when cross-compiling software for other platforms, as described in Chapter 12, Cross-Platform Compiling and Custom Toolchains. If containers for shipping whole build environments are not an option, sysroots can be an alternative to provide a defined build environment.
+简单地说，系统根目录(或简称sysroot)是构建系统认为的根目录，可以从中查找头文件和库。简而言之，这个目录包含用于编译软件的平台的根文件系统的精简版本，经常用于为其他平台交叉编译软件时。若用于运输整个构建环境的容器不是一个选项，sysroot可以作为提供已定义构建环境的替代方案。
 
-To use a sysroot with CMake, a toolchain file is needed. As the name suggests, these files define the tools to use to compile and link the software as well as where to find any libraries. In a normal build, CMake automatically detects the toolchain by introspecting the system. Toolchain files are passed to CMake with the CMAKE\_TOOLCHAIN\_FILE variable like this:
+要在CMake中使用sysroot，需要一个工具链文件，这些文件定义了用来编译和链接软件的工具，以及在哪里可以找到库。正常的构建中，CMake通过自动检测系统检测工具链。工具链文件通过CMAKE\_TOOLCHAIN\_FILE传递给CMake:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <source_dir> -B <binary_dir> -DCMAKE_TOOLCHAIN_FILE=
   <path/to/toolchain.cmake>
 \end{tcblisting}
 
-Since version 3.21, CMake additionally supports the -{}-toolchain option to pass toolchain files, which is equivalent to passing the CMAKE\_TOOLCHAIN\_FILE cache variable.
+从3.21版本起，CMake支持-{}-toolchain选项来传递工具链文件，这相当于使用CMAKE\_TOOLCHAIN\_FILE缓存变量。
 
-Alternatively, the toolchain file can be passed with a CMake preset as a cache variable. At a minimum, a toolchain file to use with a sysroot will define the CMAKE\_SYSROOT variable to point to the sysroot and the CMAKE\_<LANG>\_COMPILER variable to point to a compiler that is compatible with the libraries in the sysroot. To avoid mixing dependencies from outside the sysroot with the files installed on the host system, the variables for controlling where the find\_ commands look for stuff are usually also set. A minimal toolchain file might look like this:
+或者，可以使用CMake预设作为缓存变量来传递工具链文件。至少，与sysroot一起使用的工具链文件将定义CMAKE\_SYSROOT变量，以指向sysroot，并定义CMAKE\_<LANG>\_COMPILER变量，以指向与sysroot中库兼容的编译器。为了避免将来自sysroot外部的依赖项与安装在主机系统上的文件混淆在一起，通常还设置了用于控制\texttt{find\_}指令查找位置的变量。一个最小的工具链文件可能是这样的:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -26,29 +26,29 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 \end{lstlisting}
 
-Let's see what happens here in detail:
+来看看这里发生了什么:
 
 \begin{enumerate}
 \item 
-First, the system name of the target system is set, by setting the CMAKE\_SYSTEM\_NAME variable. This is the system for which the files are compiled inside the sysroot.
+首先，使用CMAKE\_SYSTEM\_NAME变量来设置目标系统的系统名称。这是在sysroot中为其编译文件的系统。
 
 \item 
-Then, the path to the sysroot itself is set by setting the CMAKE\_SYSROOT variable. CMAKE\_STAGING\_PREFIX is optional and is used to specify a location on the host machine to install any artifacts of the project. Specifying a staging prefix helps keep the sysroot and the host filesystem clean, as without it, any installation of the artifacts will happen on the host filesystem.
+然后，通过设置CMAKE\_SYSROOT变量来设置到sysroot本身的路径。CMAKE\_STAGING\_PREFIX可选，用于指定在主机上安装项目构件的位置。指定暂存前缀有助于保持sysroot和主机文件系统的整洁；否则，构件的安装都将发生在主机文件系统上。
 
 \item 
-Next, the compilers are set to the compilers binaries delivered with the sysroot by setting the CMAKE\_C\_COMPILER and CMAKE\_CXX\_COMPILER variables.
+接下来，设置CMAKE\_C\_COMPILER和CMAKE\_CXX\_COMPILER变量，将编译器设置为sysroot附带的编译器二进制文件。
 
 \item 
-Lastly, the search behavior of any find\_ command in CMake is set. The CMAKE\_FIND\_ROOT\_PATH\_MODE\_* variables take any of the values of ONLY, NEVER, and BOTH. If set to ONLY, CMake will only search the type of file inside the sysroot; if set to NEVER, searches will only consider the host file structure. If set to BOTH, then the host system path and the sysroot path will be searched. Note that CMAKE\_STAGING\_PREFIX is considered a system path, so in order to search the sysroot and the staging directory, BOTH must be selected. In the example, this is configured in a way that all header files and libraries are restricted to the sysroot, while any call for find\_program will look only on the host system and find\_package will look in both places.
+最后，设置CMake中\texttt{find\_}指令的搜索行为。CMAKE\_FIND\_ROOT\_PATH\_MODE\_*变量可以为ONLY、NEVER和BOTH。若设置为ONLY，CMake将只搜索sysroot中的文件类型;若设置为NEVER，则搜索将只考虑主机文件结构。若设置为BOTH，则将搜索主机系统路径和sysroot路径。注意，CMAKE\_STAGING\_PREFIX认为是系统路径，因此为了搜索sysroot和暂存目录，必须同时选中两者。本例中，配置的方式是将所有头文件和库限制在sysroot中，而\texttt{find\_program}的调用将只查找主机系统，而\texttt{find\_package}将在两个文件系统内查找。
 \end{enumerate}
 
-Setting the CMAKE\_SYSROOT variable will not automatically set the place where build artifacts are installed. For situations where the resulting binaries are compatible with the host system, this might be the intended behavior. In a lot of cases, such as when cross-compiling, this is not what is wanted, so setting CMAKE\_STAGING\_PREFIX is often recommended. Setting the staging directory has two effects: first, it will cause any artifacts to be installed in the staging directory, and second, the staging directory will be added to the search prefix for the find\_ commands. One caveat is that the staging directory will be added to CMAKE\_SYSTEM\_PREFIX\_PATH, which has the downside that the CMAKE\_FIND\_ROOT\_PATH\_MODE\_XXX variables from the preceding example have to be set to BOTH so the packages, libraries, and programs installed in the staging area are found.
+设置CMAKE\_SYSROOT不会自动设置安装构建构件的位置。对于生成的二进制文件与主机系统兼容的情况，这可能是预期的行为。很多情况下，比如交叉编译，这不是我们想要的结果，所以建议设置CMAKE\_STAGING\_PREFIX。设置暂存目录有两个效果:第一，在暂存目录中进行安装；第二，暂存目录将添加到\texttt{find\_}指令的搜索前缀中。需要注意的是，暂存目录将添加到CMAKE\_SYSTEM\_PREFIX\_PATH中，这有一个问题，即来自前面示例的CMAKE\_FIND\_ROOT\_PATH\_MODE\_XXX变量必须设置为BOTH，这样才能找到安装在暂存区域中的包、库和程序。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=CMAKE\_STAGING\_PREFIX and CMAKE\_INSTALL\_PREFIX]
-If both CMAKE\_STAGING\_PREFIX and CMAKE\_INSTALL\_PREFIX are set, the staging prefix will take precedence. So, as a rule of thumb, whenever the toolchain is compatible with the host system, the staging might be omitted, else it tends to be defined.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=CMAKE\_STAGING\_PREFIX和CMAKE\_INSTALL\_PREFIX]
+若同时设置了CMAKE\_STAGING\_PREFIX和CMAKE\_INSTALL\_PREFIX，则暂存前缀优先。根据经验，只要工具链与宿主系统兼容，就可以省略暂存，否则就去定义。
 \end{tcolorbox}
 
-One downside of sysroots compared to containers is that they cannot be started and be used to execute commands within just like that. So, if the toolchain and the sysroot are not compatible with the host platform, any files produced will not be executable without either moving to the target platform or using an emulator.
+与容器相比，sysroot的一个缺点是不能启动，也不能在其中执行命令。因此，若工具链和sysroot与主机平台不兼容，产生的文件在不移动到目标平台或使用模拟器时，都不能执行。
 
 
 

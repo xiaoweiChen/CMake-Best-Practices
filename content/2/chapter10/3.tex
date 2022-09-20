@@ -1,12 +1,11 @@
 
-Software projects, either directly or indirectly, span multiple code repositories. Dealing with local project code is the easiest, but software projects are rarely standalone. Things may get complicated really fast without a proper dependency management strategy. The first recommendation of this chapter is to use a package manager if you can. Package managers greatly reduce the effort spent on dependency management. If you are not able to use a package manager, you may need to roll your very own mini project-specific package manager, which is called a super-build.
+软件项目都会直接或间接地跨越多个代码存储库。处理本地项目代码最简单，但软件项目很少是独立的。若没有适当的依赖管理策略，事情可能会变得复杂。本章的第一个建议是若可以的话使用包管理器，包管理器大大减少了花费在依赖项管理上的工作。若不能使用包管理器，可能需要使用自己的迷你项目专用包管理器，这称为超级构建。
 
-Super-builds are mostly used for making a project self-sufficient dependency-wise, which means the project is able to satisfy its very own dependencies without the intervention of the user. Having such an ability is very convenient for all consumers. To demonstrate this technique, we will start with an example of such a scenario. Let's begin.
+超级构建通常用于实现项目自给自足的依赖关系，所以项目能够在不需要用户干预的情况下满足依赖关系，拥有这样的能力对所有使用来说都非常方便。
 
+\subsubsubsection{10.3.1\hspace{0.2cm}推荐的方法 – FetchContent}
 
-\subsubsubsection{10.3.1\hspace{0.2cm}The recommended way – FetchContent}
-
-We will be following Chapter 10, Example 01 for this part. Let's start by inspecting Chapter 10, Example 01's CMakeLists.txt file, as usual. The first seven lines are left out for simplicity:
+我们将使用第10章01例进行演示。像往常一样，先从第10章，示例01的CMakeLists.txt文件开始。为了简单起见，省略了前七行:
 
 \begin{lstlisting}[style=styleCMake]
 if(CH10_EX01_USE_SUPERBUILD)
@@ -27,7 +26,7 @@ target_link_libraries(ch10_ex01_benchmarks PRIVATE
 	benchmark::benchmark)
 \end{lstlisting}
 
-As we can see, it is a simple CMakeLists.txt file that defines two targets, named ch10\_ex01\_tests and ch10\_ex01\_benchmarks. These targets depend on Google Test and Google Benchmark libraries, respectively. These libraries are found and defined by either the super-build or the find\_package(…) calls, depending on the CH10\_EX01\_USE\_SUPERBUILD variable. The find\_package(…) path is the way we have followed until now. Let's inspect the super-build file, superbuild.cmake, together:
+它是一个简单的CMakeLists.txt文件，定义了两个目标ch10\_ex01\_tests和ch10\_ex01\_benchmark。这些目标分别依赖于Google Test和Google Benchmark库。这些库可以通过超级构建或\texttt{find\_package(…)}调用找到和定义，这取决于CH10\_EX01\_USE\_SUPERBUILD变量。目前为止，我们一直使用\texttt{find\_package(…)}确定路径，来看一下超级构建文件superbuild.cmake:
 
 \begin{lstlisting}[style=styleCMake]
 include(FetchContent)
@@ -43,9 +42,9 @@ FetchContent_MakeAvailable(GTest benchmark)
 add_library(GTest::Main ALIAS gtest_main)
 \end{lstlisting}
 
-In the first line, the FetchContent CMake module is included, since we are going to utilize it for the dependencies. In the following six lines, the FetchContent\_Declare function is used to declare two external targets, benchmark and GTest, which are instructed to be fetched via Git. Consequently, the FetchContent\_MakeAvailable(…) function is called to make the declared targets available. Lastly, an add\_library(…) call is made for defining an alias target named GTest::Main for the gtest\_main target. This is done to keep the compatibility between find\_package(…) and super-build target names. There is no alias target defined for benchmark, since its find\_package(…) and super-build target names are already compatible.
+第一行中，包含了\texttt{FetchContent}模块，使用它来获取依赖。在、接下来的六行中，\texttt{FetchContent\_Declare}用于声明两个外部目标，benchmark和GTest，并通过Git获取它们。因此，调用\texttt{FetchContent\_MakeAvailable(…)}以使声明的目标可用。最后，\texttt{add\_library(…)}用于为gtest\_main目标定义一个名为GTest::Main的别名目标。这样做是为了保持\texttt{find\_package(…)}和超级构建目标名称之间的兼容性。没有为benchmark定义别名目标，因为\texttt{find\_package(…)}和超级构建目标名称已经兼容。
 
-Let's configure and build the example by invoking the following commands:
+通过调用以下命令来配置和构建这个示例:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_10/ex01_external_deps
@@ -53,17 +52,17 @@ cmake -S ./ -B build -DCH10_EX01_USE_SUPERBUILD:BOOL=ON
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}
 
-In the first two lines, we are going into the example\_10/ folder and configuring the project. Note that we are setting the CH10\_EX01\_USE\_SUPERBUILD variable to ON in order to enable the super-build code. In the last line, we are building the project with N parallel jobs, where N is the result of the nproc command.
- 
-Thanks to the alternate find\_package(...) path, the build will also work fine without enabling the super-build, given that google test >= 1.10.0 and google benchmark >= 1.6.1 are available in the environment. This will allow package maintainers to change dependency versions without patching the project. Small customization points such as this are important for portability and reproducibility.
+在前两行中，进入example\_10/文件夹并配置项目。注意，这里CH10\_EX01\_USE\_SUPERBUILD为ON，以便启用超级构建代码。最后一行中，用N个并行作业构建项目，其中N是nproc的结果。
 
-Up next, we'll be taking a look at a super-build example that uses the ExternalProject module instead of the FetchContent module.
+由于有了\texttt{find\_package(…)}的路径，若环境中的google test>= 1.10.0和google benchmark>= 1.6.1，那么构建也可以在不启用超级构建的情况下正常工作。这将允许包维护人员在不打补丁的情况下更改依赖项版本。像这样的小型定制点对于可移植性和可重复性非常重要。
 
-\subsubsubsection{10.3.2\hspace{0.2cm}The legacy way – ExternalProject\_Add}
+接下来，再来看一个使用ExternalProject模块的超级构建示例。
 
-Before FetchContent was a thing, most people implemented the super-build approach by utilizing the ExternalProject\_Add CMake function. This function is provided by the ExternalProject CMake module. In this section, we will see a superbuild example with ExternalProject\_Add to see how it differs from using the FetchContent module.
+\subsubsubsection{10.3.2\hspace{0.2cm}传统的方式 – ExternalProject\_Add}
 
-Let's take a look at the CMakeLists.txt file in Chapter 10, Example 02 together (comments and the project directive are omitted):
+在\texttt{FetchContent}之前，大多数人会使用\texttt{ExternalProject\_Add}来实现超级构建方法。该功能由\texttt{ExternalProject}模块提供。本节中，将看到一个使用\texttt{ExternalProject\_Add}的超级构建示例，以了解它与\texttt{FetchContent}模块的区别。
+
+来一起看看第10章中的CMakeLists.txt文件，示例02(省略了注释和项目指令):
 
 \begin{lstlisting}[style=styleCMake]
 # ...
@@ -73,7 +72,7 @@ target_sources(ch10_ex02_tests PRIVATE src/tests.cpp)
 target_link_libraries(ch10_ex02_tests PRIVATE catch2)
 \end{lstlisting}
 
-Again, the project is a unit-test project containing a single C++ source file, but this time it is with Catch2 instead of Google Test. The CMakeLists.txt file includes the superbuild.cmake file directly, defines an executable target, and links the Catch2 library to the target. You may have noticed that this example does not use FindPackage(...) to discover the Catch2 library. The reason for this is that, unlike FetchContent, ExternalProject fetches and builds the external dependencies at build time. Since the content of the Catch2 library is not available at configuration time, we are unable to use FindPackage(...) here. FindPackage(…) runs at configure time and requires the package files to be present. Let's take a look at superbuild.cmake as well:
+同样，该项目是一个包含单C++源文件的单元测试项目，但这次使用的是Catch2。CMakeLists.txt文件包括superbuild.cmake文件，定义一个可执行目标，并将Catch2库链接到目标。这个示例没有使用\texttt{FindPackage(…)}来查找Catch2库。这是因为，与\texttt{FetchContent}不同，\texttt{ExternalProject}在构建时获取并构建外部依赖项。由于Catch2库的内容在配置时不可用，因此我们无法在这里使用\texttt{FindPackage(…)}。\texttt{FindPackage(…)}在配置时运行，并要求提供包文件。来看下superbuild.cmake:
 
 \begin{lstlisting}[style=styleCMake]
 include(ExternalProject)
@@ -93,11 +92,11 @@ set_target_properties(catch2 PROPERTIES "INTERFACE_INCLUDE_
 	DIRECTORIES" "${CATCH2_INCLUDE_DIR}")
 \end{lstlisting}
 
-The superbuild.cmake module includes the ExternalProject CMake module. The code calls the ExternalProject\_Add function to declare a target named catch2\_download with the GIT\_REPOSITORY, GIT\_TAG, INSTALL\_COMMAND, and CMAKE\_ARGS arguments. As you may recall from previous chapters, the ExternalProject\_Add function can fetch dependencies from different sources. Our example is trying to fetch the dependency via using Git. The GIT\_REPOSITORY and GIT\_TAG arguments are for specifying the target Git repository URL and the tag to be checked out after the git clone, respectively. Since Catch2 is a CMake project, the amount of parameters we need to supply to the ExternalProject\_Add function is minimal. The ExternalProject\_Add function knows how to configure, build, and install a CMake project by default, so no CONFIGURE\_COMMAND or BUILD\_COMMAND arguments are needed. The empty INSTALL\_COMMAND argument is for disabling and installing the dependency after the build. The last argument, CMAKE\_ARGS, is for passing CMake arguments to the external project's configure step. We use this to suppress a GCC warning (treated as an error) about legacy pragmas in the Catch2 compilation.
+superbuild.cmake模块包括\texttt{ExternalProject}模块，使用\texttt{ExternalProject\_Add}，用GIT\_REPOSITORY、GIT\_TAG、INSTALL\_COMMAND和CMAKE\_ARGS参数声明一个名为catch2\_download的目标。\texttt{ExternalProject\_Add}可以从不同的源获取依赖项，示例试图通过使用Git获取依赖项。GIT\_REPOSITORY和GIT\_TAG参数分别用于指定目标git库URL和在git克隆后要检出的标记。因为Catch2是一个CMake项目，需要提供给\texttt{ExternalProject\_Add}的参数量最小。\texttt{ExternalProject\_Add}默认知道如何配置、构建和安装CMake项目，因此不需要CONFIGURE\_COMMAND或BUILD\_COMMAND参数。空的INSTALL\_COMMAND参数用于在构建之后禁用并安装依赖项。最后一个参数，CMAKE\_ARGS，用于将CMAKE参数传递给外部项目的配置步骤。我们使用它来抑制关于Catch2编译中的语法警告(作为错误处理)。
 
-The ExternalProject\_Add command fetches the desired library into a prefix path and builds it. So, to use the fetched content, we have to import it to the project first. Since we cannot utilize FindPackage(...) to let CMake deal with the importing of the library, we have some manual work to do. One of them is to define the include directory of the Catch2 target. Since Catch2 is a header-only library, defining an interface target with the headers will be sufficient. We are declaring the CATCH2\_INCLUDE\_DIR variable to set the directory that will contain the Catch2 headers. We are using this variable to set the INTERFACE\_INCLUDE\_DIRECTORIES property of the imported target created in this example. Up next, the file (MAKE\_DIRECTORY \$\{CATCH2\_INCLUDE\_DIR\}) CMake command is called to create the include directory. The reason for that is, because of how ExternalProject\_Add works, the Catch2 content is not present until the build step executes. Setting a target's INTERFACE\_INCLUDE\_DIRECTORIES requires the given directories to be present, so we're doing a small hack as a workaround. In the last three lines, we declare an IMPORTED INTERFACE library for Catch2, making this library dependent on the catch2\_download target and setting INTERFACE\_INCLUDE\_DIRECTORIES of the imported library.
+\texttt{ExternalProject\_Add}将所需的库获取到前缀路径中并构建，要使用获取的内容，必须首先将其导入到项目中。因为不能使用\texttt{FindPackage(…)}进行导入，所以需要手动做一些工作，其中之一是定义Catch2目标的include目录。因为Catch2是一个纯头文件库，所以用头文件定义一个接口目标就够了。这里声明了CATCH2\_INCLUDE\_DIR变量来设置将包含CATCH2头文件的目录，使用这个变量来设置本例中创建的导入目标的INTERFACE\_INCLUDE\_DIRECTORIES属性。接下来，使用\texttt{file (MAKE\_DIRECTORY \$\{CATCH2\_INCLUDE\_DIR\})}指令来创建include目录。由于ExternalProject\_Add的工作方式，在执行构建步骤之前不会出现Catch2内容。设置一个目标的INTERFACE\_INCLUDE\_DIRECTORIES需要给定的目录存在，所以我们使用了一个小hack作为解决方案。最后三行中，为Catch2声明一个导入的INTERFACE库，使这个库依赖于Catch2 \_download目标，并设置导入库的INTERFACE\_INCLUDE\_DIRECTORIES。
 
-Let's try to configure and build our example to check whether it works or not:
+试着配置和构建来检查以上设置是否有效:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_10/ex02_external_deps_with_extproject
@@ -105,7 +104,7 @@ cmake -S ./ -B build
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}
 
-If everything goes as expected, you should be seeing output similar to this:
+若一切正常，会看到类似这样的输出:
 
 \begin{tcblisting}{commandshell={}}
 [ 10%] Creating directories for 'catch2_download'
@@ -126,24 +125,24 @@ HEAD is now at 62fd6605 v2.13.9
 [100%] Built target ch10_ex02_tests
 \end{tcblisting}
 
-Alright, it seems we have built our test executable successfully. Let's run it to check whether it works by running the ./build/ch10\_ex02\_tests executable:
+好了，似乎已经成功构建了测试可执行文件。通过运行./build/ch10\_ex02\_tests可执行文件来检查它是否有效:
 
 \begin{tcblisting}{commandshell={}}
 ===========================================================
 All tests passed (4 assertions in 1 test case)
 \end{tcblisting}
 
-Up next, we'll see a simple QT application using the QT framework from a super-build.
+接下来，将了解如何在超级构建中使用QT框架，并创建简单的QT应用程序。
 
-\subsubsubsection{10.3.3\hspace{0.2cm}Bonus – using the Qt 6 framework with a super-build}
+\subsubsubsection{10.3.3\hspace{0.2cm}福利 - 在超级构建中使用Qt 6框架}
 
-Until now, we have dealt with libraries that have rather small footprints. Let's try something more complex, such as using a big framework such as the Qt framework in a super-build. For this part, we are going to follow the Chapter 10, Example 03 example.
+我们处理的都是体积相当小的库。来试试一些更复杂的东西，比如在超级构建中使用一个大框架，比如Qt框架。对于这一部分，我们将使用第10章，示例03的例子。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Important note]
-If you are going to try this example outside of the provided Docker container, you may have to install some additional dependencies required by the Qt runtime. The required packages for the Debian-like systems are as follows: libgl1-mesa-dev libglu1-mesa-dev '\^{}libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=重要note]
+若打算在提供的Docker容器之外尝试这个示例，可能必须安装Qt运行时所需的一些附加依赖项。类Debian系统所需的包如下:libgl1-mesa-dev libglu1-mesa-dev '\^{}libxcb.*-dev' libx11-xcb-dev libglu1-mesa-dev libxrender-dev libxi-dev libxkbcommon-dev libxkbcommon-x11-dev。
 \end{tcolorbox}
 
-The example contains a single source file, main.cpp, that outputs a simple Qt window application with a message. The implementation is as follows:
+该示例包含一个源文件main.cpp，输出一个简单的Qt窗口应用程序和一条消息。具体实现如下:
 
 \begin{lstlisting}[style=styleCXX]
 #include <qapplication.h>
@@ -159,7 +158,7 @@ int main( int argc, char **argv )
 }
 \end{lstlisting}
 
-Our goal is to be able to compile this Qt application without requiring the user to install the Qt framework themselves. The super-build should automatically install the Qt 6 framework, and the application should be able to use that. Let's take a look at the CMakeLists.txt file of the example, as usual:
+我们的目标是能够编译这个Qt应用程序，而不需要用户自己安装Qt框架。超级构建应该会自动安装Qt 6框架，应用程序应该能够使用该框架。像往常一样，看一下这个例子的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 if(CH10_EX03_USE_SUPERBUILD)
@@ -171,15 +170,12 @@ else()
 
 	find_package(Qt6 COMPONENTS Core Widgets REQUIRED)
 endif()
-add_execu
-table(ch10_ex03_simple_qt_app main.cpp)
-target_compile_features(ch10_ex03_simple_qt_app PRIVATE
-	cxx_std_11)
-target_link_libraries(ch10_ex03_simple_qt_app Qt6::Core
-	Qt6::Widgets)
+add_executable(ch10_ex03_simple_qt_app main.cpp)
+target_compile_features(ch10_ex03_simple_qt_app PRIVATE cxx_std_11)
+target_link_libraries(ch10_ex03_simple_qt_app Qt6::Core Qt6::Widgets)
 \end{lstlisting}
 
-Like the first example, the CMakeLists.txt file includes the superbuild.cmake file, depending on an option flag. If the user is opted in to use a super-build for the example, it will include the super-build module. Otherwise, the dependency will try to be located in the system via find\_package(...). In the last three lines, an executable target is defined, C++ standards for the target are set, and the defined target is linked to the QT6::Core and QT6::Widgets targets. These targets are either defined by the super-build or the find\_package(...) call, depending on whether the user is opted in to use the super-build or not. Let's continue by taking a look at the superbuild.cmake file:
+与第一个示例类似，CMakeLists.txt文件包括superbuild.cmake文件，取决于选项标志。若用户选择为该示例使用超级构建，那么将包括超级构建模块。否则，依赖将尝试使用\texttt{find\_package(…)}在系统中定位。最后三行中，定义了一个可执行目标，设置了目标的C++标准，并将定义的目标链接到QT6::Core和QT6::Widgets目标。这些目标要么由超级构建定义，要么由\texttt{find\_package(…)}定义，这取决于用户是否选择使用超级构建。继续来看superbuild.cmake文件:
 
 \begin{lstlisting}[style=styleCMake]
 include(FetchContent)
@@ -210,7 +206,7 @@ FetchContent_Declare(qt6
 FetchContent_MakeAvailable(qt6)
 \end{lstlisting}
 
-The superbuild.cmake file uses the FetchContent module to fetch the Qt dependency. Since the fetching and preparing process for the Qt may be lengthy, some of the unused Qt framework features are disabled. The FetchContent message output is enabled for better tracking of the progress. Let's try to configure and compile the example by running the following commands:
+superbuild.cmake文件使用\texttt{FetchContent}模块来获取Qt依赖。由于Qt的获取和准备过程可能很长，一些未使用的Qt框架特性会禁用。为了更好地跟踪进度，启用了\texttt{FetchContent}消息输出。让我们试着通过运行以下命令来配置和编译这个示例:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_10/ex03_simple_qt_app/
@@ -218,7 +214,7 @@ cmake -S ./ -B build -DCH10_EX03_USE_SUPERBUILD:BOOL=ON
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}
 
-If everything goes as expected, you should see similar output, as shown here:
+若一切顺利，应该会看到类似的输出:
 
 \begin{tcblisting}{commandshell={}}
 /*...*/
@@ -230,6 +226,8 @@ Cloning into 'qt6-src'...
 [100%] Completed 'qt6-populate'
 [100%] Built target qt6-populate
 /*...*/
+\end{tcblisting}
+\begin{tcblisting}{commandshell={}}
 -- Configuring done
 -- Generating done
 /*...*/
@@ -244,20 +242,20 @@ Cloning into 'qt6-src'...
 /*...*/
 \end{tcblisting}
 
-If all goes well, you have succeeded in compiling the example. Let's check whether it works by running the produced executable with the following command:
+一切顺利！让我们用以下命令运行生成的可执行文件来检查它是否工作:
 
 \begin{tcblisting}{commandshell={}}
 ./build/ch10_ex03_simple_qt_app
 \end{tcblisting}
 
-If everything is alright, a small GUI window should pop up. The window should look similar to the following figure:
+一切正常的话，应该会弹出一个小GUI窗口。该窗口看起来应该类似于下图:
 
 \begin{center}
-\includegraphics[width=0.3\textwidth]{content/2/chapter10/images/1.jpg}\\
-Figure 10.1 – The simple Qt application window
+\includegraphics[width=0.4\textwidth]{content/2/chapter10/images/1.jpg}\\
+图10.1 简单的Qt应用程序窗口
 \end{center}
 
-With this sorted out, we have concluded the part that learns about how to use super-build in a CMake project. Next, we will be taking a look at ensuring version consistency in a super-build.
+有了这些，我们已经完成了学习如何在CMake项目中使用超级构建。接下来，我们将看看如何在超级构建中保持版本一致性。
 
 
 

@@ -1,21 +1,21 @@
-Containerization brings the benefit that developers can control the build environment to some extent. Containerized build environments are also a tremendous help for setting up CI environments. There are quite a few container runtimes out there, with Docker being the most popular. It would exceed the scope of this book to look in depth at containerization, so we will use Docker for the examples in this book.
+容器化带来的好处是开发人员可以在一定程度上控制构建环境。容器化构建环境对于设置CI环境也有很大帮助。容器的运行时软件有很多，其中Docker最受欢迎。容器化的深入讨论超出了本书的范围，所以我们使用Docker运行本书的示例。
 
-A build container contains a fully defined build system including CMake and any tools and libraries needed to build a certain software. By providing the container definition, for example, the Dockerfile, along with the project, or over a publicly accessible container registry, anyone can use the container to build the software. The huge advantage is that developers do not need to install and possibly pollute their host machine by installing additional libraries or tools except the software needed to run the containers. The downside is that building might take longer and not all IDEs and tools support working with containers in a convenient way. Notably, Visual Studio Code has very good support for working in containers. You can visit \url{https://code.visualstudio.com/docs/remote/containers for more details}.
+构建容器包含完整的构建系统，包括CMake和构建特定软件所需的工具和库。通过提供容器定义(例如Dockerfile)和项目一起提供，或者通过公开可访问的容器注册表提供，任何人都可以使用容器来构建软件。这样做的好处是，除了运行容器所需的软件外，开发人员不需要安装其他库或工具。缺点是构建可能需要更长的时间，并且不是所有IDE和工具都支持容器。Visual Studio Code对在容器支持的很好，可参考\url{https://code.visualstudio.com/docs/remote/containers}了解更多详情。
 
-At a very high level, the workflow for using a build container is the following:
+从高层来看，使用构建容器的工作流程如下:
 
 \begin{enumerate}
 \item 
-Define the container and build it.
+定义容器并构建。
 
 \item 
-Mount a local copy of the source code into the build container.
+将源代码的副本装入构建容器中。
 
 \item 
-Run any commands for building inside the container.
+运行用于在容器内构建的命令。
 \end{enumerate}
 
-A very simple Docker definition for building a simple C++ application could look like this:
+构建简单C++应用程序的Docker定义如下:
 
 \begin{lstlisting}[style=styleCMake]
 FROM alpine:3.15
@@ -23,13 +23,13 @@ RUN apk add --no-cache cmake ninja g++ bash make git
 RUN <any command to install additional libraries etc.>
 \end{lstlisting}
 
-This will define a small container based on the Alpine Linux 3.15 and install cmake, ninja, bash, make, and git. Any real-life container will probably have additional tools and libraries installed inside to work conveniently; however, just to illustrate how building software with a container works, having such a minimal container is enough. The following Docker command builds the container image and tags it with the name builder\_minimal:
+这将定义一个基于Alpine Linux 3.15的容器，并安装cmake、ninja、bash、make和git。实际容器都可能有额外的工具和库安装在里面以方便工作;然而，为了说明如何使用容器构建软件，拥有这样一个最小的容器就足够了。下面的Docker命令构建容器映像，并用builder\_minimal标记:
 
 \begin{tcblisting}{commandshell={}}
 docker build . -t builder_minimal
 \end{tcblisting}
 
-Once the container is a clone of the local, the source is mounted inside the container and all CMake commands are executed inside the container. Assuming the user is executing the Docker command from the source directory, the commands to configure a CMake build project might look like this:
+当容器是本地的副本，那么源就挂载在容器中，所有的CMake命令都可以在容器中执行。假设用户从源目录执行Docker命令，配置CMake构建项目的命令可能如下所示:
 
 \begin{tcblisting}{commandshell={}}
 docker run --user 1000:1000 --rm -v $(pwd):/workspace
@@ -38,22 +38,22 @@ docker run --user 1000:1000 --rm -v $(pwd):/workspace
   builder_minimal cmake --build /workspace/build
 \end{tcblisting}
 
-This will start up the container we created and execute the CMake commands within. The local directory is mounted inside the container as /workspace with the -v option. Since our Docker containers use root as the default user, the user ID and group to use are passed with the -{}-user option. On Unix-like operating systems, this should match the user ID of the host, so any files created can also be edited from outside the container. The -{}-rm flag tells Docker to remove the image once it is done with it.
+这将启动创建容器并在其中执行CMake命令。使用-v将本地目录作为/workspace挂载到容器中。因为Docker容器通常使用root作为默认用户，所以使用的用户ID和组是通过-{}-user选项传递的。在类Unix操作系统上，这应该与主机的用户ID相匹配，因此创建的文件也可以在容器外部编辑。-{}-rm标志告诉Docker在容器退出后删除该容器。
 
-An alternative way to work with the container is to run it in interactive mode by passing the -ti flag to the docker run command:
+使用容器的另一种方法是通过向docker run命令传递-ti标志以交互模式运行:
 
 \begin{tcblisting}{commandshell={}}
 docker run --user 1000:1000 --rm -ti -v $(pwd):/workspace
   builder_minimal
 \end{tcblisting}
 
-This will start a shell inside the container where the build command can be invoked without the need to restart the container every time.
+这将在容器内启动shell，可以直接使用构建命令，而不需要每次都重新启动容器。
 
-There are several strategies on how editors or IDEs and build containers can work together. The most convenient way is, of course, if the IDE supports it natively or through a convenient extension like Visual Studio Code does. If this is not the case, packing a suitable editor inside the container and executing it from within can be a strategy to develop software conveniently. Another way is to run the editor on the host system and reconfigure it so it invokes CMake not directly but starts the container and executes CMake within.
+关于编辑器或IDE和构建容器如何协同工作，有几种策略。当然，若IDE本身支持，或者像Visual Studio Code那样通过扩展支持最好了。若不是这样，在容器中装入合适的编辑器，并在容器中执行也是方便开发软件的一种策略。另一种方法是在主机系统上进行编辑并重新配置Docker，不直接调用CMake，而是启动容器时直接执行CMake。
 
-What we have shown here is the bare minimum for working with containers as build environments but we hope it serves as a very first stepping stone to working with containers. As more and more IDEs start to support working with containerized build environments, using them will become much easier. Containers make build environments very portable between various machines and can help to ensure that all developers of a project are using the same build environment. It is also a good idea to put container definition files under version control so that necessary changes to the build environment are tracked together with the code.
+这里展示的是使用容器作为构建环境的最低要求，随着越来越多的IDE支持使用容器构建环境，使用容器将变得容易得多。容器使构建环境在不同机器之间可移植，并且可以帮助确保项目的所有开发人员使用相同的构建环境。将容器定义文件置于版本控制之下也是一个好主意，以便对构建环境的必要更改与代码一起跟踪。
 
-Containers are a good and portable way of creating isolated build environments. But if this is not an option for any reason, another way to create an isolated and portable build environment is using sysroots.
+容器是创建隔离构建环境的一种可移植的方法，但若由于某种原因这不是一个选项，那么另一种创建可移植构建环境的方法是使用sysroot。
 
 
 

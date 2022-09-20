@@ -1,21 +1,24 @@
-As we should have learned by now, every big project comes with its own set of dependencies. The easiest way of dealing with these dependencies is by using a package manager, such as Conan or vcpkg. But using a package manager might not always be possible or feasible, due to company policies, project requirements, or lack of resources. Thus, the project authors might consult the traditional, old-style ways to deal with the dependencies. The usual way of dealing with these dependencies may include shipping all dependencies embedded into the repository's build code. Alternatively, project authors may decide to let the end user deal with the dependencies from scratch. Neither of these ways is clean and has its own drawbacks. What if I told you there is a middle ground? Welcome to the super-build approach.
+我们现在应该已经知道，每个大项目都有自己的一组依赖关系。处理这些依赖关系的最简单方法是使用包管理器，例如Conan或vcpkg。但是由于公司策略、项目需求或缺乏资源，使用包管理器可能并不总是可行的。因此，项目作者可能会参考传统的、老式的方法来处理依赖性。处理这些依赖关系的通常方法可能包括将所有的依赖关系嵌入到存储库的构建代码中。或者，项目作者可能决定让最终用户从头处理依赖项。这两种方法都不优雅，有自己的缺点。
 
-A super-build is a method that can be used for decoupling the logic required for satisfying dependencies from project code, similar to how package managers work. In fact, we can call this method the poor man's package manager. Separating the dependency logic from the project code allows us to have a more flexible and maintainable project structure. In this chapter, we will learn how to achieve this in detail.
+所以呢?
 
-To understand the skills shared in this chapter, we'll cover the following main topics:
+欢迎使用超级构建。
+
+超级构建是一种方法，可用于从项目代码中分离满足依赖关系所需的逻辑，类似于包管理器的工作方式，我们可以称这个方法为穷人的包管理器。将依赖逻辑从项目代码中分离出来，可以使我们拥有更灵活和可维护的项目结构。本章中，将详细了解如何实现。
+
+我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-The requirements and prerequisites for a super-build
+超级构建的要求和需求
 
 \item 
-Building across multiple code repositories
+跨多个代码库的构建
 
 \item 
-Ensuring version consistency in a super-build
+超级构建中的版本一致性
 \end{itemize}
 
-Let's begin with the technical requirements.
 
 
 
