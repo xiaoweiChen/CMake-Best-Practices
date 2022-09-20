@@ -1,19 +1,16 @@
-Software testing is crucial for ensuring that a software system behaves as expected. Unsurprisingly, the need for scenario-based testing strategies is still at its peak. But the scenario-based approach often does not suffice. The real world is wild. Things out there are not sterile as in a test environment. Many different variables contribute to a software's behavior. Environments, users, hardware, operating systems, or third-party libraries can affect software unexpectedly. As software becomes more extensive, it becomes painfully hard to come up with a testing suite that covers all possible aspects of it. Therefore, the need for a technique that performs the unexpected arises. Thankfully, fuzzing comes to the rescue.
+软件测试对于确保软件系统的行为符合预期是至关重要的，对基于场景的测试策略的需求仍然很高，但是基于场景的方法通常不够。实际中，所使用的东西并不像测试环境中那样纯洁。许多不同的变量影响软件的行为：环境、用户、硬件、操作系统或第三方库可能会意外地影响软件。随着软件使用的越来越广泛，找到一种可以涵盖软件所有可能方面的测试套件变得非常困难。谢天谢地，模糊测试来了！
 
-In this chapter, we will learn the basics of fuzzing and learn how to use this technique 
-to test our software to make it more reliable. Furthermore, we will learn how we can integrate fuzzing tools into CMake to easily define fuzzing targets.
+本章中，我们将学习模糊测试的基础知识，并学习如何使用该技术来测试软件，使其更可靠。此外，将学习如何将模糊测试工具集成到CMake中，以轻松定义模糊目标。
 
-To understand the skills shared in this chapter, we'll cover the following main topics:
+我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-A brief look at fuzzing in CMake projects
+简介模糊测试
 
 \item 
-Integrating AFL/libfuzzer into your CMake project
+集成AFL/libfuzzer
 \end{itemize}
-
-Let's begin with the technical requirements.
 
 
 

@@ -1,7 +1,7 @@
 
 In this section, we will take a look into the two prominent fuzzing tools you can encounter in the wild, namely libFuzzer and AFL++. Let's start by learning about libFuzzer.
 
-\subsubsubsection{11.3.1\hspace{0.2cm}Using libFuzzer in your CMake project}
+\subsubsubsection{11.3.1\hspace{0.2cm}使用libFuzzer}
 
 libFuzzer is a fuzzing library that is part of the LLVM project. It is a compiler-aided fuzzer that has powerful fuzzing techniques, It is the default go-to fuzzer if your project is already compilable with the LLVM toolchain, since using libFuzzer only requires an additional compiler/linker flag and defining a single function. We will start learning more about these details by digging into an example. Let's get our hands dirty.
 
@@ -152,7 +152,7 @@ recommend you to take a look at \url{https://google.github.io/clusterfuzz/settin
 
 Up next, we will investigate another fuzzing tool, the infamous American Fuzzy Lop (AFL).
 
-\subsubsubsection{11.3.2\hspace{0.2cm}Using AFL++ in your CMake project}
+\subsubsubsection{11.3.2\hspace{0.2cm}使用AFL++}
 
 If you are stuck with GCC for whatever reason and you can't compile your code with LLVM, an alternative fuzzer to libFuzzer is AFL. Unfortunately, the original project is no longer maintained, but don't get downhearted. An even better, enhanced version of the project known as AFL++ is still maintained. In this section of the chapter, we will learn how to use AFL++ with the GCC toolchain.
 
