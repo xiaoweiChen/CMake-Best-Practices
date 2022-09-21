@@ -1,7 +1,7 @@
 
 这一节中，将了解可能使用过的两个著名的模糊测试工具，即libFuzzer和AFL++。我们从学习libFuzzer开始。
 
-\subsubsubsection{11.3.1\hspace{0.2cm}使用libFuzzer}
+\subsubsubsection{11.3.1\hspace{0.2cm}libFuzzer}
 
 libFuzzer是LLVM项目中的模糊测试库。若项目可以使用LLVM工具链进行编译，那么libFuzzer是默认的模糊测试器，使用libFuzzer需要额外的编译器/链接器标志和定义一个函数。接下来，通过一个示例来深入了解更多的细节。
 
@@ -148,7 +148,7 @@ if (*msg[0] == a[0]) {
 
 接下来，我们将研究另一个模糊测试工具——American Fuzzy Lop(AFL)。
 
-\subsubsubsection{11.3.2\hspace{0.2cm}使用AFL++}
+\subsubsubsection{11.3.2\hspace{0.2cm}AFL++}
 
 若因为某种原因无法使用GCC，并且无法使用LLVM编译代码，那么可以使用AFL模糊测试器替换libFuzzer。不幸的是，原来的项目不再维护了，但不要灰心。项目的一个更好的增强版本AFL++仍然在维护中。这一节中，将学习如何在GCC中使用AFL++。
 

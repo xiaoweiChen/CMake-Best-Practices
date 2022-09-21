@@ -1,28 +1,28 @@
-One of the powerful features of CMake is its support for the cross-platform building of software. Simply said, this means that with CMake, a project from any platform can be built for any other platform, as long as the necessary tools are available on the system running CMake. When building software, we typically talk about compilers and linkers, and they are of course essential tools for building software, but on a closer look, there are often some other tools, libraries, and files involved when building software. Collectively, these are commonly known as toolchains in CMake.
+CMake支持软件的跨平台构建，只要运行CMake的系统上有必要的工具，就可以为其他平台构建项目。构建软件时，通常要了解编译器和链接器，这些是构建软件的基本工具，但在构建软件时还有一些其他工具、库和文件，这些统称为工具链。
 
-So far in this book, all the examples were built for the same system CMake was running on. In these cases, CMake usually does a pretty good job of finding the correct toolchain to use. However, if the software is to be built for another platform, the toolchain usually has to be specified by the developer. Toolchain definitions might be relatively straightforward and just specify the target platform, or they might be as complex as specifying paths to individual tools needed to build the software or specific compiler flags to create binaries for a specific chipset.
+本书所有的示例都是运行在同一系统上构建的，CMake通常能很好地找到正确的工具链。然而，若软件是为另一个平台构建，则工具链通常由开发人员指定。工具链的定义可能相对简单，只指定目标平台，也可能复杂到指定构建软件所需的每个工具的路径，或者为特定芯片组创建二进制文件所需的特定编译器标志。
 
-In the context of cross-compiling, toolchains are often accompanied by system roots (sysroots), which were introduced in Chapter 9, Creating Reproducible Build Environments. Sysroots are directories that contain a stripped-down filesystem for the target platform to build. When building software, they are considered the root folder for finding the necessary libraries and files to compile and link the software for the intended target platform.
+交叉编译中，工具链通常和系统根目录(sysroot)一起使用，这在第9章介绍过。sysroot是目标平台的精简文件系统目录。构建软件时，将其视为根文件夹，用于查找必要的库和文件，以便为预期的目标平台进行编译和链接。
 
-While cross-compiling might be intimidating at first, it is often not as hard as it seems when using CMake properly. In this chapter, we will look at how to use toolchain files and how to write them yourself. We will look in detail into which tools are involved at particular stages of building software. Finally, we will look at how to set up CMake so that it can run tests with an emulator.
+虽然交叉编译开始可能令人生畏，但当正确使用CMake后，就没看上去那么困难了。本章将介绍如何使用工具链文件，以及如何自己编写工具链文件。我们将详细研究在构建软件的特定阶段使用了哪些工具。最后，再来了解如何设置CMake，从而可以使用模拟器运行测试。
 
-We'll cover the following main topics in this chapter:
+我们将讨论以下主题:
 
 \begin{itemize}
 \item 
-Using existing cross-platform toolchain files
+使用跨平台工具链
 
 \item 
-Creating toolchain files
+创建工具链
 
 \item 
-Testing cross-compiled binaries
+测试交叉编译的二进制文件
 
 \item 
-Testing a toolchain for supported features
+测试工具链支持的功能
 \end{itemize}
 
-By the end of the chapter, you will be proficient in handling existing toolchains and in how to build and test software for different platforms using CMake. We will have a deeper look into how to test a compiler for a certain feature to determine whether it suits our purposes.
+本章结束时，将能够处理现有的工具链，以及如何使用CMake为不同平台构建和测试软件。我们将深入研究如何测试编译器的某个特性，以确定是否符合我们的预期。
 
 
 

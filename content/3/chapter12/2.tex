@@ -1,26 +1,26 @@
-When building software for multiple platforms, the most straightforward way to do this is to compile software on the target system itself. The downside of that is that each developer has to have a running version of the target system to build the software. If these are desktop systems, that might work reasonably well, although moving between different installations for developing the software also makes the developer workflow quite tedious. Less powerful devices such as embedded systems might be very uncomfortable because of the lack of proper development tools or because compiling the software takes very long.
+为多个平台构建软件时，最直接的方法是在目标系统上编译。这样做的缺点是每个开发人员都必须有一个目标系统，才能构建软件。若是桌面系统，那么可能还好。若是功能较弱的设备(如嵌入式系统)，可能会因为缺乏适当的开发工具或编译软件需要花费很长时间。
 
-So, a much more convenient way from the developer's perspective is to use crosscompiling. This means the software engineer writes code and builds the software on their own machine, but the resulting binaries are for a different platform. The machine and platform on which the software is built are usually called the host machine and host platform, whereas the platform on which the software should run is called the target platform. For instance, the developer writes code on their x64 desktop machine running Linux, but the resulting binaries are for embedded Linux on an arm64 processor. So the host platform is x64 Linux and the target platform is arm64 Linux. To cross-compile software, the following two things are needed:
+因此，从开发人员的角度来看，更方便的方法是使用交叉编译。从而软件工程师在自己的机器上编写代码并构建软件，但生成的二进制文件适用于不同的平台。构建软件的机器通常称为主机平台，而运行软件的平台则称为目标平台。例如，开发人员在运行Linux的x64桌面计算机上编写代码，但生成的二进制文件是针对arm64处理器上的嵌入式Linux的。所以主机平台是x64 Linux，目标平台是arm64 Linux。要交叉编译软件，需要以下两件事:
 
 \begin{itemize}
 \item 
-A toolchain capable of producing binaries in the correct format
+工具链可以生成正确格式的二进制文件
 
 \item 
-Any dependencies of the project compiled for the target system
+提供编译目标系统目的依赖项
 \end{itemize}
 
-The toolchain is a set of tools such as a compiler, linker, and archiver to produce binaries that run on the host system but produce output for the target system. The dependencies are usually collected in a sysroot directory. Sysroots are directories containing a reduced version of a root filesystem where the needed libraries are stored. For cross-compilation, these directories serve as the root for searching any dependencies.
+工具链是一组工具，如编译器、链接器和压缩器，用于生成运行在主机系统上为目标系统生成输出的二进制文件。依赖项通常收集在sysroot目录中，sysroot是包含精简版本的根文件系统的目录，所需的库存储在其中。对于交叉编译，这些目录为搜索依赖项的根目录。
 
-Some tools, such as the Yocto Project (YP) for building embedded Linux distributions, can build sysroots and toolchains for cross-compiling out of the box. This automation is often convenient, but when this is not available, creating a sysroot manually can be as simple as copying or mounting the filesystem from the target platform into a directory on the host machine. Sometimes, the combination of a toolchain and a sysroot is also referenced as SDKs. These SDKs might also contain further tools for debugging or definitions for running an emulator for the cross-platform build. CMake uses so-called toolchain files to configure the build tools and sysroots for cross-compiling. Toolchain files are ordinary CMake scripts that mostly set some cache variables to describe the target platform and the location of various components of the toolchain. Toolchain files can be passed to CMake by setting the CMAKE\_TOOLCHAIN\_FILE variable or, since CMake 3.21, with the -{}-toolchain option, like this:
+一些工具，例如用于构建嵌入式Linux发行版的Yocto Project (YP)，可以构建sysroot和工具链，用于开箱即用的交叉编译。这种自动化通常是很方便的，但当不可用时，手动创建sysroot可以像从目标平台复制或挂载文件系统到主机上的一个目录一样简单。有时，工具链和sysroot的组合也称为sdk。这些sdk还可能包含用于调试的进一步工具或用于运行跨平台构建的模拟器的定义，CMake使用工具链文件为交叉编译配置构建工具和sysroot。工具链文件是普通的CMake脚本，主要设置一些缓存变量来描述目标平台和工具链的各个组件的位置。工具链文件可以通过设置CMake \_TOOLCHAIN\_FILE变量传递给CMake，或自CMake 3.21起支持的-{}-toolchain选项:
 
 \begin{tcblisting}{commandshell={}}
 cmake -DCMAKE_TOOLCHAIN_FILE=toolchain.cmake -S <SourceDir> -B
-	<BuildDir>
+  <BuildDir>
 cmake --toolchain toolchain.cmake -S <SourceDir> -B <BuildDir>
 \end{tcblisting}
 
-These calls are equivalent. If CMAKE\_TOOLCHAIN\_FILE is set as an environment variable, CMake will interpret this as well. If using CMake presets, the configure presets may configure a toolchain file with the toolchainFile option, like this:
+两种方式是等价的。若CMAKE\_TOOLCHAIN\_FILE设置为一个环境变量，CMAKE也会解释这个变量。若使用CMake预设，配置预设可以配置一个带有toolchainFile选项的工具链文件:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -34,9 +34,9 @@ These calls are equivalent. If CMAKE\_TOOLCHAIN\_FILE is set as an environment v
 },
 \end{lstlisting}
 
-The toolchainFile option supports macro expansion, as described in Chapter 9, Creating Reproducible Build Environments. If the path to the toolchain file is a relative path, CMake will first look relative to the build directory, and if the file is not found there, it will then search from the source directory. As CMAKE\_TOOLCHAIN\_FILE is a cache variable, it only needs to be specified for the first run of CMake; subsequent runs will use the cached value.
+toolchainFile选项支持宏扩展。若工具链文件的路径是一个相对路径，CMake将首先相对于构建目录查找，若在那里没有找到，将从源目录搜索。由于CMAKE\_TOOLCHAIN\_FILE是一个缓存变量，只需要在CMake的第一次运行时指定，后续的运行将使用缓存的值。
 
-On the first run, CMake will perform some internal queries to establish which features a toolchain supports. This happens regardless of whether the toolchain is specified with a toolchain file or whether the default system toolchain is used. A more in-depth look at how these tests happen is done in the Testing a toolchain for supported features section. CMake will output the results of the tests for the various features and properties on the first run, like this:
+第一次运行时，CMake将执行一些内部检查，以确定工具链支持哪些特性。不管工具链是用工具链文件指定的，还是使用默认的系统工具链。在“测试工具链支持的功能”一节中，可以更深入地了解这些测试是如何进行的。CMake将在第一次运行时输出各种特性和属性的测试结果，如下所示:
 
 {\footnotesize
 \begin{tcblisting}{commandshell={}}
@@ -55,18 +55,17 @@ On the first run, CMake will perform some internal queries to establish which fe
 \end{tcblisting}
 }
 
-The detection of the features mostly happens on the first call to project() in a CMakeLists.txt file. However, for any later call to project() that enables a previously disabled language, further detection will be triggered. The same happens if enable\_language() is used to enable an additional programming language in a CMakeLists.txt file.
+特性的检测通常发生在CMakeLists.txt文件中对\texttt{project()}的第一次使用时，但当之后的\texttt{project()}来启用之前禁用的语言，则将触发进一步的检测。若使用\texttt{enable\_language()}来启用CMakeLists.txt文件中的另一种编程语言，也会发生同样的情况。
 
-As the features and test results of the toolchains are cached, changing the toolchain of a configured build directory cannot be done. CMake might detect that the toolchain has changed, but usually, the replacement of the cache variables is incomplete. Because of this, the build directory should be fully deleted before changing the toolchain.
+由于工具链的特性和测试结果可以缓存，因此无法更改已配置构建目录的工具链。CMake可能会检测到工具链已经更改，但缓存变量的替换不完全。因此，在更改工具链之前，最好完全删除构建目录。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=Switching Toolchains After Configuring]
-Always clear the build directory completely before switching toolchains. Deleting only the CMakeCache.txt file will not be enough, as toolchainrelated things might be cached in various locations.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=配置完成后切换工具链]
+切换工具链之前，始终要完全清空构建目录。只删除CMakeCache.txt文件是不够的，因为与工具链相关的内容可能会缓存在不同的位置。
 \end{tcolorbox}
 
-CMake works under the paradigm that a project should use the same toolchain for everything. Because of this, using multiple toolchains is not directly supported. If this is really needed, the parts of a project that need a different toolchain have to be configured as sub-builds, as described in Chapter 10, Handling Big Projects and Distributed Repositories in a Superbuild.
+CMake的工作模式是一个项目应该对所有东西使用相同的工具链。因此，不直接支持使用多个工具链。若这是真的需要的，项目中需要不同工具链的部分必须配置为子构建，可以在第10章了解详细的信息。
 
-Toolchains should be kept as small as possible and be completely decoupled from any
-project. Ideally, they are reusable for different projects. Often, toolchain files come bundled together with any SDK or sysroot used for cross-compiling. However, sometimes they need to be written manually.
+工具链体积应该保持尽可能小，并且与项目完全解耦。理想情况下，它们可用于不同的项目。工具链文件通常与用于交叉编译的任何SDK或sysroot捆绑在一起。然而，有时需要手动编写。
 
 
 

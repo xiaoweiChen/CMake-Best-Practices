@@ -36,7 +36,7 @@ A trick regarding CMAKE\_CROSSCOMPILING\_EMULATOR is that it also can be used to
 
 In this section, we mentioned CMake's try\_run() command, which, along with the closely related try\_compile() command, is used to check for the availability of certain features in the compiler or the toolchain. In the next section, we will have a closer look at the two commands and into feature testing toolchains.
 
-\subsubsubsection{12.4.1\hspace{0.2cm}Testing a toolchain for supported features}
+\subsubsubsection{12.4.1\hspace{0.2cm}测试工具链支持的功能}
 
 When CMake is run for the first time on a project tree, it performs various tests for compiler and language features. Any call to project() or enable\_language() will trigger testing again, but the results may already be cached from a previous run. Caching is also the reason why switching toolchains on an existing build is not recommended. As we will see in this section, CMake can check for quite a few features out of the box.
 
@@ -147,7 +147,7 @@ Underlying the commands for checking compilation or running the test program are
 
 Checking compiler features by compiling and running programs is a very versatile approach to checking for toolchain features. Some checks are so common that CMake provides dedicated modules and functions for them.
 
-\subsubsubsection{12.4.2\hspace{0.2cm}Common checks for toolchain and language features}
+\subsubsubsection{12.4.2\hspace{0.2cm}工具链和语言特性的常规检查}
 
 For some of the most common feature checks, such as checking whether a compiler flag is supported or whether a header file exists, CMake provides its own modules for convenience. Since CMake 3.19, the general modules that take the language as an argument exist, but the corresponding Check<LANG>... language-specific modules may still be used.
 
