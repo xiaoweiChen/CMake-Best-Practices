@@ -1,31 +1,30 @@
-Writing build system code for a project is no easy task. Project maintainers and developers are spending a lot of effort on writing CMake code for configuring compiler flags, project build variants, third-party libraries, and tool integrations. Writing CMake code for project-agnostic details from scratch may start to incur a significant burden when dealing with multiple CMake projects. Most of the CMake code written for a project to configure the aforementioned details could be reused between the projects. With that in mind, it is for our benefit to develop a strategy to make our CMake code reuse-friendly. The straightforward way to approach this problem is to treat CMake code as regular code and apply some of the most basic coding principles: the Don't Repeat Yourself (DRY) principle and the Single Responsibility Principle (SRP).
 
-CMake code can be easily reused if structured with reusability in mind. Achieving essential reusability is pretty straightforward: separate CMake code into modules and functions. You may have realized that the way to make CMake code reusable is no different from making software code reusable. Remember, CMake itself is a scripting language, after all. So, it is natural to treat CMake code as regular code and apply software design principles while dealing with it. As with any functional scripting language, CMake has the following basic abilities for reusability:
+为项目编写构建系统代码不是一件容易的事。项目维护者和开发人员花费大量精力编写CMake代码，以配置编译器标志、项目构建变量、第三方库和工具集成。处理多个CMake项目时，从头开始为项目无关的细节编写CMake代码可能会带来很大的负担。为项目编写的配置上述细节的大部分CMake代码可以在项目之间重用。考虑到这一点，开发一种策略使CMake代码可以友好的重用会很有帮助。解决这个问题的直接方法是将CMake代码视为常规代码，并应用一些最基本的编码原则:不要重复自己(DRY)原则和单责任原则(SRP)。
 
-\begin{itemize}
-\item 
-Ability to include other CMake files
-
-\item 
-Functions/macros
-
-\item 
-Portability
-\end{itemize}
-
-In this chapter, we will learn the ways of writing CMake code for a project with reusability in mind and reusing CMake code in CMake projects. We will also discuss the ways of versioning and sharing common CMake code between projects.
-
-To understand the skills shared in this chapter, we'll cover the following main topics:
+若考虑到可重用性，CMake代码可以很容易地重用。实现基本的可重用非常简单:将CMake代码分离为模块和函数，使CMake代码可重用的方法与使软件代码可重用没有什么不同。CMake本身毕竟是一种脚本语言，可以很自然地将CMake代码视为常规代码，并在处理它时应用软件设计原则。与任何函数式脚本语言一样，CMake具有以下重用性的基本能力:
 
 \begin{itemize}
 \item 
-What is a CMake module?
+能够包含其他CMake文件
 
 \item 
-Fundamental building blocks of modules – functions and macros
+函数/宏
 
 \item 
-Writing your first very own CMake module
+可移植性
 \end{itemize}
 
-Let's begin with the technical requirements.
+本章中，我们将学习为一个项目编写CMake代码的方法，并考虑到可重用性，以及在CMake项目中重用CMake代码。还将讨论版本控制和在项目之间共享通用CMake代码的方法。
+
+将讨论以下主题:
+
+\begin{itemize}
+\item 
+了解CMake模块
+
+\item 
+模块的基本构建块——函数和宏
+
+\item 
+编写一个CMake模块
+\end{itemize}

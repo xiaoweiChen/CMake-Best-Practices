@@ -1,25 +1,24 @@
 
-
-Toolchain files might seem intimidating at first, but on a closer look, they are often relatively trivial. The misconception that defining cross-compilation toolchains is hard stems from the fact that there are many overly complicated examples of toolchain files found on the internet. Many of them were written for early versions of CMake and thus implemented many additional tests and checks that are now part of CMake itself. CMake toolchain files basically do the following things:
+工具链文件乍一看可能令人生畏，对于交叉编译工具链很难的误解可能源于这样一个事实:互联网上有许多过于复杂的工具链文件。其中许多是为CMake的早期版本编写的，因此实现需要许多额外的测试和检查，这些测试和检查现在已经内置为CMake的一部分。CMake工具链文件基本上做以下几件事:
 
 \begin{itemize}
 \item 
-Define the target system and architecture.
+定义目标系统和架构。
 
 \item 
-Provide paths to any tools needed to build the software for the defined platform. Often, these are just compilers.
+为已定义平台构建软件提供所需工具的路径，通常是编译器。
 
 \item 
-Set default flags for the compiler and linkers.
+为编译器和链接器设置默认标志。
 
 \item 
-Point to the sysroot and possibly any staging directory if cross-compiling.
+若是交叉编译，则指向sysroot和可能的暂存目录。
 
 \item 
-Set hints for the search order for any find\_ commands of CMake. Changing the search order is something the project might define, and it is debatable whether this belongs in the toolchain file or should be handled by the project. See Chapter 5, Integrating Third-Party Libraries and Dependency Management, for details on find\_ commands.
+为CMake的\texttt{find\_}指令设置搜索顺序提示。更改搜索顺序是项目可以定义的，这属于工具链文件，还是应该由项目处理信息，目前是有争议的。有关\texttt{find\_}指令的详细信息，请参见第5章。
 \end{itemize}
 
-A sample toolchain doing all these things might look like this:
+执行这些操作的工具链示例可能如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -40,32 +39,31 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 \end{lstlisting}
 
-This example would define a toolchain targeting a build for a Linux operating system
-running on an Advanced RISC Machine (ARM) processor. The C and C++ compilers to use are a version of GCC and are installed in the /usr/bin/ folders on the host system. Then, the compiler flags to print all warnings demanded by strict International Standards Organization (ISO) C and ISO C++ standardization with the -pedantic flag. Next, the sysroot for finding any needed libraries is set to /home/builder/raspi-sysroot/, and the staging directory for installing things when cross-compiling is set to /home/builder/raspi-sysroot-staging/. Finally, the search behavior for CMake is changed so that programs are searched only on the host system but libraries, include files, and packages are only searched in the sysroot. It is a controversial debate whether a toolchain file should influence the search behavior or not. Typically, only the project knows what it is trying to find, so making assumptions in the toolchain file might break that. However, only the toolchain knows which system root to use and what kinds of files are present inside it, so having the toolchain define this might be convenient. A good middle way is to use a CMake preset to define the toolchain and the search behavior instead of putting it either into the project or the toolchain file.
+本例将定义一个工具链，目标是在Advanced RISC Machine (ARM)处理器上运行的Linux操作系统的构建。要使用的C和C++编译器使用一个版本的GCC，并且安装在主机系统的/usr/bin/文件夹中。编译器用-pedantic标记严格的输出，国际标准组织(ISO) C和ISO C++标准化要求的所有警告。接下来，用于查找所需库的sysroot设置为/home/builder/raspi-sysroot/，交叉编译时安装程序的暂存目录设置为/home/builder/raspi-sysroot-staging/。最后，更改CMake的搜索行为，以便只在主机系统上搜索程序，而只在sysroot中搜索库(包括文件和包)。工具链文件是否应该影响搜索行为，目前存在争议。通常，只有项目知道要寻找什么，所以在工具链文件中做假设可能会破坏这一点。但只有工具链知道要使用哪个系统根目录，以及其中包含什么类型的文件，所以让工具链来定义这一点可能比较方便。一种中间方法是使用CMake预设来定义工具链和搜索行为，而不是将其放入项目或工具链文件中。
 
 \subsubsubsection{12.3.1\hspace{0.2cm}定义目标系统}
 
-The target system for cross-compiling is defined by the following three variables: CMAKE\_SYSTEM\_NAME, CMAKE\_SYSTEM\_PROCESSOR, and CMAKE\_SYSTEM\_VERSION. Corresponding to them are the CMAKE\_HOST\_SYSTEM\_NAME, CMAKE\_HOST\_SYSTEM\_PROCESSOR, and CMAKE\_HOST\_SYSTEM\_VERSION variables, which describe the platform on which the build is performed.
- 
-The CMAKE\_SYSTEM\_NAME variable describes the target operating system for which the software is to be built. Setting this variable is important as this will cause CMake to set the CMAKE\_CROSSCOMPILING variable to true. Typical values are Linux, Windows, Darwin, Android, or QNX, although you could use more specific platform names such as WindowsPhone, WindowsCE, WindowsStore, and more. For bare-metal embedded devices, the CMAKE\_SYSTEM\_NAME variable is set to Generic. Unfortunately, at the time of writing this book, there exists no official list of supported systems in the CMake documentation. However, if really needed, the files in the /Modules/Platform folder in the local CMake installation can be inspected.
+交叉编译的目标系统由以下三个变量定义:CMAKE\_SYSTEM\_NAME、CMAKE\_SYSTEM\_PROCESSOR和CMAKE\_SYSTEM\_VERSION。与它们对应的是CMAKE\_HOST\_SYSTEM\_NAME、CMAKE\_HOST\_SYSTEM\_PROCESSOR和CMAKE\_HOST\_SYSTEM\_VERSION变量，这些变量描述了执行构建的平台。
 
-The CMAKE\_SYSTEM\_PROCESSOR variable is used to describe the hardware architecture of the platform. If not specified, the value of the CMAKE\_HOST\_SYSTEM\_PROCESSOR variable will be assumed. The target processor architecture should also be set when cross-compiling for a 32-bit platform from a 64-bit platform, even if the processors are of the same type. For Android and Apple platforms, the processor is often not specified. When cross-compiling for Apple targets, the actual device is defined by the SDK that is used, which is specified by the CMAKE\_OSX\_SYSROOT variable. When cross-compiling for Android, specialized variables such as CMAKE\_ANDROID\_ARCH\_ABI, CMAKE\_ANDROID\_ARM\_MODE, and—optionally—CMAKE\_ANDROID\_ARM\_NEON are used to control the target architecture. Building for Android will be covered in more depth in the Cross-compiling for Android section.
+CMAKE\_SYSTEM\_NAME变量描述要为其构建软件的目标操作系统。这个变量很重要，会让CMake将CMAKE\_CROSSCOMPILING设置为true。典型的值是Linux、Windows、Darwin、Android或QNX，也可以使用更具体的平台名称，如WindowsPhone、WindowsCE、WindowsStore等。对于裸板嵌入式设备，CMAKE\_SYSTEM\_NAME变量可设置为Generic。但在撰写本书时，CMake文档中还没有支持系统的官方列表。若真的需要，可以检查本地CMake安装中的/Modules/Platform文件夹中的文件。
 
-The last variable for defining a target system is CMAKE\_SYSTEM\_VERSION. The content of it depends on the system being built. For WindowsCE, WindowsStore, and WindowsPhone, it will be used to define which version of the Windows SDK to use. On Linux, it is often omitted or might contain the kernel revision of the target system if this is relevant.
+CMAKE\_SYSTEM\_PROCESSOR变量用于描述平台的硬件架构。若没有指定，则设置为CMAKE\_HOST\_SYSTEM\_PROCESSOR变量的值。当64位平台交叉编译32位平台时，也应该设置目标处理器架构，即使处理器的类型相同。对于Android和Apple平台，处理器通常不指定。当对Apple目标进行交叉编译时，实际的设备由所使用的SDK定义，该SDK由CMAKE\_OSX\_SYSROOT变量指定。当交叉编译Android，有专门的变量，如CMAKE\_ANDROID\_ARCH\_ABI，CMAKE\_ANDROID\_ARM\_MODE和可选的CMAKE\_ANDROID\_ARM\_NEON来控制目标架构。
 
-With the CMAKE\_SYSTEM\_NAME, CMAKE\_SYSTEM\_PROCESSOR, and CMAKE\_SYSTEM\_VERSION variables, target platforms are usually fully specified. However, some generators such as Visual Studio support their native platforms directly. For these, the architecture can be set with the -A command-line option of CMake, like this:
+定义目标系统的最后一个变量是CMAKE\_SYSTEM\_VERSION，其取决于所构建的系统。对于WindowsCE、WindowsStore和WindowsPhone，它将用于定义要使用的Windows SDK的哪个版本。在Linux上经常省略，或者可能包含目标系统的内核修订版(若与此相关)。
+
+使用CMAKE\_SYSTEM\_NAME、CMAKE\_SYSTEM\_PROCESSOR和CMAKE\_SYSTEM\_VERSION变量，目标平台通常是完全指定的。然而，一些生成器(如Visual Studio)直接支持原生平台，可以使用CMake的-A命令行选项设置体系结构，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Visual Studio 2019" -A Win32 -T host=x64
 \end{tcblisting}
 
-When using a preset, the architecture setting may be used in a configure preset for the same effect. Once the target system is defined, the tools to actually build the software are defined.
+当使用预设时，架构设定可以在配置预设中使用，以达到同样的效果。当定义了目标系统，就等于定义了实际构建软件的工具。
 
-Some compilers such as Clang and QNX is Not Unix GCC (QNX GCC) are inherently cross-compilers and take the platform as arguments. To pass the argument to those compilers, the CMAKE\_<LANG>\_COMPILER\_TARGET variable is used. For Clang, the value is a target triple such as arm-linux-gnueabihf, and for QNX GCC, the compiler name and target have a value such as gcc\_ntoarmv7le. The supported triples for Clang are described in its official documentation at \url{https://clang.llvm.org/docs/CrossCompilation.html}.
+一些编译器，如Clang和QNX(非Unix GCC (QNX GCC))，本质上是交叉编译器，并以平台为参数。为了将参数传递给这些编译器，使用了CMAKE\_<LANG>\_COMPILER\_TARGET变量。对于Clang来说，该值是一个目标三元组，如arm-linux-gnueabihf，而对于QNX GCC，编译器名称和目标的值为gcc\_ntoarmv7le。Clang支持的三元组在其官方文档\url{https://clang.llvm.org/docs/CrossCompilation.html}中有描述。
 
-For available options for QNX, the QNX documentation found at \url{https://www.qnx.com/developers/docs/} should be consulted.
+有关QNX的可用选项，可以参考\url{https://www.qnx.com/developers/docs/}上的QNX文档。
 
-So, a toolchain file that uses Clang might look something like this:
+因此，使用Clang的工具链文件可能看起来像这样:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -78,28 +76,25 @@ set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
 \end{lstlisting}
 
-In this example, Clang is used to compile C and C++ code for a Linux system running on an ARM processor with hardware floating-point support. Defining the target system often has a direct influence on the build tools that are to be used. In the next section, we will look into how the compiler and the related tools are selected for cross-compilation.
+本例中，Clang用于为运行在ARM处理器上的Linux系统编译C和C++代码，该系统具有硬件浮点支持。定义目标系统通常对要使用的构建工具有直接影响。下一节中，我们将研究如何选择编译器和相关工具进行交叉编译。
 
 \subsubsubsection{12.3.2\hspace{0.2cm}选择构建工具}
 
-When building software, the compiler is the tool that comes to mind, and in most cases, it is sufficient to set the compiler in a toolchain file. The path to the compiler is set by the CMAKE\_<LANG>\_COMPILER cache variable, which may be set in the toolchain file or passed manually to CMake. If the path is absolute it will be used directly; else, the same search order as when using find\_program() will be used, which is one of the reasons why changing the search behavior in a toolchain file has to be treated with care. If neither the toolchain file nor the user does not specify the compiler, CMake will try to choose one automatically based on the target platform and generator specified. Additionally, the compiler can be set over an environment variable that is named after <LANG>. So, C will set the C compiler, CXX the C++ compiler, ASM the assembler, and so on.
+构建软件时，编译器是主要工具。大多数情况下，设置编译器就足够了。编译器的路径由CMAKE\_<LANG>\_COMPILER缓存变量设置，该变量可以在工具链文件中设置，也可以手动传递给CMAKE。若路径是绝对的，将直接使用;否则，将使用与\texttt{find\_program()}相同的搜索顺序进行搜素，这就是为什么必须谨慎对待更改工具链文件中搜索行为的原因。若工具链文件和用户都没有指定编译器，CMake将根据指定的目标平台和生成器自动选择一个编译器。此外，编译器可以设置在以<LANG>命名的环境变量上。因此，C将设置C编译器，CXX设置C++编译器，ASM设置汇编器等。
 
-Some generators such as Visual Studio may support their own toolset definition that
-works differently. They can be set with the -T command-line option. The following
-command would tell CMake to generate code for Visual Studio to produce binaries
-for a 32-bit system but to use 64-bit compilers to do so:
+一些生成器(如Visual Studio)支持的不同的工具集定义。可以使用-T命令行选项进行设置。以下命令将告诉CMake为Visual Studio生成代码，为32位系统生成二进制文件，但要使用64位编译器来编译:
 
 \begin{tcblisting}{commandshell={}}
 cmake -G "Visual Studio 2019" -A Win32 -T host=x64
 \end{tcblisting}
 
-The values might also be set with the CMAKE\_GENERATOR\_TOOLSET variable from a toolchain file. This should not be set inside a project as it obviously breaks the idea of CMake project files being agnostic to the generator and platform used.
+这些值也可以通过工具链文件中的CMAKE\_GENERATOR\_TOOLSET变量来设置。这是不应该在项目内部设置的，因为它显然破坏了CMake项目文件不受生成器和平台影响的想法。
 
-For Visual Studio users, it is possible to have multiple competing instances of the same Visual Studio version installed by having the preview and the official release of the same version installed. If this is the case, the CMAKE\_GENERATOR\_INSTANCE variable may be set to the absolute installation path of Visual Studio in the toolchain file.
+对于Visual Studio用户来说，通过安装相同版本的预览版和正式发布版，可以安装同一Visual Studio版本的多个实例。若是这种情况，CMAKE\_GENERATOR\_INSTANCE变量可以设置为工具链文件中Visual Studio的绝对安装路径。
 
-By specifying the compiler to use, CMake will choose the default flags for the compiler and linker and make them available in the project by setting CMAKE\_<LANG>\_FLAGS and CMAKE\_<LANG>\_FLAGS\_<CONFIG>, where <LANG> stands for the respective programming language and <CONFIG> for the build configuration such as debug or release, and so on. The default linker flags are set by the CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS and CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS\_<CONFIG> variables, where <TARGETTYPE> is either EXE, STATIC, SHARED, or MODULE.
+通过指定要使用的编译器，CMake将为编译器和链接器选择默认标志，并通过设置CMAKE\_<LANG>\_FLAGS和CMAKE\_<LANG>\_FLAGS\_<CONFIG>使其在项目中可用，其中<LANG>代表各自的编程语言，<CONFIG>表示构建配置，如Debug或Release等。默认的链接器标志是由CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS和CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS\_<CONFIG>变量设置的，其中<TARGETTYPE>是EXE、STATIC、SHARED或MODULE。
 
-To add custom flags to the default flags, there exists a variable with \_INIT appended for each of the variables—for example, CMAKE\_<LANG>\_FLAGS\_INIT. When working with toolchain files, \_INIT variables are used to set any necessary flags. A toolchain file compiling with GCC for a 32-bit target from a 64-bit host would look like this:
+要将自定义标志添加到默认标志中，每个变量都有一个\_INIT的变量——例如，CMAKE\_<LANG>\_FLAGS\_INIT。使用工具链文件时，使用\_INIT变量设置必要的标志。用GCC从64位主机为32位目标编译的工具链文件如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -117,71 +112,69 @@ set(CMAKE_STATIC_LINKER_FLAGS_INIT -m32)
 set(CMAKE_MODULE_LINKER_FLAGS_INIT -m32)
 \end{lstlisting}
 
-For simple projects, setting up the target system and the toolchain might already be enough to start creating binaries, but for more complex projects, they might need access to libraries and headers of the target system. For such cases, sysroots can be specified in the toolchain files.
+对于简单的项目，设置目标系统和工具链可能已经足够开始创建二进制文件了，但是对于更复杂的项目，可能需要访问目标系统的库和头文件。对于这种情况，可以在工具链文件中指定sysroot。
 
 \subsubsubsection{12.3.3\hspace{0.2cm}设置sysroot}
 
-When cross-compiling, all linked dependencies obviously have to match the target platform as well, and a common way of dealing with this is to create a sysroot, which is the root filesystem of the target system in a folder. While sysroots may contain full systems, they are often stripped down to just provide what is needed. Sysroots are described in detail in Chapter 9, Creating Reproducible Build Environments.
+交叉编译时，所有链接的依赖项必须与目标平台匹配，处理此问题的常用方法是创建sysroot，它是文件夹中目标系统的根文件系统。虽然sysroot可能包含完整的系统，但它们通常被精简，只提供所需的内容。sysroot在第9章中有过详细描述。
 
-Setting the sysroot is done by setting CMAKE\_SYSROOT to the path of the sysroot. If this is set, CMake will by default look in the sysroot first for libraries and header files unless specified differently, as described in Chapter 5, Integrating Third-Party Libraries and Dependency Management. In most cases, CMake will also automatically set the necessary compiler and linker flags to make the tools work with the sysroot.
+将CMAKE\_SYSROOT设置为sysroot的路径。若设置了该值，CMake将默认情况下首先在sysroot中查找库和头文件，除非另有指定，如第5章中所述。大多数情况下，CMake还会自动设置必要的编译器和链接器标志，使工具与sysroot一起工作。
 
-In cases where the build artifacts should not be installed directly in the sysroot, the CMAKE\_STAGING\_PREFIX variable can be set to provide an alternative installation path. This is often the case when the sysroot should be kept clean or when it is mounted as read-only. Note that the CMAKE\_STAGING\_PREFIX setting will not add this directory to CMAKE\_SYSTEM PREFIX\_PATH, so things installed in the staging directory will only be found with find\_package() if the CMAKE\_FIND\_ROOT\_PATH\_MODE\_PACKAGE variable in the toolchain is set to BOTH or NEVER.
+不应该直接在sysroot中安装构建构件的情况下，可以设置CMAKE\_STAGING\_PREFIX变量来提供另一种安装路径。当sysroot应该保持干净或者将其挂载为只读时，通常会出现这种情况。注意，CMAKE\_STAGING\_PREFIX设置不会将这个目录添加到CMAKE\_SYSTEM\_PREFIX\_PATH中，所以只有当工具链中的CMAKE\_FIND\_ROOT\_PATH\_MODE\_PACKAGE变量设置为BOTH或NEVER时，才会使用\texttt{find\_package()}来查找安装在暂存目录中的东西。
 
-Defining the target system and setting the toolchain configuration, the sysroot, and staging directory are often all that are needed for cross-compiling. Two exceptions are cross-compiling for Android and Apple's iOS, tvOS, or watchOS.
+定义目标系统和设置工具链配置、sysroot和暂存目录通常是交叉编译所需的全部内容。两个例外是对Android和Apple的iOS、tvOS或watchOS的交叉编译。
 
 \subsubsubsection{12.3.4\hspace{0.2cm}交叉编译——Android}
 
-In the past, the compatibility between Android's NDK and various CMake versions was sometimes a bit of an unhappy relationship, as new versions of the NDK suddenly no longer worked the same way with CMake as previous releases did. However, this condition has now been vastly improved, as the r23 version of the Android NDK will now use CMake's internal support for handling the Android NDK if CMake is version 3.21 or higher, so using these versions is recommended. The official documentation of the Android NDK's integration with CMake can be found here: \url{https://developer.android.com/ndk/guides/cmake}.
+过去，Android的NDK和各种CMake版本之间的兼容性有时很不愉快，因为新版本的NDK突然之间不再像以前的版本那样与CMake工作。然而，现在已经有了很大的改善，因为r23版本的Android NDK现在将使用CMake(3.21或更高的版本)的内部支持来处理Android NDK。Android NDK与CMake集成的官方文档可以在这里看到:\url{https://developer.android.com/ndk/guides/cmake}。
 
-As of r23, the NDK provides its own CMake toolchain file located at <NDK\_ROOT>/build/cmake/android.toolchain.cmake, which may be used like any regular toolchain file. The NDK also includes all the necessary tools for a Clang-based toolchain, so usually, no further tools have to be defined. To control the target platform, the following CMake variables should be passed over the command line or by a CMake preset:
+从r23起，NDK提供CMake工具链文件，位于<NDK\_ROOT>/build/cmake/android.toolchain.cmake，可以像任何常规的工具链文件一样使用。NDK还包括基于clang的工具链所需的所有工具，因此通常不需要定义进一步的工具。为了控制目标平台，以下CMake变量应该通过命令行或CMake预设设置:
 
 \begin{itemize}
 \item 
-ANDROID\_ABI: Specifies the target Application Binary Interface (ABI) to be used. Valid values are armeabi-v7a, arm64-v8a, x86, and x86\_64. This should always be set when cross-compiling for Android.
+ANDROID\_ABI: 指定要使用的目标应用程序二进制接口(ABI)。有效值为armeabi-v7a、arm64-v8a、x86和x86\_64。为Android交叉编译时，应该始终设置这个值。
 
 \item 
-ANDROID\_ARM\_NEON: Enables NEON support for armeabi-v7a. This variable has no effect on other ABI versions. When using an NDK above version r21, NEON support is enabled by default, and it is rare that this needs to be disabled.
+ANDROID\_ARM\_NEON: 启用armeabi-v7a的NEON支持。此变量对其他ABI版本没有影响。当使用r21版本以上的NDK时，NEON支持默认是启用的，很少需要禁用。
 
 \item 
-ANDROID\_ARM\_MODE: Specifies whether to generate ARM or Thumb instructions for armeabi-v7a. Valid values are either thumb or arm. This variable has no effect on other ABI versions.
+ANDROID\_ARM\_MODE: 指定是否为armeabi-v7a生成ARM或Thumb指令。有效值是thumb或arm。此变量对其他ABI版本没有影响。
 
 \item 
-ANDROID\_LD: Selects whether the default linker or the experimental lld from llvm should be used. Valid values are default or lld, but this variable is usually omitted for production builds because of the experimental state of lld.
+ANDROID\_LD: 选择是使用默认链接器，还是使用llvm中的实验性的lld。有效值是默认值或lld，但由于lld处于实验状态，这个变量通常在生产构建中忽略。
 
 \item 
-ANDROID\_PLATFORM: Specifies the minimum Application Programming Interface (API) level supported by the application in the format \$API\_LEVEL, android-\$API\_LEVEL, or android-\$API\_LETTER, where \$API\_LEVEL is a number and \$API\_LETTER is the version code of the platform. ANDROID\_NATIVE\_API\_LEVEL is a variable alias for this. While it is not strictly necessary to set the API level, this is usually done.
+ANDROID\_PLATFORM: 指定应用程序支持的最小API级别，格式为\$API\_LEVEL, android-\$API\_LEVEL，或android-\$API\_LETTER，其中\$API\_LEVEL是一个数字，\$API\_LETTER是平台的版本代码。ANDROID\_NATIVE\_API\_LEVEL是变量的别名。虽然没有必要严格地设置API级别，但通常都会这样做。
 
 \item 
-ANDROID\_STL: Specifies which Standard Template Library (STL) to use for this application. This can either be c++\_static (which is the default), c++\_shared,
-none, or system. Either c++\_shared or c++\_static is needed for modern C++ support. The system library only provides new and delete and C++ wrappers for the C library headers, while none provides no STL support at all.
+ANDROID\_STL: 指定用于此应用程序的标准模板库(STL)。这可以是c++\_static(这是默认值)，c++\_shared，none或system。无论是c++\_shared还是c++\_static都需要支持现代C++。系统库只为C库头提供new、delete和C++包装器，而没有库提供STL支持。
 \end{itemize}
 
-A call to CMake to configure an Android build could look like this:
+使用CMake来配置Android版本可能像这样:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S . -B build --toolchain <NDK_DIR>/build/cmake/android
-  .toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_
-    PLATFORM=23
+  .toolchain.cmake -DANDROID_ABI=armeabi-v7a -DANDROID_PLATFORM=23
 \end{tcblisting}
 
-This call would specify a build that requires API level 23 or higher, which corresponds to Android 6.0 or higher for a 32-bit ARM Central Processing Unit (CPU).
+这个调用将指定一个需要API级别23或更高的构建，这对应于32位ARM中央处理单元(CPU)的Android 6.0或更高。
 
-An alternative to using the toolchain provided by the NDK is to point CMake to the location of the Android NDK, which is the recommended way with NDKs newer than version r23. The configuration of the target platform then happens with the respective CMake variables. By setting the CMAKE\_SYSTEM\_NAME variable to android and the CMAKE\_ANDROID\_NDK variable to the location of the Android NDK, CMake is told to use the NDK. This can either happen over the command line or in a toolchain file. Alternatively, if the ANDROID\_NDK\_ROOT or ANDROID\_NDK environment variables are set, they will be used as the value for CMAKE\_ANDROID\_NDK.
+使用NDK提供的工具链的另一种选择是将CMake指向Android NDK的位置，对于r23版本或更高版本的NDK，这是推荐的方法。然后使用各自的CMake变量进行目标平台的配置。通过将CMAKE\_SYSTEM\_NAME变量设置为android，将CMAKE\_ANDROID\_NDK变量设置为android NDK的位置，就可以在CMake中使用NDK了。这既可以通过命令行进行，也可以在工具链文件中进行。或者，若ANDROID\_NDK\_ROOT或ANDROID\_NDK环境变量已经设置，将作为CMAKE\_ANDROID\_NDK的值。
 
-When using the NDK in this way, the configuration is defined over the CMAKE\_ equivalent of the variables used when invoking the toolchain file of the NDK directly, as follows:
+以这种方式使用NDK时，配置是在CMAKE\_变量上定义的，相当于直接调用NDK的工具链文件时使用的变量，如下所示:
 
 \begin{itemize}
 \item 
-CMAKE\_ANDROID\_API or CMAKE\_SYSTEM\_VERSION is used to specify the minimum API level to build for.
+CMAKE\_ANDROID\_API或CMAKE\_SYSTEM\_VERSION用于指定要构建的最低API级别。
 
 \item 
-CMAKE\_ANDROID\_ARCH\_ABI is used to specify which ABI mode to use.
+CMAKE\_ANDROID\_ARCH\_ABI用于指定要使用的ABI模式。
 
 \item
-CMAKE\_ANDROID\_STL\_TYPE specifies which STL to be used.
+CMAKE\_ANDROID\_STL\_TYPE指定要使用的STL。
 \end{itemize}
 
-A sample toolchain file to configure CMake with the Android NDK might look like this:
+用Android NDK配置CMake的工具链文件示例如下:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Android)
@@ -191,34 +184,33 @@ set(CMAKE_ANDROID_NDK /path/to/the/android-ndk-r23b)
 set(CMAKE_ANDROID_STL_TYPE c++_static)
 \end{lstlisting}
 
-When cross-compiling for Android using Visual Studio generators, CMake requires either NVIDIA Nsight Tegra Visual Studio Edition or Visual Studio tools for Android, which uses the Android NDK. When using Visual Studio to build Android binaries, the built-in support for CMake's Android NDK may be used by setting the CMAKE\_ANDROID\_NDK variable to the location of the NDK.
+当使用Visual Studio生成器为Android交叉编译时，CMake需要安装NVIDIA Nsight Tegra的Visual Studio插件，或使用Android NDK的Visual Studio工具。当使用Visual Studio构建Android二进制文件时，可以通过将CMAKE\_ANDROID\_NDK变量设置为NDK的位置来使用CMake的Android NDK的内置支持。
 
-Cross-compiling native code for Android has become much easier with the recent versions of the NDK and the CMake versions from 3.20 on. Another special case for cross-compiling is when targeting Apple's iOS, tvOS, or watchOS.
+CMake 3.20起，NDK的最新版本和CMake版本使得交叉编译Android本地代码变得更加容易。交叉编译的另一个特殊情况是针对Apple的iOS、tvOS或watchOS。
 
 \subsubsubsection{12.3.5\hspace{0.2cm}交叉编译——iOS、tvOS或watchOS}
 
-The recommended way to cross-compile for Apple's iPhone, Apple TV, or Apple Watches is to use the Xcode generator. Apple is quite restrictive in what to use for building apps for these devices, so using macOS or a Virtual Machine (VM) running macOS is needed. While using Makefiles or Ninja files is possible, they require much more in-depth knowledge of the Apple ecosystem to be configured correctly.
+推荐交叉编译Apple的iPhone、Apple TV或Apple Watche的方法是使用Xcode生成器。Apple在为这些设备构建应用程序时使用的工具非常有限，因此使用macOS或运行macOS的虚拟机(VM)是必要的。虽然也可以使用Makefiles或Ninja文件，但需要对Apple系统有更深入的了解才能正确配置。
 
-To cross-compile for any of these devices, the Apple device SDK is needed, and the CMAKE\_SYSTEM\_NAME variable is set to iOS, tvOS, or watchOS, as in the following example:
+为了对这些设备进行交叉编译，需要使用Apple设备SDK，并将CMAKE\_SYSTEM\_NAME变量设置为iOS、tvOS或watchOS，如下例所示:
 
 \begin{tcblisting}{commandshell={}}
-cmake -S <SourceDir> -B <BuildDir> -G Xcode -DCMAKE_SYSTEM_
-  NAME=iOS
+cmake -S <SourceDir> -B <BuildDir> -G Xcode -DCMAKE_SYSTEM_NAME=iOS
 \end{tcblisting}
 
-For relatively modern SDKs and a CMake version of 3.14 or higher, this is usually all that is needed. By default, the latest device SDK available on the system is used, but different SDKs can be selected by setting the CMAKE\_OSX\_SYSROOT variable to the path of the SDK if really needed. The minimum target platform version can be specified with the CMAKE\_OSX\_DEPLOYMENT\_TARGET variable.
+对于相对现代的sdk和3.14或更高版本的CMake，这通常就够了。默认情况下，使用系统上可用的最新设备SDK，但若确实需要，可以通过将CMAKE\_OSX\_SYSROOT变量设置为SDK的路径来选择不同的SDK。最小目标平台版本可以通过CMAKE\_OSX\_DEPLOYMENT\_TARGET变量指定。
 
-When cross-compiling for iPhone, Apple TV, or Apple Watches, the target can either be the real devices or the device simulator that comes with different SDKs. However, Xcode has built-in support to switch this during the build part, so CMake does not have to be run twice. CMake uses the xcodebuild command-line tool internally if the Xcode generator is selected, which supports the -sdk option to select the desired SDK. When building through CMake, this option can be passed like so:
+在为iPhone、Apple TV或Apple watch交叉编译时，目标可以是真实的设备，也可以是不同sdk附带的设备模拟器。然而，Xcode内置支持在构建部分切换，所以CMake不需要运行两次。如果选择了Xcode生成器，CMake内部使用xcodebuild命令行工具，它支持-sdk选项来选择所需的SDK。当通过CMake构建时，选项可以像这样使用:
 
 \begin{tcblisting}{commandshell={}}
 cmake -build <BuildDir> -- -sdk <sdk>
 \end{tcblisting}
 
-This will pass the -sdk option with the specified value to xcodebuild. The allowed values are iphoneos or iphonesimulator for iOS, appletvos or appletvsimulator for Apple TV devices, and watchos or watchsimulator for Apple Watches. Apple-embedded platforms require the mandatory signing of certain build artifacts.
+把带有指定值的-sdk选项传递给xcodebuild。iOS允许的值为iphoneos或iphoneonessimulator，Apple TV设备允许的值为appletvos或appletvsimulator，Apple watch允许的值为watchos或watchsimulator。Apple嵌入式平台要求对某些构建构件进行强制签名。
 
-For the Xcode generator, the development team Identifier (ID), which is usually a short string of around 10 characters, can be specified with the CMAKE\_XCODE\_ATTRIBUTE\_DEVELOPMENT\_TEAM cache variable.
+对于Xcode生成器，开发团队标识符(ID)，通常是大约10个字符的短字符串，可以通过CMAKE\_XCODE\_ATTRIBUTE\_DEVELOPMENT\_TEAM缓存变量来指定。
 
-When building for Apple-embedded devices, the simulators come in handy for testing the code without the need to deploy to the devices each time. In this case, the testing is best done through Xcode or xcodebuild itself, but for other platforms, cross-compiled code may be tested through CMake and CTest directly.
+为Apple嵌入式设备构建时，模拟器可以方便地测试代码，而不需要每次都部署到设备上。这种情况下，最好通过Xcode或xcodebuild进行测试，但对于其他平台，交叉编译的代码可以直接通过CMake和CTest进行测试。
 
 
 

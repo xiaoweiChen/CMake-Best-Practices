@@ -1,7 +1,7 @@
 
 It is clear that we need some basic building blocks to create utility modules. The most fundamental building blocks for utility modules are functions and macros, so it is essential to learn their working principles well. Let's start by learning about functions.
 
-\subsubsubsection{13.3.1\hspace{0.2cm}Functions}
+\subsubsubsection{13.3.1\hspace{0.2cm}函数}
 
 Let's remember what we have learned in Chapter 1, Kickstarting CMake, about functions. A function is the CMake language feature to define a logical code block that can be invoked to execute CMake commands. A function starts with function(…), has a body that contains CMake commands, and ends with the endfunction() CMake command. The function() command needs a name as the first argument, and optional function argument names, shown as follows:
 
@@ -42,7 +42,7 @@ message(STATUS "Current git branch name is: ${branch_n}")
 
 Let's look at macros next.
 
-\subsubsubsection{13.3.2\hspace{0.2cm}Macros}
+\subsubsubsection{13.3.2\hspace{0.2cm}宏}
 
 If the function's scoping is a deal-breaker for your use case, you might consider using macro(…) instead. Macros start with macro(…) and end with endmacro(). Functions and macros behave similarly in every aspect but one: macros do not define a new variable scope. Returning to our git branch example, considering execute\_process(…) already has the OUTPUT\_VARIABLE parameter, it is more convenient to define git\_get\_branch\_name as a macro instead of a function to get rid of set(… PARENTSCOPE) at the end:
 

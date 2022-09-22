@@ -93,7 +93,7 @@ The output of the command should look similar to this:
 
 As we can see, we have succeeded in retrieving the information from the git command. Our first CMake module works as expected.
 
-\subsubsubsection{13.4.1\hspace{0.2cm}Case study – dealing with project metadata files}
+\subsubsubsection{13.4.1\hspace{0.2cm}案例研究——处理项目元数据文件}
 
 Let's continue with another example. Assume that we have an environment file that contains key-value pairs per line. It is not unusual to have external files in the project that contain some metadata about the project (for example, project version and dependencies). The file may be in different formats, such as JSON or new-line separated key-value pairs, as we have in this example. The task at hand is to create a utility module that reads the environment variable file and defines a CMake variable per key-value pair in the file. The contents of the file will look similar to this:
 
@@ -218,7 +218,7 @@ Use macros for simple command wrappers, and functions for everything else.
 
 With that said, we conclude this part of the chapter. Next, we will take a look into ways of sharing CMake modules between projects.
 
-\subsubsubsection{13.4.2\hspace{0.2cm}Recommendations for sharing CMake modules 	between projects}
+\subsubsubsection{13.4.2\hspace{0.2cm}项目间共享CMake模块的建议}
 
 The recommended way of sharing CMake modules is by maintaining a separate project for CMake modules and then incorporating the project as an external resource, either directly by Git submodules/subtree or CMake's FetchContent/ExternalProject. This way, all reusable CMake utilities can be maintained under a single project and can be propagated to all downstream projects. Putting CMake modules into a repository in an online Git hosting platform (such as GitHub or GitLab) will make using the module convenient for most people. Since CMake supports fetching content directly from Git, it will be straightforward to use the shared libraries.
 
