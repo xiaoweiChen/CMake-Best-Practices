@@ -1,16 +1,16 @@
-A CMake module is a logical entity that contains CMake code, functions, and macros that are put together to serve a particular purpose. A module can provide functions and macros for other CMake code and execute CMake commands when included. CMake is shipped with many pre-made modules by default. These modules provide extra utility to consume CMake code and allow the discovery of third-party tools and dependencies (Find*.cmake modules). A list of the modules that CMake provides by default is available at \url{https://cmake.org/cmake/help/latest/manual/cmakemodules.7.html}. The official CMake documentation categorizes modules in the following two main categories:
+CMake模块包含CMake代码、函数和宏，它们放在一起以服务于特定的目的。模块可以为其他CMake代码提供函数和宏，并在包含时执行CMake命令。通常，CMake附带了许多预先制作好的模块。这些模块提供了额外的实用程序来使用CMake代码，并允许发现第三方工具和依赖项(Find*.cmake模块)。CMake默认提供的模块列表可在\url{https://cmake.org/cmake/help/latest/manual/cmakemodules.7.html}获得。官方文档将模块分为以下两类:
 
 \begin{itemize}
 \item 
-Utility modules
+实用工具模块
 
 \item 
-Find modules
+查找模块
 \end{itemize}
 
-As their name suggests, the utility modules provide utility, whereas the find modules are designed to search for third-party software in a system. As you can recall, we have covered the find modules thoroughly in Chapter 4, Packaging, Deploying, and Installing a CMake Project, and Chapter 5, Integrating Third-Party Libraries and Dependency Management. Therefore, we will exclusively focus on utility modules in this chapter. As you can recall, we have been using some CMake-provided utility modules in previous chapters. Some of these modules we used were the GNUInstallDirs, CPack, FetchContent, and ExternalProject modules. These modules are located under the CMake installation folder.
+实用工具模块提供相应的工具，而查找模块用于搜索系统中的第三方软件。我们已经在第4章和第5章中详细介绍了查找模块。因此，在本章中专门关注实用工具模块。前面的章节中使用了一些CMake提供的实用模块，其中一些模块是GNUInstallDirs、CPack、FetchContent和ExternalProject，这些模块位于CMake安装文件夹下。
 
-To better understand the concept of a utility module, let's start by investigating a simple utility module that CMake provides. For this purpose, we will look into the ProcessorCount utility module. You can find the source file for this module at \url{https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake}. The ProcessorCount module is a module that allows retrieving the CPU core count of a system in CMake code. The ProcessorCount. cmake file defines a CMake function named ProcessorCount, which takes a single parameter named var. The implementation of the function is roughly as follows:
+为了更好地理解实用工具模块的概念，先从研究CMake提供的实用程序模块开始，先来看看ProcessorCount实用程序模块。可以在\url{https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake}找到这个模块的源文件。ProcessorCount模块可在CMake代码中检索系统的CPU核心计数的模块。ProcessorCount.cmake定义了名为ProcessorCount的函数，它接受一个名为var的参数。该函数的实现大致如下:
 
 \begin{lstlisting}[style=styleCMake]
 function(ProcessorCount var)
@@ -33,7 +33,7 @@ set(${var} ${count} PARENT_SCOPE)
 endfunction()
 \end{lstlisting}
 
-The ProcessorCount function attempts several different approaches to retrieve the CPU core count of the host machine. The usage of the ProcessorCount module is simple, as follows:
+ProcessorCount函数尝试几种不同的方法来检索主机的CPU核心计数。ProcessorCount模块的用法很简单:
 
 \begin{lstlisting}[style=styleCMake]
 include(ProcessorCount)
@@ -41,9 +41,9 @@ ProcessorCount(CORE_COUNT)
 message(STATUS "Core count: ${CORE_COUNT}")
 \end{lstlisting}
 
-As you can see in the preceding example, using a CMake module is as easy as including the module in the required CMake file. The include() function is transitive, so the code after the include line can consume all CMake definitions contained in the module.
+使用CMake模块非常简单，只需将该模块包含到所需的CMake文件中即可。\texttt{include()}具有传递性，因此行之后的代码可以使用模块中包含的所有CMake定义。
 
-We now have a rough idea of what a utility module looks like. Let's continue by learning more about the fundamental building blocks of a utility module: functions and macros.
+现在我们对实用工具模块有了大致的了解。继续了解更多关于实用程序模块的基本构建模块:函数和宏。
 
 
 

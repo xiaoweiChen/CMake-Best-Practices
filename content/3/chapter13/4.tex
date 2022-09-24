@@ -1,20 +1,20 @@
 
-In the previous section, we learned about how to use functions and macros to provide useful utility in CMake projects, Now, we can learn about how we can move these functions and macros to a separate CMake module.
+上一节中，我们学习了如何使用函数和宏在CMake项目中提供有用的功能。现在，来学习如何将这些函数和宏移动到单独的CMake模块中。
 
-Creating and using a simple CMake module file is extremely simple:
+创建和使用简单的CMake模块文件非常简单:
 
 \begin{enumerate}
 \item 
-Create a <module\_name>.cmake file under your project.
+在项目中创建一个<module\_name>.cmake文件。
 
 \item 
-Define any macros/functions in the <module\_name>.cmake file.
+在<module\_name>.cmake文件中定义宏/函数。
 
 \item 
-Include <module\_name>.cmake in the desired file.
+将<module\_name>.cmake文件包含在必要的文件当中
 \end{enumerate}
 
-Alright, let's follow these steps and create a module together. As a follow-up to our previous git branch name example, let's extend the scope and write a CMake module that provides the ability to retrieve the branch name, head commit hash, current author name, and current author email information by using the git command. For this part, we will follow the chapter\_13/ex01\_git\_utility example. The example folder contains a CMakeLists.txt file and a git.cmake file under the .cmake folder. Let's start by taking a look at the .cmake/git.cmake file first. The contents of the file are as follows:
+好了，让我们按照这些步骤一起创建一个模块。作为上一个git分支名称示例的后续，我们扩展范围编写一个CMake模块，该模块通过使用git命令提供检索分支名称、HEAD提交哈希、当前作者名称和当前作者电子邮件信息的能力。这一部分中，将遵循chapter\_13/ex01\_git\_utility的示例。示例文件夹包含一个CMakeLists.txt文件和一个git.cmake文件。文件存放在.cmake文件夹下。先来看看.cmake/git.cmake文件。文件内容如下:
 
 \begin{lstlisting}[style=styleCMake]
 # …
@@ -31,9 +31,9 @@ endmacro()
 # … git_get_head_commit_hash(), git_get_config_value()
 \end{lstlisting}
 
-The git.cmake file is the CMake utility module file that contains three macros named git\_get\_branch\_name, git\_get\_head\_commit\_hash, and git\_get\_config\_value respectively. Additionally, there is an include\_guard(DIRECTORY) line at the top of the file. This is analogous to the \#pragma once preprocessor directive in C/C++ and prevents the file from being included more than once. The DIRECTORY parameter denotes that include\_guard is defined at the directory scope and this file can be included once at most within the current directory and below. Alternatively, the GLOBAL parameter can be specified instead of DIRECTORY to limit the inclusion of the file once, regardless of the scope.
+git.cmake文件是cmake实用工具模块文件，包含三个宏，分别名为git\_get\_branch\_name、git\_get\_head\_commit\_hash和git\_get\_config\_value。此外，文件的顶部有include\_guard(DIRECTORY)。这类似于C/C++中的\#pragma once预处理器指令，防止文件多次包含。DIRECTORY参数表示include\_guard在目录范围内定义，该文件最多只能在当前目录内或以下包含一次。另外，可以指定GLOBAL参数(而不是DIRECTORY)，以限制只包含一次文件，而不考虑范围。
 
-To see how we can use the git.cmake module file, let's investigate the CMakeLists. txt file of chapter\_13/ex01\_git\_utility together:
+看看如何使用git.cmake模块文件，研究下chapter\_13/ex01\_git\_utility中的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -61,14 +61,14 @@ message(STATUS "\tAuthor e-mail: ${current_user_email}")
 message(STATUS "-----------------------------------------")
 \end{lstlisting}
 
-The CMakeLists.txt file includes the git.cmake file by specifying the full relative path to the module file. The git\_get\_branch\_name, git\_get\_head\_commit\_hash, and git\_get\_config\_value macros provided by the module are used to retrieve the branch name, commit hash, author name, and email to the current\_branch\_name, current\_head, current\_user\_name, and current\_user\_email variables respectively. Lastly, these variables are printed on the screen by the message(…) command. Let's configure the example project to see whether the git module we've just written works as expected:
+通过指定模块文件的完整相对路径，CMakeLists.txt文件包含git.cmake文件。模块提供的git\_get\_branch\_name、git\_get\_head\_commit\_hash和git\_get\_config\_value宏分别用于检索分支名称、提交哈希、作者名和电子邮件到current\_branch\_name、current\_head、current\_user\_name和current\_user\_email。最后，通过\texttt{message(…)}指令将这些变量打印在屏幕上。配置示例项目，看看刚编写的git模块是否能如预期的那样工作:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_13/ex01_git_utility/
 cmake -S ./ -B ./build
 \end{tcblisting}
 
-The output of the command should look similar to this:
+命令的输出应该如下所示:
 
 \begin{tcblisting}{commandshell={}}
 -- The CXX compiler identification is GNU 9.4.0
@@ -91,18 +91,18 @@ The output of the command should look similar to this:
 /ex01_git_utility/build
 \end{tcblisting}
 
-As we can see, we have succeeded in retrieving the information from the git command. Our first CMake module works as expected.
+正如我们所看到的，已经成功地从git命令中检索了信息。我们的第一个CMake模块工作正常。
 
 \subsubsubsection{13.4.1\hspace{0.2cm}案例研究——处理项目元数据文件}
 
-Let's continue with another example. Assume that we have an environment file that contains key-value pairs per line. It is not unusual to have external files in the project that contain some metadata about the project (for example, project version and dependencies). The file may be in different formats, such as JSON or new-line separated key-value pairs, as we have in this example. The task at hand is to create a utility module that reads the environment variable file and defines a CMake variable per key-value pair in the file. The contents of the file will look similar to this:
+继续看另一个例子。假设有一个每行包含键值对的环境文件，项目中包含一些关于项目的元数据(例如，项目版本和依赖项)的外部文件并不罕见。该文件可以是不同的格式，例如：JSON或换行分隔的“键-值”对。当前的任务是创建一个实用工具模块，该模块读取环境变量文件，并在文件中为每个“键-值”对定义一个CMake变量。文件的内容如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 KEY1="Value1"
 KEY2="Value2"
 \end{lstlisting}
 
-For this section, we will follow the chapter\_13/ex02\_envfile\_utility example. Let's begin by examining the contents of .cmake/envfile-utils.cmake first:
+本节中，将遵循chapter\_13/ex02\_envfile\_utility的示例。从了解.cmake/envfile-utils.cmake的内容开始:
 
 \begin{lstlisting}[style=styleCMake]
 include_guard(DIRECTORY)
@@ -131,7 +131,7 @@ function(read_environment_file ENVIRONMENT_FILE_NAME)
 endfunction()
 \end{lstlisting}
 
-The envfile-utils.cmake utility module contains a single function, read\_environment\_file, that reads an environment file in the format of a list of key-value pairs. This function reads all the lines in the file to the KVP\_LIST variable, then iterates through all lines. Each individual line is split by the (=) equals token, then the left side of the equals token is used as the variable name, whereas the right side is used as the variable value to define each key-value pair as a CMake variable. Empty lines and comment lines are skipped. As for the usage of the module, let's have a look into the chapter\_13/ex02\_envfile\_utility/CMakeLists.txt file:
+envfile-utils.cmake实用工具模块包含一个函数read\_environment\_file，它以键值对列表的格式读取一个环境文件。这个函数将文件中的所有行读入KVP\_LIST变量，然后遍历所有行。每一行都用(=)等号标记分隔，然后等号的左侧作为变量名，而右侧作为变量值，将每个“键-值”对定义为CMake变量，空行和注释行将跳过。关于模块的使用，让我们看看chapter\_13/ex02\_envfile\_utility/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 # Add .cmake folder to the module path, so subsequent 
@@ -143,7 +143,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 add_subdirectory(test-executable)
 \end{lstlisting}
 
-You may have noticed that the .cmake folder is added to the CMAKE\_MODULE\_PATH variable. The CMAKE\_MODULE\_PATH variable is the collection of paths that the include(…) directive will search in. By default, it is empty. This allows us to include the envfile-utils module directly by name in the current and children CMakeLists. txt files. Lastly, let's take a look at the chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt file:
+可能已经注意到，.cmake文件夹现在添加到CMAKE\_MODULE\_PATH变量中。CMAKE\_MODULE\_PATH变量是\texttt{include(…)}指令将搜索的路径集合。默认情况下，是空的。这允许我们直接在当前和子CMakeLists.txt中使用名称包含envfile-utils模块。最后，让我们看看chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 # ....
@@ -161,7 +161,7 @@ target_compile_definitions(ch13_ex02_envfile_utility_test
 		PROJECT_AUTHOR="${TEST_PROJECT_AUTHOR}")
 \end{lstlisting}
 
-As you can see, the envfile-utils environment file reader module is included by name. This is because the folder that contains the envfile-utils.cmake file is appended to the CMAKE\_MODULE\_PATH variable before. The read\_environment\_file() function is called to read the variables.env file in the same folder. The variables.env file contains the following key-value pairs:
+可以按名称包含envfile-utils环境文件读取器模块，这是因为包含envfile-utils.cmake的文件夹已经添加到CMAKE\_MODULE\_PATH变量中。read\_environment\_file()函数用来读取同文件夹下的variables.env文件。variables.env文件包含以下键值对:
 
 \begin{lstlisting}[style=styleCMake]
 # This file contains some metadata about the project
@@ -169,7 +169,7 @@ TEST_PROJECT_VERSION="1.0.2"
 TEST_PROJECT_AUTHOR="CBP Authors"
 \end{lstlisting}
 
-So, after calling the read\_environment\_file() function, we expect the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR variables to get defined in the current CMake scope, with their respective values specified in the file. To verify that, an executable target named ch13\_ex02\_envfile\_utility\_test is defined, and the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR variables are passed into the target as macro definitions. Lastly, the target's source file, test.cpp, prints the TEST\_PROJECT\_VERSION and TEST\_PROJECT\_AUTHOR macro definitions to the console:
+因此，使用read\_environment\_file()之后，期望TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量在当前的CMake作用域中定义，并在文件中指定各自的值。为了验证这一点，定义了一个名为ch13\_ex02\_envfile\_utility\_test的可执行目标，并将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量作为宏定义传递给目标。最后，目标的源文件test.cpp将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR宏定义打印到控制台:
 
 \begin{lstlisting}[style=styleCXX]
 #include <cstdio>
@@ -179,7 +179,7 @@ int main(void) {
 }
 \end{lstlisting}
 
-Alright, let's compile and run the application to see whether this works or not:
+好了，让我们编译并运行应用程序，看看这是否有效:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_13/ex02_envfile_utility
@@ -189,42 +189,42 @@ cmake --build build
 # Will output: Version '1.0.2', author 'CBP Authors'
 \end{tcblisting}
 
-As we can see, we have successfully read a key-value pair-formatted file from our source tree, defined each key-value pair as CMake variables, and then exposed these variables as macro definitions to our application.
+如我们所见，我们已经成功地从源树中读取了键值对格式的文件，将每个键值对定义为CMake变量，然后将这些变量作为宏定义公开给应用程序。
 
-Although writing CMake modules is very straightforward, there are a few extra recommendations to consider:
+尽管编写CMake模块非常简单，但这里有一些建议:
 
 \begin{itemize}
 \item 
-Always use unique names for your functions/macros.
+为函数/宏使用唯一的名称。
 
 \item 
-Use a common prefix for all module functions/macros.
+为所有模块函数/宏使用共同的前缀。
 
 \item 
-Avoid using constant names for non-function scope variables.
+避免对非函数作用域变量使用常量名。
 
 \item 
-Use include\_guard() for your module.
+为模块使用\texttt{include\_guard()}。
 
 \item 
-If your module prints messages, provide a quiet mode for your module.
+若模块需要打印消息，请为模块提供静默模式。
 
 \item 
-Do not expose your module's internals.
+不要暴露模块的内部。
 
 \item 
-Use macros for simple command wrappers, and functions for everything else.
+为简单的命令包装器使用宏，其他的都使用函数。
 \end{itemize}
 
-With that said, we conclude this part of the chapter. Next, we will take a look into ways of sharing CMake modules between projects.
+这样，我们就结束本章的这一部分。接下来，我们将探讨在项目之间共享CMake模块的方法。
 
 \subsubsubsection{13.4.2\hspace{0.2cm}项目间共享CMake模块的建议}
 
-The recommended way of sharing CMake modules is by maintaining a separate project for CMake modules and then incorporating the project as an external resource, either directly by Git submodules/subtree or CMake's FetchContent/ExternalProject. This way, all reusable CMake utilities can be maintained under a single project and can be propagated to all downstream projects. Putting CMake modules into a repository in an online Git hosting platform (such as GitHub or GitLab) will make using the module convenient for most people. Since CMake supports fetching content directly from Git, it will be straightforward to use the shared libraries.
+共享CMake模块的推荐方法是为CMake模块维护一个单独的项目，然后将该项目作为外部资源合并，可以直接通过Git子模块/子树或CMake的FetchContent/ExternalProject。这样，所有可重用的CMake实用程序都可以维护在单个项目下，并可以传播到所有下游项目。将CMake模块放入在线Git托管平台(如GitHub或GitLab)的存储库中，将使大多数人使用该模块更加方便。因为CMake支持直接从Git获取内容，所以使用共享库将非常简单。
 
-To demonstrate how we can use an external CMake modules project, we will use an open source CMake utility module project named Hadouken. This project is accessible from \url{https://github.com/mustafakemalgilor/hadouken}. This project contains CMake utility modules for tool integrations, target creation, and feature checks.
+为了演示如何使用外部CMake模块项目，我们将使用一个名为Hadouken的开源CMake实用模块项目。该项目可从\url{https://github.com/mustafakemalgilor/hadouken}访问。该项目包含用于工具集成、目标创建和特性检查的CMake实用工具模块。
 
-For this part, we will follow the chapter\_13/ex03\_hadouken example. This example will fetch Hadouken, and then use the Hadouken project's target creation helper utility. Let's have a look at the CMakeLists.txt file as usual:
+这一部分中，使用chapter\_13/ex03\_hadouken的例子。用这个例子将获取Hadouken，然后使用Hadouken项目的目标创建助手实用程序。先来看看CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -254,9 +254,9 @@ include(core/MakeTarget)
 make_target(TYPE EXECUTABLE)
 \end{lstlisting}
 
-In the preceding example, we have used FetchContent\_Declare and FetchContent\_MakeAvailable to retrieve Hadouken into our project. Then, the Hadouken project's module directory is appended into CMAKE\_MODULE\_PATH to use the Hadouken project's CMake utility modules via the include(…) directive. Consequently, the Log, Utility, MakeCompilationUnit, and MakeTarget modules are included. Lastly, the make\_target() function is called to ensure that we can use an external CMake module project's functions.
+前面的例子中，使用了FetchContent\_Declare和FetchContent\_MakeAvailable将Hadouken检索到项目中。然后，Hadouken项目的模块目录添加到CMAKE\_MODULE\_PATH中，通过\texttt{include(…)}指令使用Hadouken项目的CMAKE实用模块。因此，包含了Log、Utility、MakeCompilationUnit和MakeTarget模块。最后，使用make\_target()函数确保我们可以使用外部CMake模块项目的函数。
 
-The make\_target(…) function is provided by the Hadouken project's core/MakeTarget module and is a wrapper function around the add\_executable and add\_library CMake commands. The make\_target(TYPE EXECUTABLE) call is supposed to discover all source files under the src/ folder and create an executable target by calling the add\_executable(…) CMake command. Let's configure and build the project to see whether that is the case or not:
+make\_target(…)函数是由Hadouken项目的核心/MakeTarget模块提供的，是\texttt{add\_executable}和\texttt{add\_library}指令的包装函数。make\_target(TYPE EXECUTABLE)将囊括src/文件夹下的所有源文件，并通过\texttt{add\_executable(…)}创建一个可执行目标。让我们来配置和构建项目，看看情况是否如此:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_13/ex03_hadouken
@@ -264,7 +264,7 @@ cmake -S ./ -B build/
 cmake --build build
 \end{tcblisting}
 
-The output should look similar to this:
+输出应该如下所示:
 
 \begin{tcblisting}{commandshell={}}
 [ 50%] Building CXX object
@@ -273,9 +273,9 @@ The output should look similar to this:
 [100%] Built target ch13_ex03_hadouken
 \end{tcblisting}
 
-The target, ch13\_ex03\_hadouken, is defined and the source file, main.cpp, is included as a source file in the target. This confirms that we can use an external CMake modules project in our CMake code.
+定义了目标ch13\_ex03\_hadouken，并将源文件main.cpp作为源文件包含在目标中。证实了我们可以在CMake代码中使用外部CMake模块项目。
 
-We have reached another chapter's end together. Up next, we'll summarize what we have learned in this chapter and what we will learn in the upcoming chapter.
+接下来，我们将总结本章学到的知识，以及下一章将学到的知识。
 
 
 

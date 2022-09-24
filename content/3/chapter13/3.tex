@@ -1,9 +1,9 @@
 
-It is clear that we need some basic building blocks to create utility modules. The most fundamental building blocks for utility modules are functions and macros, so it is essential to learn their working principles well. Let's start by learning about functions.
+我们需要一些基本的构建块来创建实用模块。实用工具模块最基本的构建模块是函数和宏，因此很有必要了解它们的工作原理。先从函数开始。
 
 \subsubsubsection{13.3.1\hspace{0.2cm}函数}
 
-Let's remember what we have learned in Chapter 1, Kickstarting CMake, about functions. A function is the CMake language feature to define a logical code block that can be invoked to execute CMake commands. A function starts with function(…), has a body that contains CMake commands, and ends with the endfunction() CMake command. The function() command needs a name as the first argument, and optional function argument names, shown as follows:
+第1章中就有关于函数的知识。函数是CMake语言的特性，可以定义一个逻辑代码块，来执行CMake指令。函数以function(…)开始，函数体包含CMake命令，以endfunction()结束。function()需要一个名称作为第一个参数，以及可选的函数参数名称:
 
 \begin{lstlisting}[style=styleCMake]
 function(<name> [<arg1> ...])
@@ -11,9 +11,9 @@ function(<name> [<arg1> ...])
 endfunction()
 \end{lstlisting}
 
-A function defines a new variable scope, so the changes made on CMake variables are only visible in the function's body. Separate scoping is the most crucial property of the function. Having a new scope means we can't accidentally leak variables to the caller or modify the caller's variables unless we want to. Most of the time, we will want to contain the changes in the function's scope and only reflect the function's result to the caller. As CMake has no notion of return values, we will take the defining a variable in the caller's scope approach to return function results to the caller.
+函数定义了一个新的变量作用域，因此对CMake变量所做的更改只在函数体中可见，独立作用域是函数最重要的属性。有了新的作用域就能避免意外地将变量暴露给使用者，除非我们想这样做。大多数时候，我们希望在函数的作用域中包含更改，并且只将函数的结果反映给使用者。由于CMake没有返回值的概念，我们将采用在调用者的作用域方法中定义一个变量来将函数结果返回给使用者。
 
-To illustrate this approach, let's define a simple function that retrieves the current Git branch name together:
+先定义一个简单的函数来检索当前Git分支名称:
 
 \begin{lstlisting}[style=styleCMake]
 function(git_get_branch_name result_var_name)
@@ -29,22 +29,22 @@ function(git_get_branch_name result_var_name)
 endfunction()
 \end{lstlisting}
 
-The git\_get\_branch\_name function takes a single argument named result\_var\_name. This argument is the name of the variable that will be defined in the caller's scope to return the Git branch name to the caller. Alternatively, we can use a constant variable name, such as GIT\_CURRENT\_BRANCH\_NAME, and get rid of the result\_var\_name argument, but this may cause issues if the project already uses the GIT\_CURRENT\_BRANCH\_NAME name.
+git\_get\_branch\_name函数接受名为result\_var\_name的参数。这个参数是将在使用者的作用域中定义的变量的名称，用于将Git分支名称返回给使用者。或者，可以使用一个常量变量名，例如GIT\_CURRENT\_BRANCH\_NAME，并去掉result\_var\_NAME参数，但若项目已经使用了GIT\_CURRENT\_BRANCH\_NAME名称，这可能会出问题。
 
-The rule of thumb here is to leave the naming to the caller since it allows maximum flexibility and portability. To retrieve the current Git branch name, we have invoked the git symbolic-ref -q -{}-short HEAD command with execute\_process(). The result of the command is stored in the git\_current\_branch\_name variable in the function's scope. The variable being in the function's scope means the caller cannot see the git\_current\_branch\_name variable. Thus, we have used set(\$\{result\_var\_name\} \$\{git\_current\_branch\_name\} PARENT\_SCOPE) to define a variable using the value of result\_var\_name in the caller's scope with the value of the local git\_current\_branch\_name variable.
-\
-The PARENT\_SCOPE argument alters the scoping of the set(…) command, so it defines the variable in the caller's scope instead of the function's scope. The usage of the git\_get\_branch\_name function is as follows:
+经验法则是将命名留给使用者，因为它具有最大的灵活性和可移植性。为了检索当前Git分支名称，使用\texttt{execute\_process()}运行了git symbolic-ref -q -{}-short HEAD命令，其结果存储在函数作用域中的git\_current\_branch\_name变量中。变量在函数的作用域中，所以使用者不能看到git\_current\_branch\_name变量。因此，需要使用\texttt{set(\$\{result\_var\_name\} \$\{git\_current\_branch\_name\} PARENT\_SCOPE)}来定义一个变量，使用外部作用域中result\_var\_name的值和本地git\_current\_branch\_name变量的值相同。
+
+PARENT\_SCOPE参数改变了\texttt{set(…)}指令的作用域，因此它在使用者的作用域内。git\_get\_branch\_name函数的用法如下:
 
 \begin{lstlisting}[style=styleCMake]
 git_get_branch_name(branch_n)
 message(STATUS "Current git branch name is: ${branch_n}")
 \end{lstlisting}
 
-Let's look at macros next.
+接下来看下宏。
 
 \subsubsubsection{13.3.2\hspace{0.2cm}宏}
 
-If the function's scoping is a deal-breaker for your use case, you might consider using macro(…) instead. Macros start with macro(…) and end with endmacro(). Functions and macros behave similarly in every aspect but one: macros do not define a new variable scope. Returning to our git branch example, considering execute\_process(…) already has the OUTPUT\_VARIABLE parameter, it is more convenient to define git\_get\_branch\_name as a macro instead of a function to get rid of set(… PARENTSCOPE) at the end:
+如果函数的作用域理解起来有困难，可以考虑使用\texttt{macro(…)}来代替。宏以macro(…)开始，以endmacro()结束。函数和宏在各个方面的行为都相似，但有一点不同:宏不定义新的变量作用域。回到git分支的例子，考虑到\texttt{execute\_process(…)}已经有OUTPUT\_VARIABLE参数，将git\_get\_branch\_name定义为宏，而不是函数会更方便些:
 
 \begin{lstlisting}[style=styleCMake]
 macro(git_get_branch_name_m result_var_name)
@@ -58,13 +58,13 @@ macro(git_get_branch_name_m result_var_name)
 endmacro()
 \end{lstlisting}
 
-The usage of the git\_get\_branch\_name\_m macro is exactly the same as the git\_get\_branch\_name() function:
+git\_get\_branch\_name\_m宏的用法与git\_get\_branch\_name()函数完全相同:
 
 \begin{lstlisting}[style=styleCMake]
 git_get_branch_name_m(branch_nn)
 message(STATUS "Current git branch name is: ${branch_nn}")
 \end{lstlisting}
 
-We have learned how we can define a function or macro when needed. Up next, we will define our first CMake module together.
+我们已经学习了如何在需要时定义函数或宏。接下来，一起定义一个CMake模块。
 
 
