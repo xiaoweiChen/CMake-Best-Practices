@@ -1,24 +1,24 @@
-While CMake is evolving into a de facto industry standard for C++ and C projects, there are still projects—sometimes large ones—that use different build systems. Of course, there is nothing wrong with that as long as it fits your needs. However, at some point, and for whatever reason, you might wish to switch to CMake. For instance, maybe the software should be buildable by different IDEs or on different platforms, or the dependency management has become cumbersome. Another common situation is when the repository structure changes from a big mono-repo, where all libraries are checked in, to distributed repositories for each library project. Whatever the reason, migrating to CMake can be a challenge, especially for large projects, but the results could be worth it.
+虽然CMake正在成为C++和C项目事实上的工业标准，但仍然有一些项目(有时是大型项目)使用不同的构建系统。当然，只要它符合需求，就没有什么错。然而，有时候，无论出于某些原因，可能希望切换到CMake。例如，也许软件在不同的IDE或不同的平台上构建，或者依赖管理变得很麻烦。另一种情况是，仓库结构从大型单体仓库变更为每个库项目的分布式仓库。无论什么原因，迁移到CMake可能是一个挑战，特别是对于大型项目，但结果可能是值得的。
 
-While converting a project in one go would be the preferred way, often, there are non-technical requirements that might not make this possible. For instance, development might still need to go on in some parts during the migration, or some parts of the project cannot be migrated right from the start because of various requirements that are outside a team's control.
+虽然一次性转换项目是首选的方式，但通常情况下，非技术需求可能无法做到这一点。例如，在迁移过程中可能仍然需要在某些部分进行开发，或者由于各种超出团队控制范围的需求，项目的某些部分无法从一开始就迁移。
 
-So, a step-by-step approach is often needed. Changing the build system will most likely influence any CI/CD process, so this should also be considered. In this chapter, we will take a look at a few high-level strategies regarding how projects could be migrated, step by step, to CMake. However, note that the concrete migration paths are very dependent on the individual situation. For example, migrating from a project based on Makefiles in a single repository will work differently from moving from a Gradle-based build that spans multiple repositories.
+因此，我们通常需要循序渐进的方法。更改构建系统很可能会影响CI/CD流程，因此也应该考虑这一点。本章中，我们将介绍一些高层策略，了解如何将项目逐步迁移到CMake。但请注意，具体的迁移路径非常依赖于个别情况。例如，从一个基于makefile的项目迁移到一个单独的仓库，和从一个基于gradle的跨多个仓库的项目迁移的效果是不同的。
 
-Changing the build system and, possibly, the project structure too can be very disruptive for all those involved, as they will have become accustomed to working with the existing structure and build system. Therefore, the decision to switch to a build system should not be taken lightly and should only be done if the benefits are significant.
+更改构建系统，甚至可能更改项目结构，对所有参与的人来说可能具有破坏性的，因为他们将习惯于使用现有的结构和构建系统。因此，不应该轻率地决定切换到构建系统，而应该只在由显著好处的情况下才这么做。
 
-While this chapter focuses on the CMake aspect of migrating projects, often, migrations are not done with the goal of switching the build system but have other primary goals instead, such as simplifying the project structure or reducing the coupling between parts of the project to make them easier to maintain independently. When talking about the benefits, remember that they do not necessarily have to be purely technical benefits, such as having faster build speeds as a result of being able to better parallelize the build. The benefits could also be more from a "social" side, for instance, having a standardized,well-known way to build software will reduce the ramp-up time for new developers.
+虽然本章主要关注迁移项目的CMake方面，但迁移并不以切换构建系统为目标，而是有其他主要目标，例如简化项目结构或减少项目各部分之间的耦合，以使它们更容易独立维护。在谈到这些好处时，它们不一定是纯技术上的好处，例如可以更好地并行化构建，从而获得更快的构建速度。好处还可能更多地来自“社交”方面，例如：拥有标准化的、众所周知的软件开发方法将减少新开发人员的时间。
 
-In this chapter, we will cover the following topics:
+本章中，我们将讨论以下内容:
 
 \begin{itemize}
 \item 
-High-level migration strategies
+高级迁移策略
 
 \item 
-Migrating small projects
+迁移小项目
 
 \item 
-Migrating large projects to CMake
+将大型项目迁移到CMake
 \end{itemize}
 
-In this chapter, we will introduce some higher-level concepts for migrating from any build system to CMake. As you will see, migrating small projects might be quite straightforward, whereas large, complex projects require more planning upfront. By the end of the chapter, you will have a good idea of the different strategies for migrating projects of various sizes to CMake. Additionally, we will provide a few hints regarding what to check for when migrating, along with a rough step-by-step guide for migrations and how to interact with legacy build systems.
+本章中，将介绍一些从构建系统迁移到CMake的高级概念。迁移小型项目可能非常简单，而大型、复杂的项目则需要预先进行更多的规划。本章结束时，您将对将不同规模的项目迁移到CMake的不同策略有一个很好的了解。此外，我们将提供一些关于迁移时要检查什么的提示，迁移的大致分步指南，以及如何与遗留构建系统交互。

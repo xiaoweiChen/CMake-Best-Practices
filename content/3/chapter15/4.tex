@@ -1,121 +1,101 @@
 
-Migrating large projects that contain a number of libraries and several executables can be quite a challenge. On a closer look, those projects might, in fact, be multiple hierarchically nested projects, with one or more root projects that pull together multiple subprojects, which, in turn, contain or require multiple subprojects themselves. Depending on the size and complexity of the software portfolio of an organization, many root projects that share common subprojects might exist side by side, which might complicate migration. Creating a dependency graph, such as the one in the following diagram, of the projects and subprojects often helps us to figure out the migration order. Each project might, in itself, contain multiple projects or targets that have their own dependencies:
+迁移包含大量库和多个可执行文件的大型项目可能是一个相当大的挑战，这些项目实际上可能是多个层次嵌套的项目，具有一个或多个将多个子项目拉在一起的根项目，而这些根项目本身又包含或需要多个子项目。根据组织软件组合的大小和复杂性，许多共享公共子项目的根项目可能并排存在，这可能使迁移复杂化。创建项目和子项目的依赖关系图(如下图所示)，通常可以帮助我们弄清楚迁移的顺序。每个项目本身可能包含多个项目或目标，这些项目或目标有自己的依赖项:
 
 \begin{center}
-\includegraphics[width=0.5\textwidth]{content/3/chapter15/images/1.jpg}\\
-Figure 15.1 – An example project hierarchy showing the various dependencies
+\includegraphics[width=0.3\textwidth]{content/3/chapter15/images/1.jpg}\\
+图15.1 显示各种依赖关系的示例项目层次结构
 \end{center}
 
-Before migrating, the first thing to do is a thorough analysis of how the projects depend on each other and in what order they need to be built. Depending on the state of the project, the resulting graph might be quite large, so figuring out where to start might be a bit of a challenge. In reality, dependency graphs are often not as neat as the ones shown in this book. Whether it is easier to first disentangle the project and then move to CMake or move to CMake first and then disentangle the project depends on the actual situation. If projects are very large and complex, start by finding islands in the graph that are as self-contained as possible and start from there.
+迁移之前，要做的第一件事是彻底分析项目之间如何相互依赖，以及需要以什么顺序构建。根据项目的状态，最终的图可能会非常大，所以确定从哪里开始可能会有点困难。实际上，依赖图往往不像本书中展示的那样简洁。先理清项目脉络，再迁移到CMake，还是先迁移到CMake再理清项目脉络更容易，这取决于实际情况。若项目非常大且复杂，那么首先在图中找到尽可能独立的孤岛，并从那里开始着手。
 
-For complex, hierarchical projects, there are two general migration strategies to consider. One is a top-down approach, where the root project(s) are migrated and replaced first, and then the child projects are ordered by which one project has the least incoming dependencies. The second is a bottom-up approach, where the individual projects are migrated one by one, starting with the one that has the most incoming dependencies.
+对于复杂的、分层的项目，有两种迁移策略。一种是自顶向下的方法，首先迁移并替换根项目，然后根据哪个项目具有最少的依赖关系对子项目进行排序。第二种是自底向上的方法，从依赖项最多的项目开始，逐个迁移各个项目。
 
-A top-down approach will have the benefit of ensuring the full project can be built, tested, and packaged with CMake early on, but it requires the existing build system to be integrated into CMake with ExternalProject. The downside of a top-down approach might be that, in the early stages, the resulting CMake project contains a lot of custom code to work with packages built by the old system. In practice, using a few temporary workarounds to include existing projects in the build is often the most pragmatic way of getting good results relatively quickly, and it partially mitigates the effort of maintaining two build systems for the same subprojects.
+自顶向下的方法有一个好处，确保完整的项目可以在早期用CMake进行构建、测试和打包，但要求现有的构建系统使用\texttt{ExternalProject}的方式集成到CMake中。自上而下的方法的缺点可能是，早期会生成的CMake项目包含大量自定义代码，用于使用旧系统构建的包。在实践中，使用一些临时方法在构建中，包含现有项目是相对快速地获得良好结果的实用方法，并且在一定程度上减轻了为相同子项目维护两个构建系统的工作量。
 
-A bottom-up approach has the benefit that each library that is migrated to CMake can use dependencies that have already been migrated. The downside is that the root project can only be replaced once all the child projects are made buildable with CMake. Even though the projects are migrated from the bottom up, a good practice is for the root CMake project to be created early on. It lives side by side with the root project in the original build system. This allows you to put in external dependencies and install configuration and packaging instructions inside the new CMake project early on.
+自底向上方法的好处是:每个库迁移到CMake已经迁移可以使用依赖项。缺点是只有在所有子项目都能用CMake构建后，根项目才能替换。即使项目从下往上迁移，好的做法是尽早创建根CMake项目，与原始构建系统中的根项目同时存在。这就可以尽早在新的CMake项目中放入外部依赖项、安装配置和打包说明。
 
-The following diagram illustrates how the top-down and bottom-up strategies look side by side. The numbers beside the boxes represent the order of migration:
+下面的图表说明了自顶向下和自底向上策略是如何同时出现的。方框旁边的数字表示迁移的顺序:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/3/chapter15/images/2.jpg}\\
-Figure 15.2 – An example of migration orders
+图15.2 迁移顺序的示例
 \end{center}
 
-Apart from the overall migration strategy, another thing to consider is whether the project is going to be set up as a superbuild or as a regular project. When working with a top-down approach, a superbuild structure might be easier to migrate, as one of its benefits is that it is easier to integrate non-CMake projects by design. More information about superbuild structures can be found in Chapter 10, Handling Big Projects and Distributed Repositories in a Superbuild.
+除了整体的迁移策略之外，另一件需要考虑的事情是项目是要设置为超级构建，还是常规项目。当使用自顶向下的方法时，超级构建结构可能更容易迁移，因为好处是更容易通过设计集成非CMake项目。有关超级构建结构的更多信息，请参阅第10章。
 
-No matter whether you choose a top-approach down or a bottom-up approach for migrating the individual projects, the general strategy for migrating large projects will look similar to the following:
+无论选择自顶向下的方法，还是自底向上的方法来迁移单个项目，迁移大型项目的策略看起来都有以下几点:
 
 \begin{enumerate}
 \item 
-Analyze what the dependencies, project hierarchy, and deployment units are.
+分析依赖关系、项目层次结构和部署单元是什么。
 
 \item 
-Decide on a migration strategy and whether a regular project structure or a superbuild is intended.
+决定迁移策略，以及是使用常规项目结构，还是超级构建。
 
 \item 
-Create or migrate the root project and pull in all not-yet-converted projects using ExternalProject, FetchContent, or intermediate find modules if working with binary packages.
+创建或迁移根项目，并使用\texttt{ExternalProject}、\texttt{FetchContent}或中间查找模块(若使用二进制包)拉入所有尚未转换的项目。
 
 \item
-Handle project-wide dependencies using CMake.
+使用CMake处理项目级别的依赖关系。
 
 \item
-Convert the child projects, one by one, into CMake, as described in the last section
-of this chapter. If using intermediate find modules, replace them one by one:
+如本章最后一节所述，将子项目逐个地转换为CMake。若使用中间查找模块，则逐个替换:
 
 \begin{enumerate}[label=\roman*]
 \item
-If desired, at this point, change the dependency handling to a package manager.
+若需要，可以将依赖项处理更改为包管理器。
 
 \item
-Find common options and propagate them toward the root and create presets.
+找到常用选项，并将它们传递至根目录并创建预设。
 \end{enumerate}
 
 \item
-When migrating the children, organize the packaging in CMake if not already done.
+迁移子节点时，若还没有完成，可以在CMake中使用该子节点的已打包文件。
 
 \item
-Clean up, reorganize the files and projects, improve performance, and more.
+清理、重新组织文件和项目、提高性能等。
 \end{enumerate}
 
-Starting the migration by analyzing the existing project hierarchy and dependencies
-will help you to set up a migration plan to communicate with all of the people involved.
-Creating a visualization such as the one from earlier is often a good tool, although, for
-very large projects, this can become quite a challenge in itself. Another important point to
-bear in mind when creating the migration plan is to identify what is commonly deployed
-together and which subproject has which frequency for releases. Projects that are rarely
-changed and released might not be as critical to migrate as those that are frequently
-touched and released. Identifying the deployment units is closely related to how projects
-are packaged. Depending on how this is organized, it might not be possible to migrate the
-packaging to CMake until all the projects have been migrated.
+通过分析现有的项目层次结构和依赖关系来开始迁移，这将帮助您建立一个迁移计划，以便与所有相关人员进行沟通。创建可视化关系图通常是一个很好的方式，尽管对于非常大的项目，这本身就可能成为一个相当大的挑战。创建迁移计划时要牢记的另一个要点是，确定什么是通常部署在一起，以及哪个子项目有哪个发布频率。很少更改和发布的项目对于迁移来说，可能不像那些经常修改和发布的项目那么重要，确定部署单元与如何打包项目密切相关。根据组织方式的不同，在所有项目迁移之前，可能无法将打包迁移到CMake。
 
-So far, we have mostly talked about subprojects, but while analyzing the existing structure,
-it is important to recognize which of the subprojects are actually projects that should be
-buildable as standalone and inside the full project context and which can be handled as
-regular CMake targets that are rarely built outside the project context.
+到目前为止，我们主要讨论了子项目，但在分析现有结构时，重要的是要认识到哪些子项目实际上是可以作为独立的项目，在整个项目上下文中构建的项目；哪些子项目可以作为常规的CMake目标来处理，而很少在项目上下文中构建。
 
-Creating the root CMakeLists.txt file will cover the basic project setup and include
-the necessary modules such as FetchContent, CTest, CPack, and more. While not
-directly in the CMakeLists.txt file, setting up toolchain files, build containers, or
-sysroots for cross-compiling will also be done here. For large projects, often, the root
-CMakeLists.txt file does not contain the targets directly. Rather, it includes them
-either with add\_subdirectory or FetchContent, or in the case of a superbuild,
-with ExternalProject. The root CMakeLists.txt file should have the
-following structure:
+创建CMakeLists.txt主文件将涵盖基本的项目设置，并包括必要的模块，如FetchContent、CTest、CPack等。虽然不是直接在CMakeLists.txt文件中，但也可以在这里设置工具链文件、构建容器或用于交叉编译的sysroot。对于大型项目，主CMakeLists.txt通常不直接包含目标。相反，可将它们包含在\texttt{add\_subdirectory}或FetchContent中，或者\texttt{ExternalProject}的超构建中。主CMakeLists.txt应该有以下的结构:
 
 \begin{enumerate}
 \item 
-The project definition and the minimum required version of CMake.
+项目定义和CMake的最低要求版本。
 
 \item
-Global properties and default variables such as the minimum language standard, the custom build types, and the search and module paths.
+全局属性和默认变量，如最低语言标准、自定义构建类型以及搜索和模块路径。
 
 \item
-Any modules and helper functions that are used project-wide.
+项目范围内使用的模块和辅助函数。
 
 \item
-Project-wide external dependencies that are included via find\_package().
+通过\texttt{find\_package()}包含的项目范围的外部依赖项。
 
 \item
-The build targets and subprojects, possibly added with add\_subdirectory, FetchContent, or in the case of a superbuild, ExternalProject.
+构建目标和子项目，使用\texttt{add\_subdirectory}、\texttt{FetchContent}添加，或者在超构建下使用\texttt{ExternalProject}。
 
 \item
-Tests for the whole project. Typically, each subproject will have its own unit tests, but integration or system tests might be at the top level.
+整个项目的测试，每个子项目都有自己的单元测试，但是集成或系统测试可能位于顶层。
 
 \item
-Packaging instructions for CPack.
+CPack的包装说明。
 \end{enumerate}
 
-Depending on the complexity of the definitions, it might help to put the handling of external dependencies, tests, and packaging into their own subdirectories to keep the CMake file short and concise. The external dependencies that are used project-wide might be large software frameworks, such as Qt or Boost, or small but common utility libraries that are used frequently.
+根据定义的复杂性，将外部依赖项的处理、测试和打包放到自己的子目录中，可能有助于保持CMake文件的简短和简洁。整个项目使用的外部依赖可能是大型软件框架，如Qt或Boost，也可能是小型但经常使用的实用工具库。
 
-For a top-down approach, the subprojects will be imported at the beginning and then migrated one by one. When using a bottom-up strategy, the build targets and subprojects will most likely be empty at the beginning and then become filled as the projects are migrated. When migrating the subprojects, keep your eyes open for common dependencies or build options that can be propagated to the root project or moved to presets.
+对于自顶向下的方法，可以一开始导入子项目，然后逐个迁移。当使用自底向上策略时，构建目标和子项目很可能为空，然后随着项目的迁移而填充。迁移子项目时，要留意可以传递到根项目，或到预设的公共依赖项或构建选项。
 
-Once all of the child projects have been migrated, typically, there are some maintenance tasks still open, such as organizing the packaging and orchestrating and grouping tests together. Also, it is not unusual for there to still be some clutter left in the CMake files after migrating everything, so having an extra round of cleaning up the centralizing functions will make sure that the migrated project is ready to use.
+迁移了所有的子项目，仍然有一些维护任务，例如组织打包、交付和分组测试。此外，在迁移所有内容后，CMake文件中仍然有一些混乱也很正常，因此需要进行额外的一轮清理，确保迁移项目的功能已经处于可用状态。
 
-Often, migrating large projects is a challenge, especially if the build process is complicated and – unfortunately, as is frequently the case – lacks proper documentation. Software is built in many different ways, and the strategy described in this section tries to give a general approach. However, in the end, each migration will be unique in its own way. There are cases where the build system is so complex that the migration strategies described earlier are more of a hindrance than a help; for instance, including non-migrated projects into CMake is so difficult that a step-by-step migration might be more effort than just starting the build from scratch. Let's take a closer look at how the subprojects that use the original build system could be included when starting with a top-down approach.
+通常，迁移大型项目是一项挑战，特别是当构建过程很复杂且(不幸的是，通常情况下)缺乏适当的文档时。软件的构建方式有很多种，本节描述的策略试图给出一种通用的方法。然而，每个迁移都有自己独特的方式。某些情况下，构建系统非常复杂，前面描述的迁移策略非但没有帮助，反而起到了反作用。例如，将未迁移的项目包含到CMake中非常困难，因此逐步迁移可能比从头开始构建更费力。让我们来了解一下，在使用自顶向下的方法开始时，如何包含使用原始构建系统的子项目。
 
-\subsubsubsection{15.4.1\hspace{0.2cm}Integrating legacy projects when migrating top down}
+\subsubsubsection{15.4.1\hspace{0.2cm}自顶向下迁移时集成历史遗留项目}
 
-For the top-down migration strategy, the existing projects are made available to CMake at the beginning. The easiest way is by using ExternalProject, regardless of whether a superbuild is intended or not. The imported targets can either be defined directly or with find modules. For regular projects, this is just an intermediate step to be able to build the full project relatively quickly and hand over control of the configuration and build order to CMake. The resulting CMake code might not look particularly nice, but the first goal is to get the root project building with CMake. However, be sure to clean it up, step by step, when migrating the subprojects. For regular projects that consist of a mono-repo or that pull in dependencies with Git submodules or similar, ExternalProject\_Add might omit downloading by specifying the SOURCE\_DIR property. The resulting CMake code for including the Autotools project might look like this:
+对于自顶向下的迁移策略，现有的项目在一开始就提供给CMake。最简单的方法是使用\texttt{ExternalProject}，不管是否打算进行超级构建。导入的目标可以直接定义，也可以使用find模块定义。对于常规项目，这只是一个中间步骤，以便能够相对快速地构建完整的项目，并将配置和构建顺序的控制权移交给CMake。生成的CMake代码可能不是特别好，但第一个目标是使用CMake构建根项目。在迁移子项目时，一定要一步一步地清理。对于由多个库组成的普通项目，或者通过Git子模块或类似的方式引入依赖项的项目，\texttt{ExternalProject\_Add}会省略下载，而是指定SOURCE\_DIR属性。包含Autotools项目的CMake代码可能如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 include(ExternalProject)
@@ -141,15 +121,15 @@ add_dependencies(SomeTarget SubProjectXZY_ext)
 target_link_libraries(SomeTarget SubProjectXYZ:: SubProjectXYZ)
 \end{lstlisting}
 
-As ExternalProject only makes the content available during build time, this approach only works for sub-projects that are already available in a local folder. Since they include directories of an imported target that have to exist at configuration time when using them in target\_link\_libraries, the exported location should point to the source directory rather than to the installation location of the external project.
+因为\texttt{ExternalProject}只在构建时提供内容，所以这种方法只适用于本地文件夹中可用的子项目。因为包含导入目标的目录，当在\texttt{target\_link\_libraries}中使用时，必须在配置时存在，导出位置应该指向源目录，而不是外部项目的安装位置。
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=These Practices Are for Temporary Workarounds]
-The practices using ExternalProject and FetchContent described here are meant for temporary workarounds to be able to include legacy projects in the CMake build while migrating. These are not good practices to use in a production environment. This pattern allows the use of the original build system and will provide an imported target to link against projects that have already been migrated. Whether the effort of creating such an intermediate project structure is justified by being able to build the full project with CMake early on, this has to be considered for each case separately.
+\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=临时的解决方案]
+这里描述的使用\texttt{ExternalProject}和\texttt{FetchContent}是一种临时解决办法，以便在迁移时能够将遗留项目包含在CMake构建中。这些都不是在生产环境中使用的良好实践。该模式允许使用原始的构建系统，并将提供一个导入的目标来链接已经迁移的项目。无论创建这种中间项目结构的努力，是否通过能够在早期使用CMake构建完整的项目来证明合理，都必须对每种情况单独考虑。
 
-If migrating from Microsoft Visual Studio instead of using ExternalProject, the include\_external\_msproject() function might be used to directly include the project files.
+若从Microsoft Visual Studio迁移而不是使用\texttt{ExternalProject}，可以使用\texttt{include\_external\_msproject()}直接包含项目文件。
 \end{tcolorbox}
 
-With this, you should have all the concepts to migrate to CMake from another build system.
+有了这些，您应该了解了从另一个构建系统迁移到CMake的所有概念。
 
 
 

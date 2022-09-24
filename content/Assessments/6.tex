@@ -2,20 +2,20 @@
 
 \begin{enumerate}
 \item 
-Doxygen is the de facto standard of documentation generation tools for C and C++ projects.
+Doxygen是C和C++项目文档生成工具的实际标准。
 
 \item
-Since CMake already provides a find module for Doxygen, this can be done by using the find\_package(...) CMake command.
+因为CMake已经为Doxygen提供了一个find模块，也可以通过\texttt{find\_package(…)}查找。
 
 \item 
-Yes – Doxygen can draw graphs, given that graphing software such as DOT, Graphviz, and PlantUML are available in the environment. To enable DOT graphing, setting HAVE\_DOT to TRUE is sufficient. For PlantUML, PLANTUML\_JAR\_PATH needs to be set to the path that contains the plantuml.jar file.
+是的-  Doxygen可以绘制图形，如果环境中有诸如DOT、Graphviz和PlantUML等绘图软件可用的话。要启用DOT绘图，将HAVE\_DOT设置为TRUE就足够了。对于PlantUML，PlantUML\_JAR\_PATH需要设置为包含plantuml.jar文件的路径。
 
 \item 
-@startuml and @enduml.
+@startuml和@enduml.
 
 \item 
-PLANTUML\_JAR\_PATH needs to be set to the path that contains the plantuml. jar file.
+PLANTUML\_JAR\_PATH需要设置为包含plantuml.jar文件的路径。
 
 \item 
-With the help of the install(DIRECTORY) command.
+通过\texttt{install(DIRECTORY)}。
 \end{enumerate}

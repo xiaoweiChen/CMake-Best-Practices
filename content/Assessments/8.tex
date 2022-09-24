@@ -2,20 +2,20 @@
 
 \begin{enumerate}
 \item 
-Commands that are added with add\_custom\_command are executed at build time, while commands that are added with execute\_process are executed at configuration time.
+使用add\_custom\_command添加的命令在构建时执行，而使用execute\_process添加的命令在配置时执行。
 
 \item
-One signature is used to create custom build steps, while the other is used to generate files.
+一个签名用于创建自定义构建步骤，而另一个用于生成文件。
 
 \item 
-Only POST\_BUILD is reliably supported across all generators.
+所有生成器只可靠地支持POST\_BUILD。
 
 \item 
-Variables can be defined either as \$\{VAR\} or as @VAR@.
+变量可以定义为\$\{VAR\}或@VAR@。
 
 \item 
-Variable substitution can be controlled by either passing @ONLY, which only replaces variables defined as @VAR@, or by specifying the COPYONLY option, which does not perform any substitution at all.
+变量替换可以通过传递@ONLY来控制，只替换定义为@VAR@的变量，或者通过指定COPYONLY选项来控制，不执行任何替换。
 
 \item 
-With cmake -E, common tasks can be executed directly. With cmake -P, .cmake files can be executed as scripts.
+使用cmake -E，可以直接执行常见任务。使用cmake -P，将.cmake文件作为脚本执行。
 \end{enumerate}

@@ -1,35 +1,35 @@
-We define small projects as any project that contains only a few targets and which are usually all deployed together. Small projects are self-contained inside a single repository, and usually, you can get a relatively quick overview of them. These might be projects that build a single library or an executable with a few external dependencies. In these cases, migrating to CMake is often relatively trivial. For small projects, in the first iteration, putting everything inside a single file will probably be the easiest way to go for a relatively quick and early result. Rearranging the files and splitting up the CMakeLists.txt file into multiple parts to be used with add\_subdirectory() is much easier if the project has already been built correctly.
+我们将小项目定义为仅包含少数目标且通常一起部署的项目。小型项目在单个存储库中是自包含的，可以相对快速地了解它们，这些项目可能是构建单个库或带有一些外部依赖的可执行文件的项目。这时，迁移到CMake相对简单。对于小型项目，在第一次迭代中，将所有内容放在一个文件中，可能是获得相对快速和早期结果的最简单方法。若项目已经正确构建，那么重新排列文件，并将CMakeLists.txt拆分为多个部分，以便使用\texttt{add\_subdirectory()}会容易得多。
 
-A general approach for migrating to CMake could be the following:
+迁移到CMake的一般方法如下:
 
 \begin{enumerate}
 \item 
-Create an empty CMakeLists.txt file inside the root of the projects.
+在项目的根目录中创建一个空的CMakeLists.txt文件。
 
 \item 
-Identify the targets and associated files in the project, and create the appropriate targets inside the CMakeLists.txt file.
+识别项目中的目标和相关文件，并在CMakeLists.txt文件中创建适当的目标。
 
 \item 
-Find all of the external dependencies and include paths, and add them to the CMake targets where necessary.
+找到所有外部依赖项并包含路径，并在必要时将它们添加到CMake目标中。
 
 \item 
-Identify the necessary compiler features, flags, and compiler definitions if any, and make them available to CMake.
+确定必要的编译器特性、标志和编译器定义(若有的话)，并使它们对CMake可用。
 
 \item 
-Migrate any tests to CTest by creating the necessary targets and calling add\_test().
+通过创建必要的目标并使用\texttt{add\_test()}，将测试迁移到CTest。
 
 \item 
-Identify any installation or packaging instructions to CMake, including the need to install any resource files and more.
+确定CMake的安装或打包说明，包括需要安装的资源文件等。
 
 \item 
-Clean up and make the project nice. Create presets, rearrange files and folders if necessary, and split up the CMakeLists.txt file if needed.
+清理并把项目做好。创建预设，若需要的话重新排列文件和文件夹，需要的话对CMakeLists.txt文件进行拆分。
 \end{enumerate}
 
-Naturally, what exactly has to be done for each step depends very much on how the original project is organized and which technology is being used. Often, a migration will require several iterations of the CMakeLists.txt file until everything works, and if the first implementation of a CMake project does not yet look particularly nice, that is often quite normal.
+当然，每个步骤具体要做什么，很大程度上取决于原始项目是如何组织的，以及使用了哪种技术。通常，迁移需要多次迭代CMakeLists.txt文件，直到一切正常工作，若CMake项目的第一个实现看起来还不是特别好，这很正常。
 
-For small projects, handling dependencies is one of the more difficult tasks to do, as there are some implicit assumptions about where to find the dependencies and how they are internally structured or hidden inside the project. Using a package manager, as described in Chapter 5, Integrating Third-Party Libraries and Dependency Management, might reduce the complexity of handling dependencies significantly.
+对于小型项目来说，处理依赖关系是比较困难的任务之一，因为有一些关于在哪里找到依赖关系，以及它们内部结构如何或隐藏在项目内部的隐含假设。第5章介绍过，使用包管理器可以大大降低处理依赖的复杂度。
 
-Usually, the process of migrating small, mostly self-contained projects is relatively straightforward, although depending on how messy the original setup was, it might be quite a bit of work to get everything organized and working again. In larger organizations, several such smaller projects might be used together in a software portfolio, which, again, might be described as a project. Their migration needs a bit more planning to go forward.
+迁移小型的、基本独立的项目的过程是相对简单的，不过根据最初设置的混乱程度，可能需要相当多的工作才能将一切组织起来并重新运行。在更大的组织中，几个这样的小项目可能在一个软件组合中一起使用，这个组合也可以描述为一个项目。它们的迁移需要更多的计划才能继续。
 
 
 

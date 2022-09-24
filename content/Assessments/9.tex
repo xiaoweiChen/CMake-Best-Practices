@@ -2,23 +2,23 @@
 
 \begin{enumerate}
 \item 
-CMakePresets.json is usually maintained and delivered together with the project, while CMakeUserPresets.json is maintained by the user. Regarding the syntax and the contents, there is no difference.
+CMakePresets.json通常与项目一起维护和交付，而CMakeUserPresets.json通常与项目一起维护和交付由用户维护。关于语法和内容，没有区别。
 
 \item
-By calling cmake -{}-preset=presetName, cmake -{}-build -{}-preset=presetName, or ctest -{}-preset=presetName.
+通过调用cmake -{}-preset=presetName, cmake -{}-build -{}-preset=presetName，或ctest -{}-preset=presetName。
 
 \item 
-There are configure, build, and test presets. Build and test presets depend on a configure preset to determine the build directory.
+有配置、构建和测试预置，构建和测试预设值依赖于配置预设值来确定构建目录。
 
 \item 
-A configure preset should define a name, the generator, and the build directory to be used.
+预设配置应该定义名称、生成器和要使用的构建目录。
 
 \item 
-The first preset to set a value takes precedence.
+设置值的第一个预设值优先。
 
 \item 
-Either using the native support of an editor for build containers, running the editor from within the container, or starting the container each time for invoking single commands inside.
+使用编辑器对构建容器的本机支持，从容器内运行编辑器，或者每次启动容器以调用容器内的单个命令。
 
 \item 
-The system name, the location of sysroot, the compilers to use, and how the find\_ commands behave.
+系统名称、sysroot的位置、要使用的编译器以及\texttt{find\_}指令的行为。
 \end{enumerate}

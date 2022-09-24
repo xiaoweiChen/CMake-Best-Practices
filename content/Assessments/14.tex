@@ -2,17 +2,17 @@
 
 \begin{enumerate}
 \item 
-The -{}-profiling-output <filename> -{}-profilingformat=google-trace flags are used.
+使用-{}-profilingformat <filename> -{}-profilingformat=google-trace。
 
 \item
-By grouping together various compilation units into a single one, the need for relinking happens less often.
+通过将各种编译单元组合成一个编译单元，重新链接的需求就会减少。
 
 \item 
-In BATCH mode, CMake automatically groups the sources together; in GROUP mode, the grouping has to be specified by the user. By default, BATCH mode groups all sources for a unity build, while GROUP only adds the explicitly marked files to the unity build.
+在批处理模式下，CMake自动将源分组在一起;在GROUP模式下，分组必须由用户指定。默认情况下，批处理模式对统一构建的所有源进行分组，而组只将明确标记的文件添加到统一构建中。
 
 \item 
-By using the target\_precompile\_headers function. Precompiled headers are automatically included, without the need for a \#include directive in the files.
+通过使用target\_precompile\_headers函数。预编译的头文件会自动包含，而不需要在文件中使用\#include。
 
 \item 
-By prefixing the compiler command with the command specified in CMAKE\_<LANG>\_COMPILER\_LAUNCHER.
+在编译器命令前加上CMAKE\_<LANG>\_COMPILER\_LAUNCHER指定的命令。
 \end{enumerate}

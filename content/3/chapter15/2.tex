@@ -1,35 +1,35 @@
-Before migrating a software project to CMake, first, it pays to answer a few questions about the existing project and define what the endpoint should look like. At a very high level of abstraction, usually, software projects define how the following things are handled:
+将软件项目迁移到CMake前，首先要回答一些关于现有项目的问题，并定义目标应该是什么样子。通常，在非常高的抽象级别上，软件项目定义了如何处理以下事情:
 
 \begin{itemize}
 \item 
-How the individual parts of the software, that is, the libraries and executables, are compiled and how they are linked together
+软件的各个部分(即库和可执行程序)是如何编译的，如何链接在一起的
 
 \item 
-Which external dependencies are used, how they are found, and how they are used in the project
+使用哪些外部依赖项，如何找到它们，以及如何在项目中使用它们
 
 \item 
-Which tests to build and how to run them
+要构建哪些测试，以及如何运行
 
 \item 
-How the software is to be installed or packaged
+如何安装或打包软件
 
 \item 
-Providing additional information such as license information, documentation, changelogs, and more
+提供额外的信息，如许可证信息、文档、变更日志等
 \end{itemize}
 
-Some projects might only define a subset of the preceding points. But typically, these are the tasks that we, as developers, want to be handled in a project setup. Often, these tasks are defined in a structured way such as with Makefiles or IDE-specific project definitions. There are countless ways regarding how projects are organized and structured, and what works for one setting might not work for another. So, in any case, an individual assessment of the situation is necessary.
+有些项目可能只定义上述要点的一部分。但这些是我们作为开发人员，希望在项目设置中处理的任务。通常，这些任务以结构化的方式定义，例如使用makefile或特定于IDE的项目定义。关于项目如何组织和结构化有无数种方法，适用于一种环境的方法可能不适用于另一种环境。因此，需要对情况进行评估。
 
-A few tools exist that can automatically convert some build systems, such as qmake, Autotools, or Visual Studio, into CMake, but the quality of the resulting CMake files is doubtful at best, and they tend to assume certain conventions. Because of this, using them is not recommended.
+有一些工具可以自动将某些构建系统转换为CMake，例如qmake、Autotools或Visual Studio，但是生成的CMake文件的质量不保证，并且它们倾向于假设某些约定。因此，不建议使用。
 
-Additionally, a project might define how it is built, tested, and deployed in a CI/CD pipeline, and while this is closely related, the definition of the CI/CD pipeline is not often seen as part of the project description, but rather as something that uses the project definition. Changing from one build system to another will invariably affect the CI/CD pipeline, and often, the desire to modernize or change the CI/CD infrastructure might be the trigger to change the build system.
+此外，项目可能会定义如何在CI/CD流水中构建、测试和部署，虽然这是密切相关的，但CI/CD流水的定义通常不视为项目描述的一部分，而是定义为使用项目的使用者。从一个构建系统变更到另一个构建系统将不可避免地影响CI/CD流水，而且对CI/CD基础设施进行现代化或更改的愿望通常是更改构建系统的导火索。
 
-It is important to realize that migrating is only complete when the old way of building is no longer used. So, we recommend removing any old build instructions once the projects are migrated to CMake, to eliminate the need to maintain backward compatibility with the old way of building.
+是要意识到，只有当旧的构建方式不再使用时，迁移才算完成。因此，建议当项目迁移到CMake，就删除任何旧的构建指令，以消除与旧构建方式保持向后兼容性的需要。
 
-In an ideal world, all parts of the project will be migrated to CMake. However, there are situations where this is not possible, or it is economically questionable if a part of a project actually should be migrated. For instance, a project could rely on a library that is no longer actively maintained and is destined to be phased out soon. The best case is that the migration effort can be used as a trigger to actually remove the dependency; however, more often than not, this is not feasible. In the cases where the legacy dependency cannot be completely removed, it might be a good idea to remove it from the project. This is so that it is no longer considered an internal dependency but an external dependency with its own release cycle. Also, if this is not possible or the effort is too big, making an exception for this particular library and using the legacy build system with ExternalProject might be the solution for a limited time. For the migration strategies discussed in this chapter, we differentiate between internal and external dependencies. Internal dependencies are those that are actively developed by the same organization or person of the project that is to be migrated, so the developers can potentially change the build process. External dependencies are those where developers have limited or no control over the build process or the code.
+理想情况下，项目的所有部分都将迁移到CMake。某些情况下，这是不可能的，或者是否应该迁移项目的一部分，在经济上可能都是有问题的。例如，一个项目可能依赖于一个不再积极维护的库，并且注定很快就会淘汰。最好的情况是，迁移工作可以作为一个触发器来实际移除依赖;然而，这通常不可行。在遗留依赖项无法完全删除的情况下，从项目中删除它可能是一个好主意。这样，就不再将其认为是内部依赖项，而是具有自己的发布周期的外部依赖。此外，若这也不可能完成或工作量太大，为这个特定的库做一个例外，并在有限的时间内使用遗留的构建系统与\texttt{ExternalProject}共存，可能是一种解决方案。对于本章讨论的迁移策略，我们要区分内部依赖和外部依赖。内部依赖项是指那些由要迁移的项目的同一组织或人员积极开发的依赖项，因此开发人员可以更改构建过程。外部依赖是指开发人员对构建过程或代码的控制有限或无法控制的依赖。
 
-One thing to consider when migrating projects is how many people will be blocked from working on the project during its migration and how long the old way of building software and CMake have to be maintained side by side. Changing the build system is very intrusive for the developer's workflow. There will likely be times when some part of a project cannot be worked on until it has been fully migrated. The easiest way to work around this is to stop feature development for the moment and get everybody to help with the migration. However, if this is not possible, good communication and good partitioning of the work are often what is needed. Having said that, avoid the trap of stopping the migration halfway through: having some parts of a large project migrated while some are still using the old way to build is very likely to bring in the disadvantages of both ways to build the software while bringing the benefit of neither.
+迁移项目时要考虑的一件事是，在迁移期间有多少人将无法从事项目工作，以及旧的构建软件的方式和CMake必须同时维护多长时间，改变构建系统会对开发人员的工作流程造成很大干扰。有时候，项目的某些部分在完全迁移之前无法继续工作。解决这个问题的最简单方法是暂时停止功能开发，让所有人都来帮助迁移。若这是不可能的，那么良好的沟通和工作划分则是必须的。话虽如此，还是要避免中途停止迁移的情况:迁移大型项目的某些部分时，有些部分仍在使用旧的方式构建软件，这很可能会给两种构建带来更麻烦的问题，从而使得两种方法无法很好的工作。
 
-So, how do you go forward when migrating a project from one build system to another? For small projects that mainly have external dependencies, this might be quite straightforward.
+那么，在将项目从一个构建系统迁移到另一个构建系统时，该如何进行下一步呢?对于主要具有外部依赖关系的小型项目，这可能非常简单。
 
 
 

@@ -2,23 +2,23 @@
 
 \begin{enumerate}
 \item 
-Tests are defined by using the add\_test function.
+通过使用add\_test函数定义测试。
 
 \item
-Either by using a regular expression on the test's name with ctest -R or by using the test number using ctest -I.
+可以在测试名称上使用正则表达式(ctest -R)，也可以使用测试编号(ctest -I)。
 
 \item 
-Yes – Doxygen can draw graphs, given that graphing software such as DOT, Graphviz, and By calling ctest -{}-repeat:until-pass:n or ctest -{}-repeat:untilfail:n.
+是的 - Doxygen可以绘制图形，给定绘图软件如DOT, Graphviz和通过调用ctest -{}-repeat:until-pass:n或ctest -{}-repeat:untilfail:n。
 
 \item 
-By running ctest -j <num\_of\_jobs> -{}-schedule-random.
+ctest -j <num\_of\_jobs> -{}-schedule-random。
 
 \item 
-By setting the RESOURCE\_LOCK or RESOURCE\_GROUP property for the respective tests.
+通过为各自的测试设置RESOURCE\_LOCK或RESOURCE\_GROUP属性。
 
 \item 
-Static code analyzers are enabled by passing the command line including any arguments to the respective target properties.
+静态代码分析器是通过，将包含参数的命令行传递给各自的目标属性来启用的。
 
 \item 
-By either adding them to the CMAKE\_CONFIGURATION\_TYPES property for multi-configuration type generators or by adding them to the CMAKE\_BUILD\_TYPE property.
+通过将它们添加到多配置类型生成器的CMAKE\_CONFIGURATION\_TYPES属性中，或者将它们添加到CMAKE\_BUILD\_TYPE属性中。
 \end{enumerate}

@@ -2,44 +2,43 @@
 
 \begin{enumerate}
 \item 
-Toolchain files are passed either by the --toolchain command-line flag, the CMAKE\_TOOLCHAIN\_FILE variable, or with the toolchainFile option in a CMake preset.
+工具链文件可以通过--toolchain命令行标志、CMAKE\_TOOLCHAIN\_FILE变量传递，也可以通过CMAKE预置中的toolchainFile选项传递。
 
 \item
-Usually, the following things are done in a toolchain file for cross-compiling:
+通常，交叉编译需要在工具链文件中执行以下操作:
 
 \begin{enumerate}[label=\Alph*]
 \item
-Defining the target system and architecture
+定义目标系统和架构
  
 \item 
-Providing paths to any tools needed to build the software
+提供构建软件所需的任何工具的路径
 
 \item 
-Setting default flags for the compiler and linkers
+设置编译器和链接器的默认标志
 
 \item 
-Pointing to the sysroot and possibly any staging directory if cross-compiling
+指向sysroot，若使用交叉编译，可以指向暂存目录
 
 \item 
-Setting hints for the search order for any find\_ commands of CMake
+设置CMake的\texttt{find\_}指令的搜索顺序
 \end{enumerate}
 
 \item 
-The staging directory is set with the CMAKE\_STAGING\_PREFIX variable and is used as a place to install any built artifacts if the sysroot should not be modified.
+暂存目录用CMAKE\_STAGING\_PREFIX变量设置，若sysroot不需要修改，就把构建的工件放在这里。
 
 \item 
-The emulator command is passed as a semicolon-separated list in the CMAKE\_CROSSCOMPILING\_EMULATOR variable.
+模拟器命令以分号分隔的列表形式在CMAKE\_CROSSCOMPILING\_EMULATOR变量中传递。
 
 \item 
-Any call to project() or enable\_language() in a project will trigger
-detection of the features.
+项目中调用\texttt{project()}或\texttt{enable\_language()}都会触发对特性的检测。
 
 \item 
-The configuration context for compiler checks can be stored with cmake\_push\_check\_state() and restored to a previous state with cmake\_pop\_check\_state().
+编译器检查的配置上下文可以用\texttt{cmake\_push\_check\_state()}保存，也可以用\texttt{cmake\_pop\_check\_state()}恢复到之前的状态。
 
 \item 
-If CMAKE\_CROSSCOMPILING is set, any call to try\_run() will only compile the test but not run it unless an emulator command is set.
+若设置了CMAKE\_CROSSCOMPILING，try\_run()调用将只编译测试，而不会运行它，除非设置了模拟器命令。
 
 \item 
-Build directories should be fully cleared because the temporary artifacts for compiler checks might not be rebuilt properly when just deleting the cache.
+构建目录应该完全清除，因为在删除缓存时，编译器检查的临时构件可能无法正确地重新构建。
 \end{enumerate}
