@@ -1,17 +1,17 @@
 
-Apart from raw compilation time, the main driver for long build times in C++ projects is often unnecessary dependencies between the targets or files. If targets have unnecessary linking requirements between each other, the build system will be limited in executing build tasks in parallel and some of the targets will be frequently relinked. Creating a dependency graph of the targets, as described in Chapter 6, Automatically Generating Documentation, will help identify the dependencies. If the resulting graph looks more like a snarl of rope than a tree, optimizing and refactoring the project structure might bring a lot of performance gains. Tools such as include what you use and link what you use, as described in Chapter 7, Seamlessly Integrating Code Quality Tools with CMake, may further help identify unnecessary dependencies. Another common theme is C or C++ projects that expose too much private information in public headers, often causing frequent rebuilds and reducing the effectiveness of incremental builds.
+除了编译时间，C++项目中导致长构建时间的主要原因通常是目标或文件之间不必要的依赖关系。若目标之间有不必要的链接要求，则构建系统将限制并行执行构建任务，并且一些目标将频繁地重新链接。如第6章所述，创建目标的依赖关系图有助于识别依赖关系。若生成的图看起来更像一条绳子而不是一棵树，那么优化和重构项目结构可能会带来很多性能提升。第7章将代码质量工具与CMake无缝集成，介绍了包含所使用的工具并链接所使用的工具，这类工具可以进一步帮助识别不必要的依赖。另一个常见的问题是C或C++项目在公共头文件中暴露了太多的私有信息，经常导致频繁的重构并降低增量构建的有效性。
 
-A relatively safe option to bring performance improvements is to set the CMAKE\_OPTIMIZE\_DEPENDENCIES cache variable to true. This will cause CMake to remove some dependencies for static or object libraries at generation time if they are not needed. If working with a lot of static or object libraries and a deep dependency graph, this might already produce some gains regarding compile time.
+一个相对安全的提高性能的选项是将CMAKE\_OPTIMIZE\_DEPENDENCIES缓存变量设置为true，这将使CMake在生成时删除一些不需要的静态或对象库的依赖项。若使用大量静态或对象库以及深度依赖图，这可能已经在编译时间方面产生了一些收益。
 
-Generally speaking, optimizing the project structure and modularizing the code will often have a greater effect on build performance than optimization of the code. On average, compiling and linking a project that consists of many small files takes longer than projects consisting of a few large files. CMake can help improve build performance with so-called unity builds, which merge several files into a larger file.
+一般来说，优化项目结构和代码模块化通常比优化代码对构建性能的影响更大。一般来说，编译和链接一个由许多小文件组成的项目，要比由几个大文件组成的项目花费更多的时间。CMake可以通过所谓的统一构建帮助提高构建性能，将几个文件合并为一个更大的文件。
 
-\subsubsubsection{14.4.1\hspace{0.2cm}Using unity builds}
+\subsubsubsection{14.4.1\hspace{0.2cm}统一构建}
 
-The unity builds that CMake can support may help with build performance by concatenating multiple files into larger files, thus reducing the number of files to be compiled. This might bring a decrease in build time because include files are processed only once instead of for every smaller file. So, this will have the biggest effect if many of the files include the same header files and if the header files are heavy to digest by the compiler. Generally speaking, these are headers containing lots of macros or template metaprogramming. Creating a unity build may improve build time significantly, especially when using large header-only libraries, such as the Eigen math library. On the other hand, unity builds have the downside that incremental builds might take longer as, usually, larger chunks of the project have to be recompiled and linked when only a single file changes.
+CMake的统一构建，可以通过将多个文件连接成更大的文件来提高构建性能，从而减少需要编译的文件数量。因为包含文件只处理一次，而不是对每个小文件都进行处理，所以这可能会减少构建时间。因此，若许多文件包含相同的头文件，并且编译器难以消化头文件，这将产生很大的效果。通常，这些头文件包含大量宏或模板元编程。创建统一构建可以显著提高构建时间，特别是当使用大型头文件库时，如数学特征库。另一方面，统一构建也有缺点，即增量构建可能需要更长的时间。通常情况下，当只有单个文件发生更改时，项目的较大块必须重新编译和链接。
 
-By setting the CMAKE\_UNITY\_BUILD cache variable to true, CMake will concatenate the sources into one or more unity sources and build them instead of the original files. The generated files use the unity\_<lang>\_<Nr>.<lang> pattern and are located in a folder called Unity in the build directory for the project. Unity files for C++ would be named unity\_0\_cxx.cxx, unity\_1\_cxx.cxx, and so on, while C files are named unity\_0\_c.c and so on. This variable is not intended to be set in CMakeLists.txt but rather to be passed over the command line or a preset, as it might depend on the context of whether a unity build is needed or not. CMake will decide on the language of the project if merging the files is needed and possible. For instance, as header files are not compiled, they will not be added to the unity sources. For C and C++, this works quite well; for other languages, this might not work.
+通过将CMAKE\_UNITY\_BUILD缓存变量设置为true, CMake将把源合并为一个或多个统一源并构建它们。生成的文件使用unity\_<lang>\_<Nr>.<lang>模式和位于项目构建目录下名为Unity的文件夹中。C++的Unity文件将命名为unity\_0\_cxx.cxx、unity\_1\_cxx.cxx等，C文件命名为unity\_0\_c.c等。这个变量不需要在CMakeLists.txt中设置，而是通过命令行或预设传递，因为它可能取决于是否需要统一构建。若需要并且可能合并文件，CMake将决定项目的语言。例如，由于头文件没有编译，其不会添加到统一源中。对于C和C++，这没问题;对于其他语言，这可能没什么作用。
 
-Unity builds work best for projects that consist of many small files. If the source files are already large on their own, unity builds might run the risk of running out of memory when compiling. If only a few files are problematic in this regard, they can be excluded from the unity build by setting the SKIP\_UNITY\_BUILD\_INCLUSION property on the source files, like this:
+统一构建最适合由许多小文件组成的项目，若源文件本身已经很大，那么在编译时统一构建可能会出现内存耗尽的风险。若只有少数文件在这方面有问题，可以通过设置SKIP\_UNITY\_BUILD\_INCLUSION属性的源文件从统一构建中排除，像这样:
 
 \begin{lstlisting}[style=styleCMake]
 target_sources(ch14_unity_build PRIVATE
@@ -24,7 +24,7 @@ set_source_files_properties(src/eratosthenes.cpp PROPERTIES
 SKIP_UNITY_BUILD_INCLUSION YES)
 \end{lstlisting}
 
-In the example, the eratosthenes.cpp file would be excluded from the unity build, while main.cpp and fibonacci.cpp would be included in a single compilation unit. If the preceding project is configured, the unit\_0\_cxx.cxx file would contain something like this:
+这个例子中，eratosthenes.cpp文件将从统一构建中排除，而main.cpp和fibonacci.cpp将包含在单个编译单元中。如果前面的项目已经配置，unit\_0\_cxx.cxx文件将包含如下内容:
 
 \begin{lstlisting}[style=styleCXX]
 /* generated by CMake */
@@ -33,13 +33,13 @@ In the example, the eratosthenes.cpp file would be excluded from the unity build
 #include "/chapter_14/unity_build/src/fibonacci.cpp"
 \end{lstlisting}
 
-Note that the original source files are only included in the unity file, not copied into the file.
+注意，原始源文件只包含在统一文件中，而不是复制到文件中。
 
-Since CMake 3.18, unity builds support two modes that are controlled with the CMAKE\_UNITY\_BUILD\_MODE variable or the UNITY\_BUILD\_MODE target property. The mode can either be BATCH or GROUP, with BATCH being the default if not specified. In the BATCH mode, CMake determines which files are grouped together by default, in the order in which they were added to the target. All files of a target will be assigned to batches unless they are explicitly excluded. In the GROUP mode, each target has to specify explicitly how the files are grouped together. Files not assigned to a group will be compiled individually. While group mode offers more precise control, using batch mode is often the preferred one, as it has significantly lower maintenance overhead.
+自CMake 3.18起，统一构建支持两种模式，它们由CMAKE\_UNITY\_BUILD\_MODE或UNITY\_BUILD\_MODE目标属性控制。该模式可以是BATCH或GROUP，拖没有指定，默认为BATCH。BATCH模式中，CMake根据添加到目标中的顺序，确定默认情况下将哪些文件分组在一起。目标中的所有文件都将分配到统一批文件中，除非明确地进行排除。GROUP模式中，每个目标必须显式指定如何将文件分组在一起，未分配给组的文件将单独编译。虽然组模式提供了更精确的控制，但使用BATCH模式通常是首选的模式，因为它降低了维护成本。
 
-By default, CMake will collect the files in batches of eight files when the UNITY\_BUILD\_MODE property is set to BATCH. By setting the UNITY\_BUILD\_BATCH\_SIZE property of a target, this can be changed. To set the batch size globally, the CMAKE\_UNITY\_BUILD\_BATCH\_SIZE cache variable is used. The batch size should be selected carefully, as setting it too low will bring little gain in performance, while setting it too high might cause the compiler to use too much memory or the compilation unit to hit other size constraints. If the batch size is set to 0, then all files of a target will be combined in a single batch, but this is discouraged because of the reasons mentioned earlier.
+默认情况下，当UNITY\_BUILD\_MODE属性设置为BATCH时，CMake将批量收集8个文件。通过设置目标的UNITY\_BUILD\_BATCH\_SIZE属性，可以修改。要进行全局的批处理大小设置，可以使用CMAKE\_UNITY\_BUILD\_BATCH\_SIZE缓存变量。批处理大小应该谨慎选择，若设置得过低不会带来什么性能提升，而设置得太高可能会导致编译器使用过多内存或编译单元达到其他大小限制。若批处理大小设置为0，那么目标的所有文件将合并到一个批处理中，但是由于前面提到的原因，不建议这样做。
 
-In group mode, no batch size is applied, but the files have to be assigned to groups by setting the UNITY\_GROUP property of the source file, as illustrated in the following example:
+GROUP模式下，不应用批处理大小，但文件必须通过设置源文件的UNITY\_GROUP属性分配给组，如下例所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch14_unity_build_group)
@@ -58,15 +58,15 @@ set_source_files_properties(src/erathostenes.cpp
 	src/pythagoras.cpp PROPERTIES UNITY_GROUP group2)
 \end{lstlisting}
 
-In the example, the main.cpp and fibonacci.cpp files would be grouped together, and erathostenes.cpp and pythagoras.cpp would be compiled in a different group. In group mode, the generated files are named unity\_<groupName>\_<lang>.<lang>. So, in this example, the files would be named unity\_group1\_cxx.cxx and unity\_group2\_cxx.cxx.
+本例中，main.cpp和fibonacci.cpp文件将分在一起，erathostenes.cpp和pythagoras.cpp将在不同的组中进行编译。GROUP模式下，生成的文件命名为unity\_<groupName>\_<lang>.<lang>。本例中，文件将命名为unity\_group1\_cxx.cxx和unity\_group2\_cxx.cxx。
 
-Depending on the anatomy of a project, using unity builds can have a significant effect on build performance. Another technique often used to improve build times is using precompiled headers.
+根据项目的结构，使用统一构建可以对构建性能产生显著影响。另一种经常用于提高构建时间的技术是使用预编译头文件。
 
-\subsubsubsection{14.4.2\hspace{0.2cm}Precompiled headers}
+\subsubsubsection{14.4.2\hspace{0.2cm}预编译头文件}
 
-Precompiled headers are often a significant boost for the compile time, especially in cases where processing the headers is a significant part of the compile time or when header files are included in many different compilation units. In a nutshell, precompiled headers work by compiling some headers into a binary format that is easier to process for the compilers. Since CMake 3.16, direct support precompiled headers and most of the major compilers support some form of precompiled headers.
+预编译头文件通常可以显著提高编译时间，特别是在处理头文件是编译时间的重要组成部分，或头文件包含在许多不同编译单元中的情况下。简言之，预编译头文件是通过将一些头文件编译成二进制格式来工作的，这种二进制格式对编译器来说更容易处理。从CMake 3.16开始，直接支持预编译头文件，并且大多数主要编译器都支持某种形式的预编译头文件。
 
-Precompiled headers are added to a target with the target\_precompile\_headers command, which has the following signature:
+可以使用\texttt{target\_precompile\_headers}指令将预编译的头文件添加到目标文件中:
 
 \begin{lstlisting}[style=styleCMake]
 target_precompile_headers(<target>
@@ -74,9 +74,9 @@ target_precompile_headers(<target>
 	[<INTERFACE|PUBLIC|PRIVATE> [header2...] ...])
 \end{lstlisting}
 
-The PRIVATE, PUBLIC, and INTERFACE keywords have the usual meaning. In the majority of the cases, PRIVATE should be used. The headers specified in the command will be collected in a cmake\_pch.h or cmake\_pch.hxx file in the build folder, which will be force-included in all source files by the respective compiler flag, so there is no need for the source files to have a \#include "cmake\_pch.h" directive.
+PRIVATE、PUBLIC和INTERFACE关键字具有通常的含义。大多数情况下，应该使用PRIVATE。指令中指定的头文件将收集在编译文件夹中cmake\_pch.h或cmake\_pch.hxx文件中，通过相应的编译器标志强制包含在所有源文件中，因此源文件不需要\#include "cmake\_pch.h"。
 
-The headers may be specified either as plain filenames, with angle brackets, or with double quotes, in which case they have to be escaped with double square brackets:
+头文件可以指定为普通文件名，用尖括号，或者用双引号，这里必须用双方括号进行转义:
 
 \begin{lstlisting}[style=styleCMake]
 target_precompile_headers(SomeTarget PRIVATE myHeader.h
@@ -85,28 +85,28 @@ target_precompile_headers(SomeTarget PRIVATE myHeader.h
 )
 \end{lstlisting}
 
-In this example, myHeader.h would be searched from the current source directory, while external\_header.h and unordered\_map are searched for in the include directories.
+本例中，将从当前源目录中搜索myHeader.h，而在include目录中搜索external\_header.h和unordered\_map头文件。
 
-In large projects, precompiled headers that are used in multiple targets are relatively common. Instead of redefining them every time, the REUSE\_FROM option of target\_precompile\_headers can be used:
+大型项目中，多个目标中使用的预编译头文件很常见。可以使用\texttt{target\_precompile\_headers}的REUSE\_FROM选项，而不是每次都重新定义:
 
 \begin{lstlisting}[style=styleCMake]
 target_precompile_headers(<target> REUSE_FROM
 	<other_target>)
 \end{lstlisting}
 
-Reusing precompiled headers will introduce an automatic dependency from target to other\_target. Both targets will have the same compiler options, flags, and definitions enabled. Some compilers will warn if this is not the case, but some might not.
+重用预编译的头文件会自动从target引入对other\_target的依赖。两个目标都将启用相同的编译器选项、标志和定义。若不是这样，有些编译器会发出警告。
 
-Precompiled headers from another target may only be used if the current target does not define its own set of precompiled headers. If the target already has precompiled headers defined, CMake will halt with an error.
+只有在当前目标没有定义自己的预编译头文件集时，才能使用来自另一个目标的预编译头文件。若目标已经定义了预编译的头文件，CMake将停止并报错。
 
-Precompiled headers are most effective in improving build times when the headers included rarely change. Any headers provided by the compiler, system, or external dependencies are generally good candidates to include in precompiled headers. Which headers exactly bring the most benefit is something that needs to be tried out and measured.
+预编译头文件在包含的头文件很少更改时，对缩短构建时间非常有效。编译器、系统或外部依赖项提供的头文件通常都可以包含在预编译头文件中。哪些头文件带来的好处最大，这需要尝试和衡量。
 
-Together with unity builds, precompiled headers can improve compile time significantly, especially for projects with frequent header reuse. A third way to optimize build time for incremental builds is the use of compiler caches, namely ccache.
+与统一构建一起，预编译头文件可以显著提高编译时间，特别是对于头文件频繁重用的项目。优化增量构建时间的第三种方法是使用编译器缓存，即ccache。
 
-\subsubsubsection{14.4.3\hspace{0.2cm}Using a compiler cache (ccache) to speed up rebuilds}
+\subsubsubsection{14.4.3\hspace{0.2cm}编译器缓存(ccache)加速重建}
 
-Ccaches work by caching compilations and detecting when the same compilation is done again. At the time of writing this book, the most popular program for caching compile results is the ccache, which is open source and distributed under the LGPL 3. Ccache not only affects incremental builds but also fresh builds, as long as the cache is not deleted between the two runs. The cache created is portable between systems running the same compilers and can be stored in remote databases, so multiple developers may access the same cache. Officially, ccache supports GCC, Clang, and NVCC but people claim to have run it for MSVC and Intel compilers. When using ccache with CMake, it works best with Makefile and Ninja generators. At the time of writing this book, Visual Studio was not supported.
+ccache的工作原理是缓存编译，并检测何时再次完成相同的编译。撰写本书时，缓存编译结果的最流行的程序是ccache，它是在LGPL 3下发布的开源程序，还不支持Visual Studio。只要在两次运行之间不删除缓存，ccache不仅会进行增量构建，还会影响新的构建。创建的缓存在相同编译器系统间可移植，并且可以存储在远程数据库中，这样多个开发人员可以访问相同的缓存。ccache官方支持GCC、Clang和NVCC，但也有人声称已经在MSVC和Intel编译器上运行过。将ccache与CMake一起使用时，它与Makefile和Ninja生成器一起使用的效果最好。
 
-To use ccache with CMake, the CMAKE\_<LANG>\_COMPILER\_LAUNCHER cache variable is used, where <LANG> is replaced with the respective programming language. The recommended way is to pass this in using a preset, but to enable ccache for C and C++ inside CMakeLists.txt, the following code can be used:
+要在CMake中使用ccache，需要使用CMAKE\_<LANG>\_COMPILER\_LAUNCHER缓存变量，其中<LANG>可替换为相应的编程语言。推荐的方法是使用预设值，但是要在CMakeLists.txt中为C和C++启用ccache，可以使用以下代码:
 
 \begin{lstlisting}[style=styleCMake]
 find_program(CCACHE_PROGRAM ccache)
@@ -116,22 +116,22 @@ if(CCACHE_PROGRAM)
 endif()
 \end{lstlisting}
 
-Passing the variable from a preset or from the command line is also a good alternative, especially because the configuration of ccache is done easiest by using environment variables.
+从预设值或命令行传递变量也是很好的替代方法，使用环境变量最容易完成ccache的配置。
 
-Using ccache with the default configuration might already bring a considerable improvement regarding build times, but if the build is a bit more complex, further configuration might be necessary. To configure ccache, certain environment variables starting with CCACHE\_ can be used; for full documentation of all the configuration options refer to the ccache documentation. Common scenarios that need special attention are combining ccache with precompiled headers, managing dependencies that are included using FetchContent, and combining ccache with other compiler wrappers, such as distcc or icecc for distributed builds. For these scenarios, the following environment variables are used:
+使用默认配置的ccache可能已经在构建时间方面带来了相当大的改进，但若构建稍微复杂一点，可能需要进一步配置。要配置ccache，可以使用以CCACHE\_开头的某些环境变量;有关所有配置选项的完整文档，请参阅ccache文档。需要特别注意的常见场景包括:将ccache与预编译头相结合，使用\texttt{FetchContent}管理包含的依赖项，以及将ccache与其他编译器包装器相结合，例如用于分布式构建的distcc或icecc。对于这些场景，需要使用以下环境变量：
 
 \begin{itemize}
 \item 
-To work efficiently with precompiled headers, set CCACHE\_SLOPPINESS to pch\_defines,time\_macros. The reason for this is that ccache cannot detect changes in \#defines in the precompiled header and it cannot tell whether \_\_TIME\_\_, \_\_DATE\_\_, or \_\_TIMESTAMP\_\_ is used when creating precompiled headers. Optionally, include\_file\_mtime to CCACHE\_SLOPPINESS might further increase the cache hit performance, but it carries a very small risk of a race condition.
+为了有效地使用预编译头文件，可将CCACHE\_SLOPPINESS设置为pch\_defines,time\_macros。这样，ccache不能检测到预编译头文件中\#define的更改，也不能判断在创建预编译头文件时是否使用了\_\_TIME\_\_、\_\_DATE\_\_或\_\_TIMESTAMP\_\_。或将include\_file\_mtime设置到CCACHE\_SLOPPINESS中，可能会进一步提高缓存命中，但也会带来非常小的条件竞争。
 
 \item 
-When including big dependencies that are built from source, for instance, by using FetchContent, setting CCACHE\_BASEDIR to CMAKE\_BINARY\_DIR might increase the cache hit rate; this might bring a performance boost especially if there are many (sub)projects fetching the same dependency. On the other hand, if the sources in the project itself are the ones that take more time to compile, setting this to CMAKE\_SOURCE\_DIR might bring better results. It needs to be tried out to learn which one brings the better result.
+当从源代码构建的大型依赖时，例如：通过\texttt{FetchContent}，将CCACHE\_BASEDIR设置为CMAKE\_BINARY\_DIR可能会提高缓存命中率;这可能会带来性能的提升，特别是当有许多(子)项目获取相同的依赖项时。另一方面，若项目本身的源代码需要花费更多的时间来编译，则将其设置为CMAKE\_SOURCE\_DIR可能会带来更好的结果。但这也需要试验，以了解哪种方法能带来更好的结果。
 
 \item 
-To work with other compiler wrappers, the CCACHE\_PREFIX environment variable is used to add the commands for the other compiler wrapper. It is recommended to use ccache first when chaining multiple wrappers so the result of the other wrappers may also be cached.
+为了与其他编译器包装器一起工作，使用CCACHE\_PREFIX环境变量可以为其他编译器包装器添加命令在链接多个包装器时，建议首先使用ccache，这样其他包装器的结果也可以缓存。
 \end{itemize}
 
-Passing the environment variables to CMake using a configure preset, as described in Chapter 9, Creating Reproducible Build Environments, is the recommended way; this can either be combined with detecting ccache inside the CMakeLists.txt, or the ccache command may also be passed using the following preset:
+推荐的做法是使用第9章中描述的配置预设值将环境变量传递给CMake。这可以与检测CMakeLists.txt中的ccache相结合，也可以使用以下预设来传递ccache命令:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -144,19 +144,17 @@ Passing the environment variables to CMake using a configure preset, as describe
 },
 \end{lstlisting}
 
-With these configurations, using ccache can yield very large benefits to the compile time, but caching compiler results is a complicated matter, so to get the full benefit, the ccache documentation should be consulted. In most cases, using ccache will probably bring the most performance benefit with a relatively trivial setup. Other tools, such as distcc for distributed builds, work very similarly from the CMake perspective, but require a bit more setup work.
+使用这些配置，ccache可以在编译时间方面带来非常大的好处，但缓存编译器结果是一个挺复杂的问题，因此要获得全部好处，应该参考ccache的文档。通常，使用ccache可能通过相对简单的设置，就能带来最大的性能优势。其他工具，如用于分布式构建的distcc，从CMake的角度来看工作非常类似，但需要更多的设置工作。
 
-\hspace*{\fill} \\ %插入空行
-\noindent
-\textbf{Distributed builds}
+\subsubsubsection{14.4.4\hspace{0.2cm}分布式构建}
 
-Distributed builds work by shoveling off some part of the compilation to different machines on a network. This requires setting up the servers that can accept connections and then configuring the clients to be able to connect to these servers. Setting up a server for distcc happens with the following command:
+分布式构建，通过将部分编译转移到网络上的不同机器来工作。这需要设置可以接受连接的服务器，然后配置客户机，使其能够连接到这些服务器。使用以下命令为distcc设置服务器:
 
 \begin{tcblisting}{commandshell={}}
 distccd --daemon --allow client1 client2
 \end{tcblisting}
 
-Here, client1 and client2 are the hostnames or IP addresses of the respective build servers. On the client side, configuring CMake to use distcc will work similarly to using ccache by setting CMAKE\_<LANG>\_COMPILER\_LAUNCHER to the distcc command. The list of potential servers is either configured over a configuration file or by the DISTCC\_HOSTS environment variable. Unlike the ccache configuration, this is very host-specific, so the configuration should be put into a user preset, not the project-specific preset. The respective preset might look like this:
+这里，client1和client2是各自构建服务器的主机名或IP地址。在客户端，通过将CMAKE\_<LANG>\_COMPILER\_LAUNCHER设置为distcc，配置CMake使用distcc将类似于ccache。服务器列表可以通过配置文件配置，也可以通过DISTCC\_HOSTS环境变量配置。与ccache配置不同，这是特定于主机的，因此配置应该放在用户预设中，而不是特定于项目的预设中。各自的预设可能看起来像这样:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -169,9 +167,9 @@ Here, client1 and client2 are the hostnames or IP addresses of the respective bu
 },
 \end{lstlisting}
 
-Note the cpp postfix after the buildsrvr1 host. This puts distcc into so-called pump mode, which further increases compilation speed by also distributing the preprocessing to the servers. The lzo postfix tells distcc to compress the communication.
+注意buildsrvr1主机后面的cpp后缀。这将使distcc进入所谓的“泵模式”，这种模式通过将预处理分配到服务器来进一步提高编译速度。lzo后缀说明distcc使用的是压缩通信。
 
-The downside to distributed builds is that in order to gain a speed benefit, the network has to be fast enough or else the cost of transferring the information for compiling might be higher than the reduced build time. However, in most local networks, this is easily the case. Distributed builds work well if the machines are similar regarding processor architecture, compilers, and operating systems. While cross-compiling using distcc is possible, it can be quite a bit of work to set up. By combining good coding practices, precompiled headers and compiler caches working on large projects still work without waiting minutes for every single build.
+分布式构建的缺点是，为了获得速度优势，网络必须足够快，否则传输编译信息的成本可能高于减少的构建时间。然而，在大多数本地网络中，这种情况很容易发生。若机器在处理器架构、编译器和操作系统方面相似，那么分布式构建可以很好地工作。虽然可以使用distcc进行交叉编译，但要进行设置可能需要相当多的工作。通过结合良好的编码实践，在大型项目中工作的预编译头文件和编译器缓存仍然可以工作，而不必为每次构建等待几分钟。
 
 
 

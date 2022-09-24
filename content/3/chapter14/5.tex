@@ -1,7 +1,7 @@
-In this chapter, we discussed some general tips on structuring and maintaining CMake projects, especially larger projects. With increased project size, configuring and building times usually increase, which could be a hindrance in the developer workflow. We looked at how the CMake profiling feature may be a useful tool to find performance hogs in the configuration process, even though it cannot be used to profile the compilation itself.
+本章中，讨论了一些构造和维护CMake项目的一般技巧，特别是大型项目。随着项目规模的增加，配置和构建时间通常会增加，这可能会成为开发人员工作中的障碍。我们研究了CMake分析特性如何成为发现配置过程中性能消耗的有用工具，尽管不能用于分析编译本身。
 
-To help with long compilation times, we showed how to use unity build and precompiled headers from CMake to improve the compile times themselves. And if all this does not yet bring the desired effect, using a compiler cache such as ccache, or a distributed compiler such as distcc, may be used by prefixing the compiler command.
+为了帮助解决长时间的编译问题，我们展示了如何使用统一构建和CMake的预编译头文件来改善编译时间。若这些没有带来满意的效果，可以使用编译器缓存(如ccache)或分布式编译器(如distcc)，为编译器命令添加前缀。
 
-Optimizing build performance is a very satisfying affair, even if finding the right combination of tools and methods to get the most out of CMake might be a bit tedious. The downside of heavily optimized builds is, however, that the builds might be more prone to failure and the added complexity in the build process might need a deeper understanding and more expert knowledge to maintain in the long run.
+优化构建性能是一件非常令人满意的事情，即使找到正确的工具和方法组合来最大限度地利用CMake可能有点乏味。然而，过度优化构建的缺点是，构建可能更容易失败，构建过程中增加的复杂性可能需要更深入的理解，以及更多的专业知识才能进行长期维护。
 
-In the next chapter, we will outline some high-level strategies for migrating from any build system to a CMake project.
+下一章中，我们将概述从任何构建系统迁移到CMake项目的一些高级策略。
