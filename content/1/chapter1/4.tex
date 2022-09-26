@@ -1,4 +1,4 @@
-现在，动手试试安装的CMake是否有效。我们提供了一个\texttt{hello world}示例，可以立即下载，并进行构建。打开一个控制台，输入以下内容:
+现在，试试安装的CMake是否有效。我们提供了一个\texttt{hello world}示例，可以立即下载，并进行构建。打开一个控制台，输入以下内容:
 
 \begin{tcblisting}{commandshell={}}
 git clone https://github.com/PacktPublishing/CMake-BestPractices.git
@@ -25,7 +25,7 @@ cmake -–build .
       └── main.cpp
 \end{tcblisting}
 
-除了包含源代码的文件夹外，还有一个名为CMakeLists.txt的文件。这个文件包含CMake关于如何创建项目的构建说明，以及如何构建的说明。每个CMake项目在项目的根目录下都有一个CMakeLists.txt文件，但是在不同的子文件夹中可能有许多同名的文件。
+除了源代码的文件夹外，还有一个名为CMakeLists.txt的文件。这个文件包含CMake关于如何创建项目的构建说明，以及如何构建的说明。每个CMake项目在项目的根目录下都有一个CMakeLists.txt文件，但是在不同的子文件夹中可能有许多同名的文件。
 
 \item 
 下载存储库之后，使用\texttt{cmake}启动构建过程。CMake的构建过程分为两个阶段。第一步称为配置，读取CMakeLists.txt文件，并为系统的本地构建工具链生成指令。第二步，执行这些构建指令，并构建可执行文件或库。
@@ -36,18 +36,18 @@ cmake -–build .
 项目还会创建一个名为CMakeCache.txt的文件，其中包含创建构建指令所需的信息。\texttt{cmake -{}-build}的下一个阶段，通过内部调用CMake来执行构建;若在Windows上，则通过调用Visual Studio编译器来实现，这是编译二进制文件的实际方式。若一切顺利，在构建文件夹中会有一个名为\texttt{Chapter1}的可执行文件。
 \end{enumerate}
 
-简单起见，前面的示例中进入构建目录，并使用相对路径来查找源文件夹。这通常很方便，但若想从其他地方使用CMake，可以使用\texttt{-{}-S}选项来选择源文件，以及使用\texttt{-{}-B}选项来指定构建文件夹:
+简单起见，前面的示例中进入构建目录，并使用相对路径来查找源文件夹。这通常很方便，但想从其他地方使用CMake，可以使用\texttt{-{}-S}选项来选择源文件，以及使用\texttt{-{}-B}选项来指定构建文件夹:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S /path/to/source -B /path/to/build
 cmake -build /path/to/build
 \end{tcblisting}
 
-在持续集成环境中使用CMake时，显式传递构建目录和源目录通常很方便，因为显式传递有助于提高可维护性。若想为不同的配置创建不同的构建目录，例如在构建跨平台软件时，这也会很有帮助。
+在持续集成环境中使用CMake时，显式传递构建目录和源目录通常很方便，也助于提高可维护性。若想为不同的配置创建不同的构建目录，例如在构建跨平台软件时，这也会很有帮助。
 
-\subsubsubsection{1.4.1\hspace{0.2cm}简单的CMakeLists.txt文件示例}
+\subsubsubsection{1.4.1\hspace{0.2cm}简单的CMakeLists.txt示例}
 
-对于一个非常简单的\texttt{hello world}例子，CMakeLists.txt文件只包含几行指令:
+对于非常简单的\texttt{hello world}例子，CMakeLists.txt文件只包含几行指令:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -71,13 +71,13 @@ target_sources(Chapter1 PRIVATE src/main.cpp)
 下一行是要构建的项目的名称、版本和描述，后面是项目中使用的编程语言。这里，使用\texttt{CXX}将其标记为一个C++项目。
 
 \item 
-\texttt{add\_executable}告诉CMake要构建一个可执行文件(与库或自定义目标不同，将在本书后面介绍)。
+\texttt{add\_executable}告诉CMake要构建一个可执行文件(与库或自定义目标不同)。
 
 \item 
-\texttt{target\_sources}告诉CMake在哪里查找名为\texttt{Chapter1}的可执行文件的源文件，并且源文件的可见性仅限于可执行文件。将在本书后面详细介绍这个指令。
+\texttt{target\_sources}告诉CMake在哪里查找名为\texttt{Chapter1}的可执行文件的源文件，并且源文件的可见性仅限于可执行文件。
 \end{itemize}
 
-祝贺你——现在可以用CMake创建程序了。但是为了理解这些指令背后发生了什么，继续了解一下CMake的构建过程。
+祝贺你——现在可以用CMake创建程序了。为了理解这些指令背后发生了什么，需要继续了解一下CMake的构建过程。
 
 
 

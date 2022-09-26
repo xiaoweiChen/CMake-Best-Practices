@@ -1,9 +1,9 @@
 
 写CMake时，有几个主要概念和语言特性需要知道。我们不会在这里详述语言的种种细节，若需要详细了解可以参考CMake的官方文档。下面的小节中，将简介主要概念和语言特性。后续章节将深入探讨其中细节。
 
-完整文档地址\url{https://cmake.org/cmake/help/latest/manual/cmake-language.7.html}.
+完整文档地址\url{https://cmake.org/cmake/help/latest/manual/cmake-language.7.html}。
 
-\subsubsubsection{1.6.1\hspace{0.2cm}CMake语言——一万英尺的全景}
+\subsubsubsection{1.6.1\hspace{0.2cm}CMake语言——鸟瞰全景}
 
 CMake使用CMakeLists.txt文件的配置文件来确定构建规范。这些文件用脚本语言编写，通常也称为CMake。语言本身很简单，支持变量、字符串函数、宏、函数定义和导入其他CMake文件。
 
@@ -19,13 +19,13 @@ target_sources(MyLibrary
 
 PUBLIC和PRIVATE关键字表示文件链接到这个库时的可见性，并充当文件列表之间的分隔符。
 
-此外，CMake语言支持“生成器表达式”，可以在生成构建系统时进行，通常用于为每个构建配置指定特殊信息。将在第3章进行详细介绍。
+此外，CMake语言支持“生成器表达式”，可以在生成构建系统时进行，通常用于为每个构建配置指定特殊信息。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{工程}
 
-CMake会将各种构建工件(如库、可执行文件、测试和文档)组织到项目中。虽然不同项目可以相互封装，但这里需要一个根项目。作为一个规则，每个CMakeLists.txt文件对应一个项目，这意味着每个项目必须在源目录中有一个单独的文件夹。
+CMake会将各种构建工件(如库、可执行文件、测试和文档)组织到项目中。虽然不同项目可以相互封装，但这里需要一个根项目。每个CMakeLists.txt文件对应一个项目，所以每个项目必须在源目录中有一个单独的文件夹。
 
 项目描述如下:
 
@@ -38,9 +38,9 @@ project(
 )
 \end{lstlisting}
 
-正在解析的当前项目存储在PROJECT\_NAME变量中。根项目存储在CMAKE\_PROJECT\_NAME中，这对于确定一个项目是独立的还是封装在另一个项目中很有用。从3.21版本开始，还有一个PROJECT\_IS\_TOP\_LEVEL变量来直接确定当前项目是否是顶层项目。此外，使用<PROJECT-NAME>\_IS\_TOP\_LEVEL，可以检测特定的项目是否为顶级项目。
+正在解析的当前项目存储在PROJECT\_NAME变量中。根项目存储在CMAKE\_PROJECT\_NAME中，这对于确定一个项目是独立的还是封装在另一个项目中很有用。从3.21版本开始，还有一个PROJECT\_IS\_TOP\_LEVEL变量来直接确定当前项目是否是顶层项目。此外，使用<PROJECT-NAME>\_IS\_TOP\_LEVEL，可以检测特定的项目是否为顶层项目。
 
-下面是关于项目的其他内置变量，它们可以在根项目的值前加上CMAKE\_前缀。若没有在\texttt{project()}指令中定义，则字符串为空:
+下面是关于项目的其他内置变量，可以在根项目的值前加上CMAKE\_前缀。若没有在\texttt{project()}指令中定义，则字符串为空:
 
 \begin{itemize}
 \item 
@@ -50,7 +50,7 @@ PROJECT\_DESCRIPTION: 项目的描述字符串
 PROJECT\_HOMEPAGE\_URL: 项目的URL字符串
 
 \item 
-PROJECT\_VERSION: 这个项目的完整版本信息
+PROJECT\_VERSION: 项目的完整版本信息
 
 \item 
 PROJECT\_VERSION\_MAJOR: 版本字符串的第一个数字
@@ -65,7 +65,7 @@ PROJECT\_VERSION\_PATCH: 版本字符串的第三个数字
 PROJECT\_VERSION\_TWEAK: 版本字符串的第四个数字
 \end{itemize}
 
-每个项目都有一个源目录和二进制目录，它们可以相互封装。假设下面的例子中的每个CMakeFiles.txt文件都定义了一个项目:
+每个项目都有一个源目录和二进制目录，假设下面的例子中的每个CMakeLists.txt文件都定义了一个项目:
 
 \begin{tcblisting}{commandshell={}}
 .
@@ -119,10 +119,10 @@ ${outer_${inner_variable}_variable}
 函数作用域:在函数内部设置的变量只在函数内部可见。
 
 \item 
-目录作用域:源树中的每个子目录绑定变量，并包括来自父目录的任何变量。
+目录作用域:源树中的每个子目录绑定变量，并包括来自父目录的变量。
 
 \item 
-持久缓存:缓存的变量可以是系统的，也可以是用户定义的。它们在多次运行中保持它们的值不变。
+持久缓存:缓存的变量可以是系统的，也可以是用户定义的。在多次运行中保持它们的值不变。
 \end{itemize}
 
 将PARENT\_SCOPE选项传递给\texttt{set()}会使变量在父作用域中可见。
@@ -157,7 +157,7 @@ list(APPEND MYLIST "xyz")
 \noindent
 \textbf{缓存变量和选项}
 
-CMake缓存了一些变量，以便后续的构建运行得更快，变量存储在CMakeCache.txt文件中。通常，不必手动编辑改文件，但对其修改可以用于调试不按预期运行的构建。
+CMake缓存了一些变量，以便后续的构建运行得更快，变量存储在CMakeCache.txt文件中。通常，不必手动编辑改文件，但对其修改可以用于调试构建。
 
 所有用于配置构建的变量都会进行缓存。要缓存一个自定义变量ch1\_MYVAR，其值为foo值，可以使用\texttt{set}指令:
 
@@ -165,7 +165,7 @@ CMake缓存了一些变量，以便后续的构建运行得更快，变量存储
 set(ch1_MYVAR foo CACHE STRING "Variable foo that configures bar")
 \end{lstlisting}
 
-请注意，缓存变量必须有一个类型和一个文档字符串，以提供对它们的快照。
+注意，缓存变量必须有一个类型和一个文档字符串，以提供它们的快照。
 
 大多数自动生成的缓存变量都标记为“高级”，这意味着它们在默认情况下对\texttt{cmake-gui}和\texttt{ccmake}中用户是隐藏的。要使它们可见，必须显式地切换。若有额外的缓存变量是由CMakeLists.txt文件生成的，也可以通过调用\texttt{mark\_as\_advanced(MYVAR)}指令来隐藏:
 
@@ -174,13 +174,14 @@ set(ch1_MYVAR foo CACHE STRING "Variable foo that configures bar")
 图1.4  左边 —— \texttt{cmake-gui}没有显示标记为“高级”的变量。右边——标记“高级”复选框将显示所有标记为高级变量
 \end{center}
 
-根据经验，用户应该更改的选项或变量很少标记为“高级”。
+根据经验，用户经常需要变更的选项或变量很少会标记为“高级”。
 
 对于简单的布尔型缓存变量，CMake还提供了\texttt{option}指令，默认值为OFF，除非另有说明。也可以通过CMakeDependentOption模块相互依赖:
 
 \begin{lstlisting}[style=styleCMake]
 option(CHAPTER1_PRINT_LANGUAGE_EXAMPLES "Print examples for 
 	each language" OFF)
+
 include(CMakeDependentOption)
 cmake_dependent_option(CHAPTER1_PRINT_HELLO_WORLD "print a
 	greeting from chapter1 " ON CHAPTER1_PRINT_LANGUAGE_EXAMPLES
@@ -238,7 +239,7 @@ set_property(<Scope> <EntityName>
 
 支持的属性的完整列表，请查阅\url{https://cmake.org/cmake/help/latest/manual/cmakeproperties.7.html}。
 
-当修改属性时，可以使用直接的函数\texttt{set\_target\_properties}和\texttt{set\ test\_properties}，而非\texttt{set\_property}。使用显式命令可以避免属性名之间的错误和混淆，可读性会更强。还有一个\texttt{define\_property}指令，其会创建一个不设置值的属性。我们不建议使用，因为属性总需要有一个默认值。
+当修改属性时，可以使用\texttt{set\_target\_properties}和\texttt{set\ test\_properties}，而非\texttt{set\_property}。使用显式指令可以避免属性名之间的错误和混淆，可读性会更强。还有一个\texttt{define\_property}指令，其会创建一个不设置值的属性。我们不建议使用，因为属性总需要有一个默认值。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
@@ -303,7 +304,7 @@ if(MYVAR STREQUAL "FOO")
 \texttt{MATCHES}: 使用正则表达式进行匹配。
 
 \item 
-\texttt{IS\_NEWER\_THAN}: 比较两个文件中哪一个最近被修改过。不幸的是，这不是很精确，若两个文件具有相同的时间戳，它也会返回True。还有更令人困惑的结果，若其中任何一个文件丢失，结果也为True。
+\texttt{IS\_NEWER\_THAN}: 比较两个文件中哪一个最近修改过。但这不是很精确，若两个文件具有相同的时间戳，也会返回True。还有更令人困惑的结果，若其中任何一个文件丢失，结果也为True。
 \end{itemize}
 
 最后，就是布尔运算符\texttt{OR}、\texttt{AND}和\texttt{NOT}。
@@ -362,7 +363,7 @@ foo("bar")
 
 CMake宏使用\texttt{macro()}/\texttt{endmacro()}定义，有点像函数。不同的是，函数参数是真变量，而在宏中是字符串替换。这意味着必须使用大括号访问宏的所有参数。
 
-另一个区别是，通过调用函数，作用区域转移到函数内部。执行宏时，就好像宏的主体粘贴到调用状态的位置一样，宏不会创建变量和控制流的作用域。因此，强烈建议避免在宏中调用\texttt{return()}。
+另一个区别是，通过调用函数，作用区域转移到函数内部。执行宏时，就好像宏的主体粘贴到调用位置一样，宏不会创建变量和控制流的作用域。因此，避免在宏中调用\texttt{return()}。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
@@ -374,14 +375,14 @@ CMake中有三种主要的方法来创建目标——\texttt{add\_executable}，
 
 目标间可以相互依赖，因此一个目标必须在另一个目标之前建立。
 
-在为构建配置或编译器选项设置属性时，使用目标变量是一个好习惯。一些目标属性具有可见性修饰符，如\texttt{PRIVATE}、\texttt{PUBLIC}或\texttt{INTERFACE}，以表示哪些需求是可传递的——哪些属性必须由依赖的目标“继承”。
+在为构建配置或编译器选项设置属性时，使用目标变量是个好习惯。一些目标属性具有可见性修饰符，如\texttt{PRIVATE}、\texttt{PUBLIC}或\texttt{INTERFACE}，以表示哪些需求是可传递的——哪些属性必须由依赖的目标“继承”。
 
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{生成器表达式}
 
-生成器表达式是在构建的配置阶段进行的语句。大多数函数都允许使用生成器表达式，只有少数例外。以\texttt{\$<OPERATOR:VALUE>}的形式使用，其中\texttt{OPERATOR}或直接使用，或与VALUE进行比较。这里，可以将生成器表达式看作小型的内联if语句。
+生成器表达式是在构建的配置阶段进行的语句。大多数函数允许使用生成器表达式，只有少数例外。以\texttt{\$<OPERATOR:VALUE>}的形式使用，其中\texttt{OPERATOR}或直接使用，或与VALUE进行比较。这里，可以将生成器表达式看作小型的内联if语句。
 
 下面的例子中，若编译器是GCC、Clang或Apple Clang，则使用生成器表达式为my\_target启用\texttt{-Wall}编译器标志。注意GCC的\texttt{COMPILER\_ID}标识为"GNU":
 
@@ -390,7 +391,7 @@ target_compile_options(my_target PRIVATE
 	"$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall>")
 \end{lstlisting}
 
-这个例子告诉CMake，若\texttt{CXX\_COMPILER\_ID}变量匹配GNU, Clang, AppleClang列表中任意一个，则附加\texttt{-Wall}选项到目标——也就是my\_target。生成器表达式在编写独立于平台和编译器的CMake文件时非常方便。
+若\texttt{CXX\_COMPILER\_ID}变量匹配GNU, Clang, AppleClang列表中任意一个，则附加\texttt{-Wall}选项到目标——也就是my\_target。生成器表达式在编写独立于平台和编译器的CMake文件时非常方便。
 
 除了查询值，生成器表达式还可以用于转换字符串和列表:
 
@@ -398,12 +399,12 @@ target_compile_options(my_target PRIVATE
 $<LOWER_CASE:CMake>
 \end{lstlisting}
 
-这将输出cmake。
+这将输出“cmake”。
 
 想要了解生成器表达式更多详情，可参阅\url{https://cmake.org/cmake/
 help/latest/manual/cmake-generator-expressions.7.html}。
 
-CMake支持各种构建系统、编译器和链接器，所以经常用于为不同的平台构建软件。下一节中，我们将学习如何在CMake中使用不同的工具链，以及如何配置不同的构建类型，如Debug或Release。
+CMake支持各种构建系统、编译器和链接器，所以经常用于为不同的平台构建软件。下一节中，将学习如何在CMake中使用不同的工具链，以及如何配置不同的构建类型，如Debug或Release。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
@@ -411,9 +412,9 @@ CMake支持各种构建系统、编译器和链接器，所以经常用于为不
 
 对于顶层的CMakeLists.txt文件的第一行，必须要有\texttt{cmake\_minimum\_required}，因为其会设置用于构建项目的内部CMake策略。
 
-策略用于保持跨多个CMake版本的向后兼容性，可以配置为使用OLD行为，这意味着cmake行为需要向后兼容，或者配置为NEW，这意味着新策略生效。由于每个新版本都将引入新的规则和功能，因此将使用策略来警告向后兼容性问题。可以使用\texttt{cmake\_policy}禁用或启用策略。
+策略用于保持跨多个CMake版本的向后兼容性，可以配置为使用OLD行为，所以CMake的行为需要向后兼容，或者配置为NEW，使新策略生效。由于每个新版本都将引入新的规则和功能，因此将使用策略来警告向后兼容性问题。可以使用\texttt{cmake\_policy}禁用或启用策略。
 
-下面的例子中，\texttt{CMP0121}策略设置为向后兼容的值。\texttt{CMP0121}在CMake 3.21版本中引入，用于检查\texttt{list()}的索引变量是否为有效格式——是否为整数:
+下面的例子中，\texttt{CMP0121}策略设置为向后兼容的值。\texttt{CMP0121}在CMake 3.21引入，用于检查\texttt{list()}的索引变量是否为有效格式——是否为整数:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -425,14 +426,13 @@ list(GET MYLIST "any" OUT_VAR)
 
 通过设置\texttt{cmake\_policy(SET CMP0121 OLD)}，启用向后兼容，并且前面的代码不会产生警告，尽管这里使用“any”(不是一个整数)索引访问MYLIST。
 
-在CMake的配置步骤中将策略设置为NEW将会抛出一个错误——\texttt{[build] list index: any is not
-	a valid index}。
+在配置步骤中将策略设置为NEW将会抛出一个错误——\texttt{[build] list index: any is not a valid index}。
 
 \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=除非包含遗留项目，否则避免设置策略]
-通常，策略应该通过设置\texttt{cmake\_minimum\_required}来控制，而不是通过更改单个策略来控制。更改策略常用于，将历史遗留项目作为子文件夹包含在其中时。
+通常，策略应该通过\texttt{cmake\_minimum\_required}来控制，而不是通过更改单个策略来控制。更改策略常用于，将历史遗留项目作为子文件夹包含在其中时。
 \end{tcolorbox}
 
-到目前为止，我们已经蓼莪及用于配置构建系统的CMake语言背后的基本概念。CMake用于为不同类型的构建和语言生成构建指令。下一节中，我们将了解如何指定要使用的编译器，以及如何配置构建。
+我们已经了解了用于配置构建系统的CMake语言背后的基本概念，CMake用于为不同类型的构建和语言生成构建指令。下一节中，我们将了解如何指定要使用的编译器，以及如何配置构建。
 
 
 

@@ -1,4 +1,4 @@
-使用CMake构建软件时，常见的问题是如何共享环境配置来构建一个项目。通常，人们和团队习惯于具体指定构建工件应该放在哪里，在哪个平台上使用哪个生成器，或者希望CI环境与本地进行相同的配置后进行构建。CMake 3.19在2020年12月发布，所以这些信息存储在CMakePresets.json文件中，放在项目的根目录中。此外，每个用户都可以将他们配置添加到CMakeUserPresets.json文件中。基本预设通常置于版本控制之下，但用户预设不会签入版本系统。这两个文件遵循相同的JSON格式，顶层写法如下所示:
+使用CMake构建软件时，常见的问题是如何共享环境配置来构建一个项目。通常，人们习惯于具体指定构建工件应该放在哪里，在哪个平台上使用哪个生成器，或者希望CI环境与本地进行相同的配置后进行构建。CMake 3.19在2020年12月发布，所以这些信息可以存储在CMakePresets.json文件中，放在项目的根目录中。此外，每个用户都可以将他们配置添加到CMakeUserPresets.json文件中。基本预设通常置于版本控制之下，但用户预设不会签入版本系统。这两个文件遵循相同的JSON格式，顶层写法如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 {
@@ -22,14 +22,14 @@
 接下来，cmakeMinimumRequired{…}指定使用哪个版本的CMake。尽管这是可选的，但将其放在这里并与CMakeLists.txt文件中指定的版本匹配是一个很好的做法。
 
 \item 
-在此之后，可以使用configurePresets、buildPresets和testPresets添加不同构建阶段的各种预设。顾名思义，configurePresets应用于CMake的构建过程的配置阶段，而其他两个用于构建和测试阶段。构建和测试预设可以继承一个或多个配置预设。如果没有指定继承，将应用于前面的所有步骤。
+之后，可以使用configurePresets、buildPresets和testPresets添加不同构建阶段的各种预设。顾名思义，configurePresets应用于CMake的构建过程的配置阶段，而其他两个用于构建和测试阶段。构建和测试预设可以继承一个或多个配置预设。若没有指定继承，将应用于前面的所有步骤。
 \end{enumerate}
 
 要查看项目中配置了哪些预设值，请运行\texttt{cmake -{}-list-presets}查看可用预设值的列表。要使用预设进行生成，请执行\texttt{cmake -{}-build -{}-preset name}。
 
 要查看JSON模式的完整规范，请参阅\url{https://cmake.org/cmake/help/v3.21/manual/cmake-presets.7.html}。
 
-预设是一中很好的方式，来分享构建的环境一种方式。编写本文的时候，越来越多的IDE和编辑器都在本地添加了对CMake预设的支持，特别是在使用工具链处理交叉编译时。这里，我们只对CMake预设进行概述，这个主题将在第12章中更深入地讨论。
+预设是分享构建的环境一种方式。编写本文的时候，越来越多的IDE和编辑器都在本地添加了对CMake预设的支持，特别是在使用工具链处理交叉编译时。这里，我们只对CMake预设进行概述，这个主题将在第12章中更详细地讨论。
 
 
 
