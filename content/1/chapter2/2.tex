@@ -227,7 +227,7 @@ cmake -G "Unix Makefiles" -DCMAKE_CXX_FLAGS:STRING="-Wall
 \noindent
 \textbf{通过CLI构建配置好的项目}
 
-要生成已配置的工程，需要使用\texttt{cmake -{}-build ./build}。这个命令告诉CMake构建已经在构建文件夹中配置的CMake项目。
+要生成已配置的工程，需要使用\texttt{cmake -{}-build ./build}在构建文件夹中配置的CMake项目。
 
 也可以使用\texttt{cd build \&\& make}进行构建。使用\texttt{cmake -{}-build}的好处是，省去了调用特定于构建系统的命令。在构建CI管道或构建脚本时，可以在不更改构建命令的情况下，更改构建系统生成器。
 
