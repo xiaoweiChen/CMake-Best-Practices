@@ -1,4 +1,4 @@
-项目中支持部署的方法是使其可安装，这里的术语"可安装"并不是指安装预先制作好的软件包，而是用户必须获取项目的源码，并从头开始构建。可安装的项目需要额外的构建系统，用于在系统上安装运行时或开发构件。构建系统将在这里执行安装操作，因为这里使用CMake来生成构建系统文件，所以CMake必须生成相关的安装代码。本节中，将了解如何来写这部分CMake代码。
+项目中支持部署的方法是可安装，这里的"可安装"并不是指安装预先制作好的软件包，而是用户必须获取项目的源码，并从头开始构建。可安装的项目需要额外的构建系统，用于在系统上安装运行时或开发构件。构建系统将在这里执行安装操作，因为这里使用CMake来生成构建系统文件，所以CMake必须生成相关的安装代码。本节中，将了解如何来写这部分CMake代码。
 
 \subsubsubsection{4.2.1\hspace{0.2cm}install()指令}
 
@@ -8,13 +8,14 @@
 \noindent
 \textbf{安装CMake目标}
 
-要使CMake目标可安装，必须用至少一个参数指定TARGETS参数。这种用法的指令签名如下:
+要使CMake目标可安装，必须用至少一个参数指定TARGETS参数。指令的签名如下所示
+:
 
 \begin{lstlisting}[style=styleCMake]
 install(TARGETS <target>... [...])
 \end{lstlisting}
 
-TARGETS参数表示\texttt{install}将接受一组CMake目标，以便为其生成安装代码，只安装目标的输出构件。最常见的目标输出工件定义如下:
+TARGETS参数表示\texttt{install}可以接受一组CMake目标，以便为其生成安装代码，只安装目标的输出构件。最常见的目标输出工件定义如下:
 
 \begin{itemize}
 \item 
@@ -54,7 +55,7 @@ target_compile_features(ch4_ex01_executable PRIVATE cxx_std_11)
 install(TARGETS ch4_ex01_executable)
 \end{lstlisting}
 
-前面的代码中，定义了一个名为ch4\_ex01\_executable的可执行目标，并在随后的两行中填充了它的属性。最后一行\texttt{install(…)}是我们感兴趣的，它是ch4\_ex01\_executable所需的安装代码。
+前面的代码中，定义了一个名为ch4\_ex01\_executable的可执行目标，并在随后的两行中填充了它的属性。最后一行\texttt{install(…)}是我们感兴趣的，是ch4\_ex01\_executable所需的安装代码。
 
 要检查ch4\_ex01\_executable是否可以安装，可以构建项目并通过CLI进行安装:
 
@@ -65,9 +66,9 @@ cmake --install ./build --prefix /tmp/install-test
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-不必为\texttt{cmake -{}-install}指定\texttt{-{}-prefix}参数，也可以使用\texttt{CMAKE\_INSTALL\_PREFIX}变量来修改非默认的安装路径。
+不必为cmake -{}-install指定-{}-prefix参数，也可以使用CMAKE\_INSTALL\_PREFIX来修改非默认的安装路径。
 
-当使用CMake和多配置生成器(如Ninja multi-config和Visual Studio)时，请为\texttt{cmake -{}-build}和\texttt{cmake -{}-install}指定\texttt{-{}-config}参数:
+当使用CMake和多配置生成器(如Ninja multi-config和Visual Studio)时，请为\texttt{cmake -{}-build}和\texttt{cmake -{}-install}指定-{}-config参数:
 
 \begin{tcblisting}{commandshell={}}
 # For multi-config generators:
@@ -77,7 +78,7 @@ cmake --install ./build --prefix /tmp/install-test
 \end{tcblisting}
 \end{tcolorbox}
 
-让我们看一下\texttt{cmake -{}-install}做了什么:
+看一下\texttt{cmake -{}-install}做了什么:
 
 \begin{tcblisting}{commandshell={}}
 -- Install configuration: ""
@@ -89,9 +90,9 @@ cmake --install ./build --prefix /tmp/install-test
 -- Installing: /tmp/install-test/bin/ch4_ex01_executable
 \end{tcblisting}
 
-前面输出的最后一行中，可以看到ch4\_ex01\_executable目标的输出构件——安装了ch4\_ex01\_executable二进制文件。由于ch4\_ex01\_executable目标拥有的唯一输出工件，所以该目标确实已经可以安装。
+前面输出的最后一行中，可以看到ch4\_ex01\_executable目标的输出构件——安装了ch4\_ex01\_executable二进制文件。由于ch4\_ex01\_executable目标拥有的唯一输出工件，所以该目标确实已经可安装。
 
-注意ch4\_ex01\_executable没有直接安装在\texttt{/tmp/installtest}(前缀)目录中，\texttt{install}将它放在bin子目录中，这是因为CMake知道什么样的工件应该放在哪里。传统的UNIX系统中，二进制文件存放在/usr/bin中，而库文件存放在/usr/lib中，CMake知道\texttt{add\_executable()}会生成一个可执行的二进制文件，所以将其放入bin子目录中。这些目录的默认值由CMake提供，具体取决于目标类型。提供默认安装路径信息的CMake模块称为GNUInstallDirs模块。GNUInstallDirs模块定义了各种\texttt{CMAKE\_INSTALL\_}的路径。默认安装目录如下表所示:
+注意ch4\_ex01\_executable没有直接安装在/tmp/installtest目录中，\texttt{install}将它放在bin子目录中，这是因为CMake知道什么样的工件应该放在哪里。传统的UNIX系统中，二进制文件存放在/usr/bin中，而库文件存放在/usr/lib中，CMake知道\texttt{add\_executable()}会生成一个可执行的二进制文件，所以将其放入bin子目录中。这些目录的默认值由CMake提供，具体取决于目标类型。提供默认安装路径信息的CMake模块称为GNUInstallDirs模块。GNUInstallDirs模块定义了各种CMAKE\_INSTALL\_的路径。默认安装目录如下表所示:
 
 \begin{table}[H]
 	\centering
@@ -106,7 +107,7 @@ cmake --install ./build --prefix /tmp/install-test
 	\end{tabular}
 \end{table}
 
-为了覆盖内置默认值，在\texttt{install(…)}指令中需要附加\texttt{<TARGET\_TYPE> DESTINATION}参数。这里，我们尝试将默认的运行时安装目录改为qbin，而不是bin。只需要对\texttt{install(…)}指令做一个小修改:
+为了覆盖内置默认值，在\texttt{install(…)}指令中需要使用<TARGET\_TYPE> DESTINATION参数。这里，我们尝试将默认的运行时安装目录改为qbin，而不是bin。只需要对\texttt{install(…)}指令做一个小修改:
 
 \begin{lstlisting}[style=styleCMake]
 # …
@@ -122,7 +123,7 @@ install(TARGETS ch4_ex01_executable
 -- Installing: /tmp/install-test/qbin/ch4_ex01_executable
 \end{tcblisting}
 
-现在，来看另一个例子。这次将安装\texttt{STATIC}库。回顾一下第4章示例2的CMakeLists.txt文件，可以在chapter4/ex02\_static文件夹中找到。由于空格的原因，注释和\texttt{project(…)}省略件:
+现在，来看另一个例子，这次将安装STATIC库。回顾一下第4章示例2的CMakeLists.txt文件，可以在chapter4/ex02\_static文件夹中找到。由于空格的原因，注释和\texttt{project(…)}省略:
 
 \begin{lstlisting}[style=styleCMake]
 add_library(ch4_ex02_static STATIC)
@@ -137,7 +138,7 @@ install (
 )
 \end{lstlisting}
 
-可能已经注意到，这与我们前面的示例有一点不同。首先，会有一个附加的DIRECTORY参数的\texttt{install(…)}指令，这是使静态库的头文件可安装。这样做的原因是CMake不会安装任何非输出工件，而\texttt{STATIC}库目标只生成一个二进制文件作为输出工件。头文件不是输出工件，应该单独安装。
+这与我们前面的示例有一点不同。首先，会有多一个DIRECTORY参数，这是使静态库的头文件可安装。这样做的原因是CMake不会安装任何非输出工件，而STATIC库目标只生成一个二进制文件作为输出工件。头文件不是输出工件，应该单独安装。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
 DIRECTORY参数中末尾的斜杠会导致CMake复制文件夹的内容，而不是按名称复制文件夹。CMake处理尾随斜杠的方式与Linux rsync命令相同。
@@ -151,7 +152,7 @@ DIRECTORY参数中末尾的斜杠会导致CMake复制文件夹的内容，而不
 \noindent
 \textbf{安装文件}
  
-\texttt{install(FILES…)}指令接受一个或多个文件作为参数，还需要\texttt{TYPE}或\texttt{DESTINATION}参数，这两个参数用于确定指定文件的目标目录。\texttt{TYPE}参数用于指示哪些文件将使用该文件类型的默认路径作为安装目录。可以通过设置相关的GNUInstallDirs变量来重写默认值。下表显示了有效的\texttt{TYPE值}，以及它们的目录映射:
+\texttt{install(FILES…)}指令接受一个或多个文件作为参数，还需要TYPE或DESTINATION参数，这两个参数用于确定指定文件的目标目录。TYPE用于指示哪些文件将使用该文件类型的默认路径作为安装目录，可以通过设置相关的GNUInstallDirs变量来重写默认值。下表显示了有效的TYPE值，以及它们的目录映射:
 
 \begin{table}[H]
 	\centering
@@ -174,7 +175,7 @@ DIRECTORY参数中末尾的斜杠会导致CMake复制文件夹的内容，而不
 	\end{tabular}
 \end{table}
 
-若不想使用\texttt{TYPE}参数，可以使用\texttt{DESTINATION}参数。可以通过\texttt{install(…)}为指定文件提供自定义目标。
+若不想使用TYPE，可以使用DESTINATION。可以通过\texttt{install(…)}为指定文件提供自定义目标。
 
 另一种形式的\texttt{install(FILES...)}是\texttt{install(PROGRAMS...)}，这与\texttt{install(FILES...)}相同，但需要为安装文件设置OWNER\_EXECUTE，GROUP\_EXECUTE和WORLD\_EXECUTE权限。这对最终用户执行的二进制文件或脚本文件是有意义的。
 
@@ -190,7 +191,7 @@ install(FILES "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter_content"
 第一个\texttt{install(…)}中，CMake在当前的CMakeLists.txt(chapter4/ex03\_file)中安装了chapter4\_greeter\_content文件，在系统默认BIN目录下。第二个\texttt{install(…)}中，CMake在默认BIN目录中安装chapter4\_greeter.py，名称为chapter4\_greeter。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-\texttt{RENAME}参数只对单文件的\texttt{install(…)}有效。
+RENAME参数只对单文件的\texttt{install(…)}有效。
 \end{tcolorbox}
 
 有了这些\texttt{install(…)}指令，CMake应该在\$\{CMAKE\_INSTALL\_PREFIX\}/bin目录下安装chapter4\_greeter.py和chapter4\_greeter\_content。通过CLI来构建和安装这个项目:
@@ -209,7 +210,7 @@ cmake --install ./build --prefix /tmp/install-test
 -- Installing: /tmp/install-test/bin/chapter4_greeter
 \end{tcblisting}
 
-上面的输出确认了CMake为chapter4\_greeter\_content和chapter4\_greeting.py文件生成了所需的安装代码。最后，因为使用了\texttt{PROGRAMS}参数来安装chapter4\_greeter，检查一下他是否可以执行，:
+上面的输出确认了CMake为chapter4\_greeter\_content和chapter4\_greeting.py文件生成了所需的安装代码。最后，因为使用了\texttt{PROGRAMS}参数来安装chapter4\_greeter，检查一下是否可以执行:
 
 \begin{tcblisting}{commandshell={}}
 15:01 $ /tmp/install-test/bin/chapter4_greeter
@@ -228,7 +229,7 @@ cmake --install ./build --prefix /tmp/install-test
 install(DIRECTORY dir1 dir2 dir3 TYPE LOCALSTATE)
 \end{lstlisting}
 
-前面的示例将把dir1和dir2目录安装到\$\{CMAKE\_INSTALL\_PREFIX\}/var目录中，以及所有子文件夹和文件。有时，安装文件夹的全部内容是不可取的。幸运的是，CMake允许安装命令根据通配符模式和正则表达式包含或排除目录内容。这次我们有选择地安装dir1、dir2和dir3:
+前面的示例将把dir1和dir2目录安装到\$\{CMAKE\_INSTALL\_PREFIX\}/var目录中，以及所有子文件夹和文件。有时，不能直接安装文件夹的全部内容。幸运的是，CMake允许安装命令根据通配符模式和正则表达式包含或排除目录内容。这次我们有选择地安装dir1、dir2和dir3:
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
@@ -241,7 +242,7 @@ install(DIRECTORY dir3 DESTINATION ${CMAKE_INSTALL_
 	LOCALSTATEDIR} PATTERN "bin" EXCLUDE)
 \end{lstlisting}
 
-前面的例子中，使用\texttt{FILES\_MATCHING}参数来定义文件选择的条件。\texttt{FILES\_MATCHING}后面可以跟\texttt{PATTERN}或\texttt{REGEX}参数。\texttt{PATTERN}可以定义通配符模式，而\texttt{REGEX}可以定义正则表达式。默认情况下，这些表达式用于包含文件。若希望排除匹配条件的文件，可以将\texttt{EXCLUDE}参数附加到模式中。注意，由于\texttt{FILES\_MATCHING}参数，这些过滤器没有应用于子目录名。我们还在最后一个\texttt{install(…)}指令中使用了\texttt{PATTERN}，并且没有添加\texttt{FILES\_MATCHING}前缀，这可以过滤子目录而不是文件。这一，将只安装dir1中扩展名为.x的文件，dir2中没有扩展名为.hpp的文件，以及dir3中除bin文件夹外的所有内容。这个例子可以在第4章找到，在chapter4/ex04\_directory文件夹中。让我们编译并安装它，看看它是否符合我们的预期:
+前面的例子中，使用FILES\_MATCHING参数来定义文件选择的条件。FILES\_MATCHING后面可以跟PATTERN或REGEX参数。PATTERN可以定义通配符模式，而REGEX可以定义正则表达式。通常，这些表达式用于包含文件。若希望排除匹配条件的文件，可以将EXCLUDE参数附加到模式中。由于FILES\_MATCHING参数，这些过滤器没有应用于子目录名。我们还在最后一个\texttt{install(…)}指令中使用了PATTERN，并且没有添加FILES\_MATCHING前缀，这可以过滤子目录而不是文件。这将只安装dir1中扩展名为.x的文件，dir2中没有扩展名为.hpp的文件，以及dir3中除bin文件夹外的所有内容。这个例子可以在第4章找到，在chapter4/ex04\_directory文件夹中。让我们编译并安装，看看是否符合我们的预期:
 
 \begin{tcblisting}{commandshell={}}
 cmake –S . -B ./build
@@ -263,22 +264,22 @@ cmake –install ./build –prefix /tmp/install-test
 \end{tcblisting}
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-\texttt{FILES\_MATCHING}不能在\texttt{PATTERN}或\texttt{REGEX}之后使用，但反之亦然。
+FILES\_MATCHING不能在PATTERN或REGEX之后使用，反之亦然。
 \end{tcolorbox}
 
-输出中，可以看到只有扩展名为.x的文件是从dir1中选取的，因为在第一个\texttt{install(…)}中使用\texttt{FILES\_MATCHING PATTERN "*.x"}，导致asset2文件没有被安装。另外，dir2/chapter4\_hello.dat文件已经安装，并且跳过dir2/chapter4\_hello.hpp文件，这是因为在第二个\texttt{install(…)}中\texttt{FILES\_MATCHING PATTERN "*.hpp" EXCLUDE PATTERN "*"}参数。最后，安装了dir3/asset4文件，并且完全跳过了dir3/bin目录，因为在最后一个\texttt{install(…)}中指定了\texttt{PATTERN "bin" EXCLUDE}参数。
+输出中，可以看到只有扩展名为.x的文件是从dir1中选取的，因为在第一个\texttt{install(…)}中使用FILES\_MATCHING PATTERN "*.x"，导致asset2文件没有被安装。另外，dir2/chapter4\_hello.dat文件已经安装，并且跳过dir2/chapter4\_hello.hpp文件，这是因为在第二个\texttt{install(…)}中指定了FILES\_MATCHING PATTERN "*.hpp" EXCLUDE PATTERN "*"。最后，安装了dir3/asset4文件，并且完全跳过了dir3/bin目录，因为在最后一个\texttt{install(…)}中指定了PATTERN "bin" EXCLUDE参数。
 
 通过\texttt{install(DIRECTORY…)}，了解了\texttt{install(…)}的基本知识。接下来，继续看看\texttt{install(…)}的其他常见参数。
 
 \subsubsubsection{4.2.3\hspace{0.2cm}install()的其他常见参数}
 
-如我们所见，\texttt{install()}的第一个参数指示要安装什么，还有一些参数允许进行定制安装。让我们一起了解一下这些常见参数。
+\texttt{install()}的第一个参数指示要安装什么，还有一些参数允许进行定制安装。让我们一起了解一下这些常见参数。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{DESTINATION}
 
-这个参数允许\texttt{install(…)}指定安装目录，目录可以是相对路径也可以是绝对路径，相对路径是相对于\texttt{CMAKE\_INSTALL\_PREFIX}的，建议使用相对路径使安装可重定位。另外，使用相对路径进行打包也很重要，因为cpack要求安装路径是相对的。最好使用以相关GNUInstallDirs变量开始的路径，以便包维护人员在需要时覆盖安装目标。DESTINATION参数可以与TARGETS，FILES，IMPORTED\_RUNTIME\_ARTIFACTS，EXPORT和DIRECTORY安装类型一起使用。
+这个参数允许\texttt{install(…)}指定安装目录，目录可以是相对路径，也可以是绝对路径。相对路径是相对于CMAKE\_INSTALL\_PREFIX的，建议使用相对路径使安装可重定位。另外，使用相对路径进行打包也很重要，因为cpack要求安装路径是相对路径。最好使用以相关GNUInstallDirs变量开始的路径，以便包维护人员在需要时覆盖安装目标。DESTINATION参数可以与TARGETS，FILES，IMPORTED\_RUNTIME\_ARTIFACTS，EXPORT和DIRECTORY安装类型一起使用。
 
 \hspace*{\fill} \\ %插入空行
 \noindent

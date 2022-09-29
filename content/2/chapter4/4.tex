@@ -23,7 +23,7 @@
 	\end{tabular}
 \end{table}
 
-CPack使用CMake的安装机制来填充包的内容，CPack使用CPackConfig.cmake中的配置细节， CPackSourceConfig.Cmake文件生成包。这些文件可以手动填写，也可以由CMake在CPack模块的帮助下自动生成。在已有的CMake项目上使用CPack，就像包含CPack模块一样简单，前提是该项目已有\texttt{install(…)}。包含CPack模块会导致CMake生成CPackConfig.cmake和CPackSourceConfig.cmake文件，这是打包项目所需的CPack配置。另外，附加包目标将用于构建步骤。这一步将构建项目并运行CPack，以便开始打包。当CMake或用户正确填充了CPack配置文件，就可以使用CPack。CPack模块允许定制包装过程，从而可以设置大量的CPack变量。这些变量分为两组——普通变量和生成器特定变量。公共变量影响所有包生成器，而生成器特定的变量只影响特定类型的生成器。下表显示了我们将在示例中最常使用的CPack变量:
+CPack使用CMake的安装机制来填充包的内容，CPack使用CPackConfig.cmake中的配置细节， CPackSourceConfig.Cmake文件生成包。这些文件可以手动填写，也可以由CMake在CPack模块的帮助下自动生成。在已有的CMake项目上使用CPack，就像包含CPack模块一样简单，前提是该项目已有\texttt{install(…)}。包含CPack模块会导致CMake生成CPackConfig.cmake和CPackSourceConfig.cmake文件，这是打包项目所需的CPack配置。另外，附加包目标将用于构建步骤。这一步将构建项目并运行CPack，以便开始打包。当CMake或用户正确填充了CPack配置文件，就可以使用CPack。CPack模块允许定制包装过程，从而可以设置大量的CPack变量。这些变量分为两组——普通变量和生成器特定变量。公共变量影响所有包生成器，而生成器特定的变量只影响特定类型的生成器。下表显示了我们在示例中最常使用的CPack变量:
 
 \begin{table}[H]
 	\centering
@@ -40,7 +40,7 @@ CPack使用CMake的安装机制来填充包的内容，CPack使用CPackConfig.cm
 	\end{tabular}
 \end{table}
 
-包含CPack模块之前，必须对变量进行更改。否则，将使用默认值。这里通过一个示例来了解CPack的实际应用，将使用第4章，例6 (chapter4/ex06\_pack)的示例。此示例构造为一个独立的项目，并不是根示例项目的一部分。它是一个常规项目，有两个子目录，分别名为executable和library。可执行目录的CMakeLists.txt文件如下所示:
+包含CPack模块之前，必须对变量进行更改，否则使用默认值。这里通过一个示例来了解CPack的实际应用，将使用第4章，例6(chapter4/ex06\_pack)的示例。此示例构造为一个独立的项目，并不是根示例项目的一部分。它是一个常规项目，有两个子目录，分别名为executable和library。可执行目录的CMakeLists.txt文件如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch4_ex06_executable src/main.cpp)
@@ -67,7 +67,7 @@ install (
 )
 \end{lstlisting}
 
-这些文件夹的CMakeLists.txt文件不包含任何不同寻常的东西。它们包含常规的、可安装的CMake目标，并没有声明关于CPack的内容。让我们看看顶层的CMakeLists.txt文件:
+这些文件夹的CMakeLists.txt文件包含常规的、可安装的CMake目标，并没有声明关于CPack的内容。让我们看看顶层的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -92,7 +92,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "CTT Authors")
 include(CPack)
 \end{lstlisting}
 
-顶层CMakeLists.txt文件除了最后四行之外，几乎和一个普通的顶层CMakeLists.txt文件无异。它设置了三个与CPack相关的变量，然后包含了CPack模块。这四条线足以提供基本的CPack支持。CPACK\_PACKAGE\_NAME和CPACK\_PACKAGE\_VERSION\_*变量没有让CPACK从顶层项目的名称和版本参数中进行推断。让我们配置这个项目，看看是否工作:
+顶层CMakeLists.txt文件除了最后四行之外，几乎和一个普通的顶层CMakeLists.txt文件无异。它设置了三个与CPack相关的变量，然后包含了CPack模块，这四行足以提供基本的CPack支持。CPACK\_PACKAGE\_NAME和CPACK\_PACKAGE\_VERSION\_*变量没有让CPACK从顶层项目的名称和版本参数中进行推断。让我们配置这个项目，看看是否工作正常:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_4/ex06_pack
@@ -148,7 +148,7 @@ Hello, world!
 
 没问题!作为练习，请尝试安装RPM和tar.bz2包。
 
-本节中，学习了如何使用CPack来打包我们的项目，这绝不是一个详尽的指南。CPack本身值得用几章来详细介绍。这样，我们就成功地完成了这一章的结尾。
+本节中，学习了如何使用CPack来打包我们的项目，这绝不是一个详尽的指南，CPack本身值得用几章来详细介绍。
 
 
 
