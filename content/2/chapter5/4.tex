@@ -1,7 +1,7 @@
 
-将依赖项添加到项目中最简单的方法是使用apt-get、brew或Chocolatey进行安装。安装的缺点是，可能会使用许多不同版本的库污染系统，并且所寻找的版本可能根本不可用。若正在处理多个项目，同时对依赖关系有不同的需求，那么这一点尤其重要。通常，开发人员会在本地为每个项目下载依赖项，以便每个项目能够独立工作。处理依赖关系的一个方法是使用包管理器，例如Conan或vcpkg。
+将依赖项添加到项目中最简单的方法是使用apt-get、brew或Chocolatey进行安装。安装的缺点是，可能会使用许多不同版本的库污染系统，并且所寻找的版本可能根本不可用。若正在处理多个项目，同时对依赖关系有不同的需求，那么这一点尤其重要。通常，开发人员会在本地为每个项目下载依赖项，以便每个项目能够独立工作。处理依赖关系的一种方法是使用包管理器，例如Conan或vcpkg。
 
-在依赖性管理方面，使用专用的包管理器有许多优点。处理C++依赖的两个比较流行的是Conan和vcpkg。它们都可以处理复杂的构建系统，掌握它们需要阅读相关的书籍，所以这里只介绍使用它们所需的基本知识。本书中，我们将着重于使用CMake项目中已经提供的包，而不是自己创建的包。
+在依赖性管理方面，使用专用的包管理器有许多优点。处理C++依赖的两个比较流行的是Conan和vcpkg，都可以处理复杂的构建系统。想要完全了解它们需要阅读相关的书籍，所以这里只介绍使用它们所需的基本知识。本书中，我们将着重于使用CMake项目中已经提供的包，而不是自己创建的包。
 
 \subsubsubsection{5.4.1\hspace{0.2cm}获取依赖——Conan}
 
@@ -9,11 +9,11 @@
 
 Conan最强大的特性是可以为多个平台、配置和版本创建和管理二进制包。创建包时，使用conanfile.py文件描述它们，该文件列出了所有依赖项、源和构建指令。
 
-使用Conan客户机构建包并将其上传到远程服务器。这还有一个好处，若找不到适合本地配置的二进制包，则可以从它的源代码在本地构建该包。
+使用Conan客户机构建包并将其上传到远程服务器。这还有一个好处，若找不到适合本地配置的二进制包，可以使用源码在本地构建。
 
-用CMake使用Conan的一个非常方便的方法是使用CMake本身的Conan。若不想这样做，可以在外部使用Conan。虽然不是严格必要的，但建议在使用Conan之前使用\texttt{find\_program}检查Conan程序是否存在。
+用CMake使用Conan的方法是使用CMake本身的Conan。若不想这样做，可以在外部使用Conan，但建议在使用Conan之前使用\texttt{find\_program}检查Conan程序是否存在。
 
-为了直接从CMake中调用Conan，Conan提供了一个CMake包装程序供下载。下面的例子下载了conan-cmake包装器，然后从ConanCenter中提取fmt格式化库作为项目中的常规库:
+为了直接从CMake中使用Conan，Conan提供了一个CMake包装程序供下载。下面的例子下载了conan-cmake包装器，然后从ConanCenter中提取fmt格式化库作为项目中的常规库:
 
 \begin{lstlisting}[style=styleCMake]
 if(NOT EXISTS "${CMAKE_CURRENT_BINARY_DIR}/conan.cmake")
@@ -55,10 +55,10 @@ CMake代码做了以下事情:
 
 \begin{enumerate}
 \item 
-若还没有下载，conan.cmake文件将会下载到当前二进制目录下。
+若还没有下载cmake-conan，conan.cmake文件将会下载到当前二进制目录下。
 
 \item 
-接下来，包含它使Conan函数可用。
+接下来，使Conan函数可用。
 
 \item 
 当包含Conan，就可以从当前的CMake配置中检测设置，如编译器、平台等，并将它们存储在CONAN\_SETTING变量中。
@@ -82,7 +82,7 @@ SETTINGS将检索到设置传递给Conan。
 完成下载后，可以使用\texttt{find\_package}来包含依赖项，然后像往常一样添加到现有目标中。
 \end{enumerate}
 
-与其直接在CMake中声明依赖项，还可以直接提供conanfile.txt文件:
+还可以直接提供conanfile.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 [requires]
@@ -91,26 +91,24 @@ fmt/6.1.2
 cmake_find_package
 \end{lstlisting}
 
-这里，不运行conan\_cmake\_configure和conan\_cmake\_install，而是通过conan\_cmake\_run调用conan。调整前面的示例以使用conanfile.txt文件将类似于以下内容(下载conan.cmake文件保持不变):
+不运行conan\_cmake\_configure和conan\_cmake\_install，而是通过conan\_cmake\_run调用conan。调整前面的示例以使用conanfile.txt文件将类似于以下内容(下载conan.cmake文件保持不变):
 
 \begin{lstlisting}[style=styleCMake]
 include(${CMAKE_CURRENT_BINARY_DIR}/conan.cmake)
 conan_cmake_autodetect(CONAN_SETTINGS)
-conan_cmake_run(CONANFILE ${CMAKE_CURRENT_LIST_DIR}/conanfile.
-	txt
+conan_cmake_run(CONANFILE ${CMAKE_CURRENT_LIST_DIR}/conanfile.txt
 	BASIC_SETUP
 	BUILD missing
 	SETTINGS ${CONAN_SETTINGS})
 list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_BINARY_DIR})
 find_package(fmt 6.1 REQUIRED)
 add_executable(conan_conanfile_example)
-target_link_libraries(conan_conanfile_example PRIVATE
-	fmt::fmt)
+target_link_libraries(conan_conanfile_example PRIVATE fmt::fmt)
 \end{lstlisting}
 
-此设置与前面的示例类似，不同之处是Conan指向conanfile.txt文件，而不是由CMake指令生成它。BASIC\_SETUP会告诉Conan自动创建必要的CMake变量，conan\_cmake\_run命令也可以用来运行所有conan命令。
+此设置与前面的示例类似，不同之处是Conan指向conanfile.txt文件。BASIC\_SETUP会告诉Conan自动创建必要的CMake变量，conan\_cmake\_run也可以用来运行所有conan命令。
 
-当然，Conan也可以从CMake外部使用。有些人认为这是一种更简洁的方法，因为Conan和CMake之间的关注点是分离的，但维护起来会很繁琐。关于依赖项的信息必须在两个地方进行跟踪，而且构建配置，例如：编译器、libc版本、平台等，不仅必须为CMake配置，也必须为Conan配置。
+当然，Conan也在CMake外部使用。有些人认为这是一种更简洁的方法，因为Conan和CMake之间的关注点是分离的，但维护起来会很繁琐。关于依赖项的信息必须在两个地方进行跟踪，而且构建配置，例如：编译器、libc版本、平台等，不仅必须为CMake配置，也必须为Conan配置。
 
 完整的Conan文档可参阅\url{https://docs.conan.io/en/latest/}。
 
@@ -132,7 +130,7 @@ vcpkg install [packages]
 	[
 	"someLibrary",
 	"anotherLibrary",
-] 
+	] 
 }
 \end{lstlisting}
 
@@ -145,7 +143,7 @@ cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
 
 若以清单模式运行，则vcpkg.json文件中指定的包将自动下载并安装在本地。若以经典模式运行，则必须在运行CMake之前手动安装这些包。当传递vcpkg工具链文件时，可以使用\texttt{find\_package}和\texttt{target\_link\_libraries}使用已安装的包。
 
-微软建议将vcpkg作为子模块安装在存储库中，与CMake根项目处于同一级别，但它可以安装在任何地方。设置工具链文件可能会在交叉编译时导致问题，因为CMAKE\_TOOLCHAIN\_FILE可能已经指向一个不同的文件。这种情况下，第二个工具链文件可以通过VCPKG\_CHAINLOAD\_TOOLCHAIN\_FILE传递，对CMake的调用看起来像这样:
+微软建议将vcpkg作为子模块安装在存储库中，与CMake根项目处于同一级别，可以安装在任何地方。设置工具链文件可能会在交叉编译时导致问题，因为CMAKE\_TOOLCHAIN\_FILE可能已经指向一个不同的文件，所以第二个工具链文件可以通过VCPKG\_CHAINLOAD\_TOOLCHAIN\_FILE传递:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
@@ -153,9 +151,9 @@ cmake -S <source_dir> -D <binary_dir> -DCMAKE_TOOLCHAIN_
   _CHAINLOAD_TOOLCHAIN_FILE=/path/to/other/toolchain.cmake
 \end{tcblisting}
 
-Conan和vcpkg只是C++和CMake中流行的两个包管理器。当然，还有更多知识点这里没有提及，但需要单独的一本书来描述它们。特别是当项目变得更加复杂时，强烈建议使用包管理器。
+Conan和vcpkg只是C++和CMake中流行的两个包管理器。当然，还有更多知识点这里没有提及，但需要单独的书来描述它们。特别是当项目变得更加复杂时，强烈建议使用包管理器。
 
-选择哪个包管理器取决于开发项目的环境和个人偏好。Conan比vcpkg有一点优势，因为它在更多的平台上得到支持，它可以在任何Python运行的地方运行。就交叉编译的特性和能力而言，两者不相上下。总之，Conan提供了更高级的配置选项和对包的控制，这是以更复杂的处理为代价的。处理本地依赖关系的另一种方法是通过使用容器、sysroot等创建完全隔离的构建环境，这将在第12章中讨论。现在，假设我们正在使用标准系统安装运行CMake。
+选择哪个包管理器取决于开发项目的环境和个人偏好。Conan比vcpkg有一点优势，因为它在更多的平台上得到支持，可以在Python运行的地方运行。就交叉编译的特性和能力而言，两者不相上下。总之，Conan提供了更高级的配置选项和对包的控制，这是以更复杂的处理为代价的。处理本地依赖关系的另一种方法是通过使用容器、sysroot等创建完全隔离的构建环境，这将在第12章中讨论。现在，假设我们正在使用标准系统安装运行CMake。
 
 处理特定于项目的依赖项时，推荐使用包管理器进行依赖项管理。然而，有时无法选择使用包管理器。这可能是因为公司政策或其他原因。这中情况下，CMake还支持将下载依赖项作为源，并将它们作为外部目标集成到项目中。
 

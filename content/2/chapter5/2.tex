@@ -1,7 +1,7 @@
 
-大多数项目的规模和复杂性都会迅速增长，它们依赖于文件、库，甚至可能是在项目外部管理的程序。CMake提供了内置指令可用来进行查找。搜索和寻找东西的过程似乎相当简单，但仔细分析一下，有很多事情需要考虑。首先，必须处理在哪里查找文件的搜索顺序。然后，可能想要添加文件可能所在的其他位置。最后，必须考虑不同操作系统之间的差异。
+大多数项目的规模和复杂性都会迅速增长，依赖于文件、库，甚至是项目外部的程序。CMake提供的内置指令可用来进行查找。搜索和寻找好像相当简单，但仔细分析一下，有很多事情需要考虑。首先，必须处理在哪里查找文件的搜索顺序。然后，可能想要添加文件可能所在的其他位置。最后，必须考虑不同操作系统之间的差异。
 
-在单个文件的更高抽象级别上，CMake能够查找定义目标、包括路径和包特定变量的整个包。更多细节请参考CMake项目部分中的库。
+CMake能够查找定义目标、包括路径和包特定变量的整个包。更多细节请参考CMake项目部分中的库。
 
 有五个\texttt{find\_…}指令，它们选项和行为非常相似:
 
@@ -22,7 +22,7 @@ find\_program: 查找可执行程序。
 find\_package: 查找完整的包。
 \end{itemize}
 
-所有这些命令都以类似的方式工作，但在查找位置方面有一些区别。特别是，\texttt{find\_package}不仅定位文件、查找包，还使得文件在CMake项目中更易于使用。本章中，在介绍如何查找包之前，先看一下比较简单的\texttt{find}函数。
+所有这些命令都以类似的方式工作，但在查找位置方面有一些区别。特别是，\texttt{find\_package}不仅定位文件、查找包，还使得文件在CMake项目中更易于使用。本章中，在介绍如何查找包之前，先了解一下\texttt{find}指令。
 
 \subsubsubsection{5.2.1\hspace{0.2cm}查找文件和路径}
 
@@ -50,17 +50,17 @@ find_file (
 	)
 \end{lstlisting}
 
-上面的命令搜索单个文件(文件名)，或者搜索可能的文件名列表(使用\texttt{NAMES}选项)。生成的路径存储在作为<VAR>变量中。若找不到文件，变量将为\texttt{<VARIABLENAME>-NOTFOUND}。
+上面的命令搜索单个文件(文件名)，或者搜索可能的文件名列表(使用NAMES)。生成的路径存储在作为<VAR>变量中。若找不到文件，变量将为<VARIABLENAME>-NOTFOUND。
 
-若要搜索的文件名有变化，比如不同的大写字母或命名约定，可能包含版本号，那么可以使用名称列表。传递名称列表时，当找到第一个文件，搜索就会停止，所以应按首选方式对名称进行排序。
+若要搜索的文件名有变，比如不同的大写字母或命名约定，可能包含版本号，那么可以使用名称列表。传递名称列表时，当找到第一个文件，搜索就会停止，所以应按首选方式对名称进行排序。
 
 \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=搜索包含版本号的文件]
 建议在搜索包含某种版本编号形式的文件名前，先搜索没有版本编号的文件名。这是为了使本地构建的文件优于操作系统安装的文件。
 \end{tcolorbox}
 
-\texttt{HINTS}和\texttt{PATHS}选项包含搜索文件的默认位置之外的其他位置。\texttt{PATH\_SUFFIXES}可以包含许多子目录，在每个位置的下面搜索这些子目录。
+HINTS和PATHS选项包含搜索文件的默认位置之外的其他位置。PATH\_SUFFIXES可以包含许多子目录，在这些位置的下面搜索相应的子目录。
 
-\texttt{find\_…}指令在已定义的位置和顺序中进行搜索。\texttt{NO\_...\_PATH}参数可以用来跳过相应的位置。下表显示了搜索位置的顺序和跳过位置的选项:
+\texttt{find\_…}指令在已定义的位置和顺序中进行搜索，NO\_...\_PATH参数可以用来跳过相应的位置。下表显示了搜索位置的顺序和跳过位置的选项:
 
 \begin{table}[H]
 	\centering
@@ -81,10 +81,10 @@ find_file (
 
 \begin{itemize}
 \item 
-包的根变量: 这只在\texttt{find\_file}作为\texttt{find\_package}的一部分时使用才有用。请参考CMake项目中的“使用第三方库”部分。
+包的根变量: 只在\texttt{find\_file}作为\texttt{find\_package}的一部分时使用才有用。
 
 \item 
-特定于CMake的缓存变量: 从macOS的CMAKE\_PREFIX\_PATH，CMAKE\_INCLUDE\_PATH和CMAKE\_FRAMEWORK\_PATH缓存变量派生的位置。一般设置CMAKE\_PREFIX\_PATH缓存变量优于其他两种类型，因为它用于所有\texttt{find\_}指令。前缀路径是位于常用文件结构(如bin、lib、include等)的搜索基点。CMAKE\_PREFIX\_PATH是一个路径列表，对于其中每一个，\texttt{find\_file}都会搜索/include或/include/\$\{CMAKE\_LIBRARY\_ARCHITECTURE\}(若变量已经设置)。一般CMake会自动设置变量，开发人员不应该更改它们。特定于架构的路径优先于通用路径。
+特定于CMake的缓存变量: 从macOS的CMAKE\_PREFIX\_PATH，CMAKE\_INCLUDE\_PATH和CMAKE\_FRAMEWORK\_PATH缓存变量派生的位置。通常设置CMAKE\_PREFIX\_PATH缓存变量优于其他两种类型，因为它可用于所有\texttt{find\_}指令。前缀路径是位于常用文件结构(如bin、lib、include等)的搜索基点。CMAKE\_PREFIX\_PATH是一个路径列表，对于其中每一个，\texttt{find\_file}都会搜索/include或/include/\$\{CMAKE\_LIBRARY\_ARCHITECTURE\}(若变量已经设置)。一般CMake会自动设置变量，开发人员不应该更改。特定于架构的路径优先于通用路径。
 
 \item 
 CMAKE\_INCLUDE\_PATH和CMAKE\_FRAMEWORK\_PATH缓存变量，仅当标准目录结构不适用时才应使用。它们不向路径添加额外的include后缀。
@@ -96,7 +96,7 @@ CMAKE\_INCLUDE\_PATH和CMAKE\_FRAMEWORK\_PATH缓存变量，仅当标准目录�
 系统环境变量: 从CMAKE\_PREFIX\_PATH、CMAKE\_INCLUDE\_PATH和CMAKE\_FRAMEWORK\_PATH系统环境变量派生。这些变量的工作方式与缓存变量相同，但通常在CMake的外部设置。
 
 \item 
-注意，在Unix平台上，列表用冒号(:)而不是分号(;)分隔，以符合特定于平台的环境变量。
+在Unix平台上，列表用冒号(:)而不是分号(;)分隔，以符合特定于平台的环境变量。
 
 \item 
 HINTS选项中的路径: 这些是手动指定的附加搜索位置。可以从属性值等其他值构造，也可以依赖于以前找到的文件或路径。
@@ -131,7 +131,7 @@ C:\verb|\|yourfolder\verb|\|
 \end{enumerate}
 
 \item 
-系统缓存变量: CMAKE\_SYSTEM\_PREFIX\_PATH和CMAKE\_SYSTEM\_FRAMEWORK\_PATH变量类似于CMAKE特定的缓存变量。这些变量不应该由开发人员更改，而是在CMake设置平台工具链时进行配置。例外是，若提供了自己的工具链文件，例如使用sysroot或交叉编译。
+系统缓存变量: CMAKE\_SYSTEM\_PREFIX\_PATH和CMAKE\_SYSTEM\_FRAMEWORK\_PATH变量类似于CMAKE特定的缓存变量。这些变量不应该由开发人员更改，而是在CMake设置平台工具链时进行配置。例外是，若提供了自定义工具链文件，例如使用sysroot或交叉编译。
 
 \item 
 除了NO\_CMAKE\_SYSTEM\_PATH选项，CMAKE\_FIND\_USE\_CMAKE\_SYSTEM\_PATH变量可以设置为false，以跳过由系统特定的缓存变量提供的位置的搜索。
@@ -142,17 +142,17 @@ PATHS选项中的路径: 与提示HINTS相同，这些是手动提供的附加�
 
 若只搜索由提示或路径提供的位置，添加NO\_DEFAULT\_PATH选项将跳过其他所有位置。
 
-有时，可能希望忽略用于搜索的特定路径。这种情况下，路径列表可以在CMAKE\_IGNORE\_PATH或CMAKE\_SYSTEM\_IGNORE\_PATH中指定。这两个变量在设计时都考虑到了交叉编译场景，很少在其他情况下使用。
+有时，可能希望忽略用于搜索的特定路径，路径列表可以在CMAKE\_IGNORE\_PATH或CMAKE\_SYSTEM\_IGNORE\_PATH中指定。这两个变量在设计时都考虑到了交叉编译场景，很少在其他情况下使用。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{交叉编译时搜索文件}
 
-交叉编译时，因为交叉编译工具链会收集到它们自包含的目录结构中，所以搜索文件的过程通常不同，而不与系统工具链混合。首先，需要在工具链的目录中查找文件。通过设置CMAKE\_FIND\_ROOT变量，可以将所有搜索的原点更改为一个新位置。
+交叉编译时，因为工具链会自包含其目录结构，所以搜索文件的过程比较特殊。首先，需要在工具链的目录中查找文件，通过设置CMAKE\_FIND\_ROOT变量，可以将所有搜索的原点更改为新位置。
 
-此外，CMAKE\_SYSROOT、CMAKE\_SYSROOT\_COMPILE和CMAKE\_SYSROOT\_LINK变量会影响搜索位置，但它们应该只在工具链文件中设置，而不是由项目本身设置。若常规搜索位置已经在sysroot或CMAKE\_FIND\_ROOT指定的位置下，它们将不会更改。任何以波浪号(~)开头并传递给\texttt{find\_}指令的路径都不会更改，以避免跳过用户主目录下的目录。
+此外，CMAKE\_SYSROOT、CMAKE\_SYSROOT\_COMPILE和CMAKE\_SYSROOT\_LINK变量会影响搜索位置，但它们应该只在工具链文件中设置，而不是由项目本身设置。若常规搜索位置已经在sysroot或CMAKE\_FIND\_ROOT指定的位置下，则不会更改。以波浪号(~)开头并传递给\texttt{find\_}指令的路径都不会更改，以避免跳过用户主目录下的目录。
 
-默认情况下，CMake首先在上一段中提供的位置中搜索，然后继续搜索主机系统。这种行为可以通过设置CMAKE\_FIND\_ROOT\_PATH\_MODE\_INCLUDE变量为BOTH、NEVER或ONLY进行全局性修改。或者，可以为\texttt{find\_file}设置CMAKE\_FIND\_ROOT\_PATH\_BOTH，ONLY\_CMAKE\_FIND\_ROOT\_PATH，或者NO\_CMAKE\_FIND\_ROOT\_PATH。
+通常，CMake首先在上一段中提供的位置中搜索，然后继续搜索主机系统。这种行为可以通过设置CMAKE\_FIND\_ROOT\_PATH\_MODE\_INCLUDE变量为BOTH、NEVER或ONLY进行全局性修改。或者，可以为\texttt{find\_file}设置CMAKE\_FIND\_ROOT\_PATH\_BOTH，ONLY\_CMAKE\_FIND\_ROOT\_PATH，或者NO\_CMAKE\_FIND\_ROOT\_PATH。
 
 下表显示了在不同的搜索模式下，设置选项或变量时的搜索顺序:
 
@@ -161,23 +161,23 @@ PATHS选项中的路径: 与提示HINTS相同，这些是手动提供的附加�
 	\begin{tabular}{|l|l|l|}
 		\hline
 		\textbf{模式} & \textbf{选项}             & \textbf{搜索顺序}         \\ \hline
-		Both &
+		BOTH &
 		CMAKE\_FIND\_ROOT\_PATH\_BOTH &
 		\begin{tabular}[c]{@{}l@{}}·CMAKE\_FIND\_ROOT\_PATH\\ ·CMAKE\_SYSROOT\_COMPILE\\ ·CMAKE\_SYSROOT\_LINK\\ ·CMAKE\_SYSROOT\\ ·常规搜索位置\end{tabular} \\ \hline
 		NEVER         & NO\_CMAKE\_FIND\_ROOT\_PATH & ·常规搜索位置 \\ \hline
 		ONLY &
 		ONLY\_CMAKE\_FIND\_ROOT\_PATH &
-		\begin{tabular}[c]{@{}l@{}}CMAKE\_FIND\_ROOT\_PATH\\ ·CMAKE\_SYSROOT\_COMPILE\\ ·CMAKE\_SYSROOT\_LINK\\ ·CMAKE\_SYSROOT\\ ·常规路径或CMAKE\_STAGINF\_PREFIX路径下   \end{tabular} \\ \hline
+		\begin{tabular}[c]{@{}l@{}}·CMAKE\_FIND\_ROOT\_PATH\\ ·CMAKE\_SYSROOT\_COMPILE\\ ·CMAKE\_SYSROOT\_LINK\\ ·CMAKE\_SYSROOT\\ ·常规路径或CMAKE\_STAGINF\_PREFIX路径下   \end{tabular} \\ \hline
 	\end{tabular}
 \end{table}
 
-CMAKE\_STAGING\_PREFIX变量用于为交叉编译提供安装路径，不应该通过在CMAKE\_SYSROOT变量上安装东西来改变它。设置交叉编译工具链将在第11章中详细介绍。
+CMAKE\_STAGING\_PREFIX用于为交叉编译提供安装路径，不应该通过在CMAKE\_SYSROOT进行安装从而进行改变。
 
 \subsubsubsection{5.2.2\hspace{0.2cm}查找应用}
 
-查找可执行文件非常类似于查找文件和路径，\texttt{find\_program}指令与\texttt{find\_file}几乎具有相同的签名。此外，\texttt{find\_program}有NAMES\_PER\_DIR选项，表明每次搜索一个目录，并在每个目录中搜索所有提供的文件名，而不是在每个目录中搜索每个文件。
+查找可执行文件非常类似于查找文件和路径，\texttt{find\_program}指令与\texttt{find\_file}几乎有相同的签名。此外，\texttt{find\_program}有NAMES\_PER\_DIR选项，表明每次搜索一个目录，并在每个目录中搜索所有提供的文件名，而不是在每个目录中搜索每个文件。
 
-在Windows上，.exe和.com文件扩展名会自动添加到提供的文件名中，而非.bat或.cmd。
+Windows上，.exe和.com文件扩展名会自动添加到提供的文件名中，而非.bat或.cmd。
 
 \texttt{find\_program}使用的缓存变量与\texttt{find\_file}使用的缓存变量略有不同:
 
@@ -189,10 +189,10 @@ CMAKE\_STAGING\_PREFIX变量用于为交叉编译提供安装路径，不应该�
 CMAKE\_LIBRARY\_ARCHITECTURE中的值会忽略，没有任何作用。
 
 \item 
-CMAKE\_PROGRAM\_PATH代替了CMAKE\_INCLUDE\_PATH。
+CMAKE\_PROGRAM\_PATH替换CMAKE\_INCLUDE\_PATH。
 
 \item 
-CMAKE\_APPBUNDLE\_PATH代替了CMAKE\_FRAMEWORK\_PATH。
+CMAKE\_APPBUNDLE\_PATH替换CMAKE\_FRAMEWORK\_PATH。
 
 \item 
 CMAKE\_FIND\_ROOT\_PATH\_MODE\_PROGRAM用于更改搜索程序的模式。
@@ -202,7 +202,7 @@ CMAKE\_FIND\_ROOT\_PATH\_MODE\_PROGRAM用于更改搜索程序的模式。
 
 \subsubsubsection{5.2.3\hspace{0.2cm}查找库}
 
-查找库是查找文件的特殊情况，因此\texttt{find\_library}支持与\texttt{find\_file}相同的选项集。与\texttt{find\_program}类似，也有附加的NAMES\_PER\_DIR选项，该选项首先检查所有文件名，然后再移动到下一个目录。查找常规文件和查找库之间的区别在于，\texttt{find\_library}自动将特定于平台的命名约定应用于文件名。在Unix平台上，名称将以lib作为前缀，而在Windows上，将添加.dll或.lib扩展名。
+查找库是查找文件的特殊情况，因此\texttt{find\_library}支持与\texttt{find\_file}相同的选项集。与\texttt{find\_program}类似，也有NAMES\_PER\_DIR选项，该选项首先检查所有文件名，然后再移动到下一个目录。查找常规文件和查找库之间的区别在于，\texttt{find\_library}自动将特定于平台的命名约定应用于文件名。在Unix平台上，名称将以lib作为前缀，而在Windows上，将添加.dll或.lib扩展名。
 
 同样，缓存变量与\texttt{find\_file}和\texttt{find\_program}中使用的变量略有不同:
 
@@ -217,13 +217,13 @@ CMAKE\_FIND\_ROOT\_PATH\_MODE\_PROGRAM用于更改搜索程序的模式。
 CMAKE\_FIND\_ROOT\_PATH\_MODE\_LIBRARY用于更改库的搜索模式。
 \end{itemize}
 
-CMake通常知道关于32位和64位搜索位置的约定，例如：为相同名称的不同库使用lib32和lib64文件夹的平台。该行为由FIND\_LIBRARY\_USE\_LIB[32|64|X32]\_PATHS变量控制，该变量控制应该首先搜索什么。此外，项目可以使用CMAKE\_FIND\_LIBRARY\_CUSTOM\_LIB\_SUFFIX变量定义自己的后缀，该变量将覆盖其他变量的行为。然而，这样做的需求非常少，修改CMakeLists.txt文件中的搜索顺序很快就会使项目难以维护，并严重影响系统间的可移植性。
+CMake通常知道关于32位和64位搜索位置的约定，例如：为相同名称的不同库使用lib32和lib64文件夹的平台。该行为由FIND\_LIBRARY\_USE\_LIB[32|64|X32]\_PATHS变量控制，该变量控制应该首先搜索什么。此外，项目可以使用CMAKE\_FIND\_LIBRARY\_CUSTOM\_LIB\_SUFFIX变量定义自己的后缀，该变量将覆盖其他变量的行为。这样做的需求非常少，修改CMakeLists.txt文件中的搜索顺序很快就会使项目难以维护，并严重影响在系统间的可移植性。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
 \textbf{查找静态或动态库}
 
-大多数情况下，简单地将库名称传递给CMake就足够了。而有时，必须重写该行为。这样做的原因是，在某些平台上，是否应该优先使用静态版本的库，而非动态版本的库，反之亦然。做到这一点的最佳方法是将\texttt{find\_library}拆分为两个调用，而不是试图在一个调用中实现这一点。若静态库与动态库位于不同的目录中，则健壮性更强:
+大多数情况下，简单地将库名称传递给CMake就足够了。而有时，必须重写该行为。这样做的原因是，在某些平台上，是否应该优先使用静态版本的库，而非动态版本的库，反之亦然。做到这一点的最佳方法是将\texttt{find\_library}拆分为两个调用，而不是试图在一个调用中实现这一点。若静态库与动态库位于不同的目录中，则鲁棒性更强:
 
 \begin{lstlisting}[style=styleCMake]
 find_library(MYSTUFF_LIBRARY libmystuff.a)
