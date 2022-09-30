@@ -1,10 +1,6 @@
-打包文档与打包软件及其工件没有什么不同——文档是项目的工件。因此，我们将使用在第4章中学到的技术来打包文档。
+打包文档与打包软件及其工件没有什么不同——文档是项目的工件。因此，我们将使用在第4章中学到的知识来打包文档。若还没有阅读第4章，强烈建议在阅读本节之前阅读。
 
-\begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-若还没有阅读第4章，强烈建议您在阅读本节之前阅读。
-\end{tcolorbox}
-
-为了说明这一节，我们使用第6章-例01，将使在此示例中生成的文档可安装和可打包。让我们回顾 CMakeLists.txt文件，它位于chapter\_6/ex01\_doxdocgen/文件夹中。使用以下代码，将使HTML和MAN文档可安装:
+这一节，我们使用第6章的例01，将使在此示例中生成的文档可安装和可打包。让我们回顾 CMakeLists.txt文件，它位于chapter\_6/ex01\_doxdocgen/文件夹中。使用以下代码，将使HTML和MAN文档可安装:
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
@@ -16,7 +12,7 @@ install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/man/"
 		ch6_ex01_man)
 \end{lstlisting}
 
-还记得在第4章中使用\texttt{install(DIRECTORY…)}来安装任何类型的文件夹，同时保留其结构吗?我们通过将docs/html和docs/man安装到GNUInstallDirs模块提供的默认文档和手册页目录中，使生成的文档可安装。另外，若是可安装的，就意味着也是可打包的，因为CMake能够从\texttt{install(…)}生成所需的打包代码。因此，包含CPack模块来为这个示例启用打包。代码如下所示:
+第4章中使用\texttt{install(DIRECTORY…)}来安装文件夹，同时保留其结构。我们通过将docs/html和docs/man安装到GNUInstallDirs模块提供的默认文档和手册页目录中，使生成的文档可安装。另外，若是可安装的，就意味着也是可打包的，因为CMake能够从\texttt{install(…)}生成所需的打包代码。因此，包含CPack模块来为这个示例启用打包。代码如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 set(CPACK_PACKAGE_NAME cbp_chapter6_example01)
@@ -26,7 +22,7 @@ set(CPACK_DEBIAN_PACKAGE_MAINTAINER "CBP Authors")
 include(CPack)
 \end{lstlisting}
 
-结果出来了!就这么简单。让我们尝试通过调用以下命令来构建和打包示例项目:
+就这么简单。尝试使用以下命令来构建和打包示例项目:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_6/
@@ -35,7 +31,7 @@ cmake --build build/
 cpack --config build/CPackConfig.cmake -B build/pak
 \end{tcblisting}
 
-总结一下这里发生了什么。配置并构建了chapter\_6/的代码，并调用CPack来使用生成的CPackConfig.cmake将项目打包到build/pak文件夹中。为了检查是否一切正常，通过调用以下命令将生成的包的内容提取到/tmp/ch6-ex01目录中:
+这里，配置并构建了chapter\_6/的代码，并使用CPack来使用生成的CPackConfig.cmake将项目打包到build/pak文件夹中。为了检查是否一切正常，通过使用以下命令将生成的包的内容提取到/tmp/ch6-ex01目录中:
 
 \begin{tcblisting}{commandshell={}}
 dpkg -x build/pak/cbp_chapter6_example01-1.0-Linux.deb
@@ -49,9 +45,9 @@ export MANPATH=/tmp/ch6-ex01/usr/share/man/
 man chapter6_ex01_calculator
 \end{tcblisting}
 
-chapter6\_ex01\_calculator名称由Doxygen从chapter6::ex01::calculator类名称自动推导出来，应该能够看到我们在前一节中介绍的手册页输出。
+chapter6\_ex01\_calculator名称由Doxygen从chapter6::ex01::calculator类名称自动推导出来的，应该能够看到我们在前一节中介绍的手册页输出。
 
-我们已经学习了大量关于生成和打包文档的知识。接下来，将学习如何生成CMake目标的依赖关系图。
+我们已经了解了关于生成和打包文档的知识。接下来，将学习如何生成CMake目标的依赖关系图。
 
 
 

@@ -1,6 +1,6 @@
 
 
-我们已经讨论了软件代码的文档化和图形化，但在一个大型项目中，可能还需要文档化和可视化CMake代码。CMake目标之间的关系可能很复杂，这可能使跟踪所有依赖关系变得困难。CMake可以通过提供一个显示目标之间所有依赖关系的图表来帮助解决这个问题。通过cmake -{}-graphviz=my-project.dot /path/to/build/dir，CMake将用dot创建包含目标如何相互依赖的文件。
+我们已经讨论了软件代码的文档化和图形化，但在大型项目中，可能还需要文档化和可视化CMake代码。CMake目标之间的关系可能很复杂，这可能使跟踪所有依赖关系变得困难。CMake可以通过提供一个显示目标之间所有依赖关系的图表来帮助解决这个问题。通过cmake -{}-graphviz=my-project.dot /path/to/build/dir，CMake将用dot创建包含目标如何相互依赖的文件。
 
 DOT语言是一种用于图形的描述语言，可以由许多程序进行解释，其中最著名的是免费的Graphviz。DOT文件可以使用Graphviz中的DOT命令行实用程序转换为图像，甚至可移植文档格式(PDF)文件:dot -Tpng filename.dot -o out.png。
 
