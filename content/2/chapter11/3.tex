@@ -1,15 +1,14 @@
 
-这一节中，将了解可能使用过的两个著名的模糊测试工具，即libFuzzer和AFL++。我们从学习libFuzzer开始。
+这一节中，将了解可能使用过的两个著名的模糊测试工具，即libFuzzer和AFL++，从libFuzzer开始。
 
 \subsubsubsection{11.3.1\hspace{0.2cm}libFuzzer}
 
-libFuzzer是LLVM项目中的模糊测试库。若项目可以使用LLVM工具链进行编译，那么libFuzzer是默认的模糊测试器，使用libFuzzer需要额外的编译器/链接器标志和定义一个函数。接下来，通过一个示例来深入了解更多的细节。
+libFuzzer是LLVM项目中的模糊测试库。若项目可以使用LLVM工具链进行编译，那么libFuzzer是默认的模糊测试器，使用libFuzzer需要额外的编译器/链接器标志和定义一个函数。通过一个示例来深入了解更多的细节。
 
 为了在实践中进行模糊测试，先从chapter\_11/ex01\_libfuzzer\_static\_lib开始。例子中，假设有一个易受攻击的静态库目标，名为message\_printer。这是一个简单的库，只有一个接口函数print()，接受const char*和length参数。假设这个库存在的漏洞，是因为没有意识到的边界情况而触发的。函数实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
-void message_printer::print(const char *msg, std::uint32_t
-len) {
+void message_printer::print(const char *msg, std::uint32_t len) {
 	constexpr char a [] = "Hello from CMake Best
 	Practices!";
 	if(len < sizeof(a)){
@@ -25,9 +24,9 @@ len) {
 }
 \end{lstlisting}
 
-print()解引null指针会导致未定义行为，当msg输入恰好包含在a变量中，表示函数中未发现漏洞的字符串时。我们例子中的漏洞很容易发现，但现实中的漏洞和未定义行为要比这隐藏的深得多。
+print()解引空指针会导致未定义行为，当msg输入恰好包含在a变量中，表示函数中未发现漏洞的字符串时。例子中的漏洞很容易发现，但现实中的漏洞和未定义行为要比这隐藏的深得多。
 
-目标在手了，现在需要一个小型驱动程序，它将libFuzzer生成的模糊测试数据提供给message\_printer::print()，从而执行模糊测试。为此，必须将驱动器程序与message\_printer库，以及libFuzzer链接起来。先看看CMakeLists.txt的驱动程序示例:
+目标在手了，现在需要一个小型驱动程序，将libFuzzer生成的模糊测试数据提供给message\_printer::print()，从而执行模糊测试。为此，必须将驱动器程序与message\_printer库，以及libFuzzer链接起来。先看看CMakeLists.txt的驱动程序示例:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch11_ex01_libfuzzer_fuzz)
@@ -39,9 +38,9 @@ target_compile_options(ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
 target_link_libraries(ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
 \end{lstlisting}
 
-我们定义了一个名为ch11\_ex01\_libfuzzer\_fuzz的可执行目标，它链接到模糊测试目标ch11\_ex01\_libfuzzer\_static。这里，需要将-fsanitize=fuzzer参数同时传递给编译器和链接器，为LLVM工具链启用libFuzzer。不幸的是，libFuzzer是特定于llvm的，目前还不能用于GCC。以上就是模糊测试驱动程序CMake端的全部了。
+我们定义了一个名为ch11\_ex01\_libfuzzer\_fuzz的可执行目标，它链接到模糊测试目标ch11\_ex01\_libfuzzer\_static。这里，需要将-fsanitize=fuzzer参数同时传递给编译器和链接器，为LLVM工具链启用libFuzzer。但libFuzzer是特定于llvm的，目前还不能用于GCC。以上就是模糊测试驱动程序CMake端的全部了。
 
-模糊测试驱动程序的实现非常简单。为了从libFuzzer得到生成的模糊测试数据，需要实现libFuzzer能够识别的函数，这个函数称为模糊测试入口。这个函数有一个特定的声明，看起来像这样:
+模糊测试驱动程序的实现非常简单。为了从libFuzzer得到生成的模糊测试数据，需要实现libFuzzer能够识别的函数，这个函数称为模糊测试入口。函数有一个特定的声明:
 
 \begin{lstlisting}[style=styleCXX]
 extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t
@@ -64,9 +63,9 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t
 }
 \end{lstlisting}
 
-可以看到，模糊测试函数的实现很简单。我们构建了一个message\_printer的实例，并使用libFuzzer生成的数据和大小调用了print()，其余的由libFuzzer自动处理。细心的读者可能已经注意到，示例应用程序没有main()函数，这是有意为之的。libFuzzer库提供了一个main()函数，引导模糊测试框架最终调用模糊测试的入口点。
+模糊测试函数的实现很简单。我们构建了一个message\_printer的实例，并使用libFuzzer生成的数据和大小调用了print()，其余的由libFuzzer自动处理。细心的读者可能已经注意到，示例应用程序没有main()函数。libFuzzer库提供了一个main()函数，引导模糊测试框架最终调用模糊测试的入口点。
 
-现在来看看驱动程序应用的实际情况，我们用以下命令配置和构建示例:
+现在来看看驱动程序应用的实际情况，用以下命令配置和构建示例:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_11/
@@ -74,7 +73,7 @@ cmake --preset="ninja-debug-clang-13" -S ./ -B build/
 cmake --build build/
 \end{tcblisting}
 
-这里，因为libFuzzer示例需要clang编译器，所以显式地指定了ninja-debug-clang-13预设。构建好这个例子之后，可以执行下面的命令来运行模糊测试驱动程序:
+因为libFuzzer示例需要clang编译器，所以显式地指定了ninja-debug-clang-13预设。构建好这个例子之后，可以执行下面的命令，来运行模糊测试的驱动程序:
 
 \begin{tcblisting}{commandshell={}}
 cd build/ex01_libfuzzer_static_lib/fuzz/
@@ -126,7 +125,7 @@ Base64: SGVsbG8gZnJvbSBDTWFrZSBCZXN0IFByYWN0a
 WNlcyEANJet/X8AAABkSAAuAA==
 \end{tcblisting}
 
-即使之前没有提供语料库数据，libFuzzer也能够立即触发未定义行为。这样做的原因是因为LLVM的libFuzzer在目标函数上可以得到更高的覆盖率。可以想象，想要从“CMake Best Practices”中找到“Hello !”，使用随机生成的字符串是不可能做到的。这类似于破解32位密码，用目前的硬件几乎不可能做到。使用这种方法，模糊测试器不可能找到隐藏的特别深的问题。因此，-fsanitize=fuzzer标志的LLVM在这里所做的是将比较数据分割为更易于管理的多个比较数据。对于32个字符长的字符串，LLVM会进行\{N\}次小比较。结果比较类似于如下方式:
+即使之前没有提供语料库，libFuzzer也能够立即触发未定义行为。这样做的原因是因为LLVM的libFuzzer在目标函数上可以得到更高的覆盖率。想要从“CMake Best Practices”中找到“Hello !”，使用随机生成的字符串是不可能做到的。这类似于破解32位密码，用目前的硬件几乎不可能做到。使用这种方法，模糊测试器不可能找到隐藏的特别深的问题。因此，-fsanitize=fuzzer标志的LLVM在这里所做的是将比较数据分割为更易于管理的多个比较数据。对于32个字符长的字符串，LLVM会进行\{N\}次小比较。结果比较类似于如下方式:
 
 \begin{lstlisting}[style=styleCXX]
 if (*msg[0] == a[0]) {
@@ -140,17 +139,17 @@ if (*msg[0] == a[0]) {
 }
 \end{lstlisting}
 
-以这种方式进行比较可以让libFuzzer通过代码覆盖率数据快速找到每个字符。但这仍然类似于破解32位密码，只是这次密码验证系统会反馈是否正确猜测了每个数字。这种反馈将发现时间从无限缩短到瞬间。由于这种行为，我将libFuzzer称为灰盒模糊测试库。事实上，该技术是通过对汇编代码进行剪裁，使模糊测试更加高效，但我不认为这会带给模糊测试偏见。出于这个原因，我也不认为这种方法是完全的白盒策略，但这显然不是一个黑箱策略。因此，灰盒这个术语很适合用来描述这种方法。 
+以这种方式进行比较可以让libFuzzer通过代码覆盖率数据快速找到每个字符。但这仍然类似于破解32位密码，只是这次密码验证系统会反馈是否正确猜测了每个数字，这种反馈将发现时间从无限缩短到瞬间。由于这种行为，我将libFuzzer称为灰盒模糊测试库。事实上，该技术是通过对汇编代码进行剪裁，使模糊测试更加高效，但我不认为这会带给模糊测试偏见。出于这个原因，我也不认为这种方法是完全的白盒策略，但这显然不是一个黑箱策略。因此，灰盒这个术语很适合用来描述这种方法。 
 
-毫无疑问，使用编译器引导的模糊测试工具有很多好处。除了libFuzzer之外，LLVM工具链还有许多其他有用的工具，例如未定义行为清理器(UBSan)、地址清理器(ASan)和内存清理器(MSan)。考虑在项目中支持LLVM编译，以受益于所有这些有用的工具。启用这些工具对目标进行模糊测试，以发现那些原本不会被注意到的bug是一个好主意。
+使用编译器引导的模糊测试工具有很多好处。除了libFuzzer之外，LLVM工具链还有许多其他有用的工具，例如未定义行为清理器(UBSan)、地址清理器(ASan)和内存清理器(MSan)。考虑在项目中支持LLVM编译，以受益于所有这些有用的工具。启用这些工具对目标进行模糊测试，以发现那些原本不会被注意到的bug是一个好主意。
 
-说了这么多，举一个真实的例子，我建议大家看一下\url{https://google.github.io/clusterfuzz/setting-up-fuzzing/heartbleed-example/}，了解使用libFuzzer如何发现OpenSSL著名的Heartbleed漏洞。另外，可以考虑在\url{https://llvm.org/docs/LibFuzzer.html}上阅读LLVM的官方libFuzzer文档，包含了关于libFuzzer的模糊概念和使用示例等信息。
+举一个真实的例子，我建议大家看一下\url{https://google.github.io/clusterfuzz/setting-up-fuzzing/heartbleed-example/}，了解使用libFuzzer如何发现OpenSSL著名的Heartbleed漏洞。另外，可以考虑在\url{https://llvm.org/docs/LibFuzzer.html}上阅读LLVM的官方libFuzzer文档，包含了关于libFuzzer的模糊概念和使用示例等信息。
 
 接下来，我们将研究另一个模糊测试工具——American Fuzzy Lop(AFL)。
 
 \subsubsubsection{11.3.2\hspace{0.2cm}AFL++}
 
-若因为某种原因无法使用GCC，并且无法使用LLVM编译代码，那么可以使用AFL模糊测试器替换libFuzzer。不幸的是，原来的项目不再维护了，但不要灰心。项目的一个更好的增强版本AFL++仍然在维护中。这一节中，将学习如何在GCC中使用AFL++。
+若因为某种原因无法使用GCC，并且无法使用LLVM编译代码，那么可以使用AFL模糊测试器替换libFuzzer。但原始的项目不再维护了，但项目的一个更好的增强版本AFL++仍然在维护中。这一节中，将学习如何在GCC中使用AFL++。
 
 遵循类似于前面libFuzzer示例的示例，但使用的是AFL++和GCC，而不是libFuzzer和LLVM。在继续之前，确保预置在CMakePresets.json中afl-gcc和afl-g++是可用的。示例项目已经包含了这样的预设:
 
@@ -176,7 +175,7 @@ if (*msg[0] == a[0]) {
 ]
 \end{lstlisting}
 
-本节中，将使用chapter11/ex02\_afl\_static\_lib的示例。这个例子中，有一个简单的URI解码器实现，我们想用AFL++来模糊测试它。URI解码器是随意实现，因此包含了严重的Bug。URI解码器包含一个名为decode()的方法，实现如下:
+本节中，将使用chapter11/ex02\_afl\_static\_lib的示例。其中，有一个简单的URI解码器实现，我们想用AFL++来模糊测试它。URI解码器是随意实现，因此包含了严重的Bug。URI解码器包含一个名为decode()的方法:
 
 \begin{lstlisting}[style=styleCXX]
 char *uri_helper::decode(const char *str) {
@@ -199,11 +198,11 @@ char *uri_helper::decode(const char *str) {
 }
 \end{lstlisting}
 
-该函数的预期效果是将每个两位数的URI编码字符替换为对应的ASCII码，将加号替换为空格，并保持其他字符不变。然而，这个实现中还有一些意想不到的效果。第一个是函数没有检查result变量是否有足够的空间存储解码后的字符，当结果输出大于结果缓冲区的大小时，可能会导致缓冲区溢出。第二个函数使用空终止符作为循环条件，但不做检查地递增和解引用循环变量str。这会导致读写越界。
+该函数的预期效果是将每个两位数的URI编码字符，替换为对应的ASCII码，将加号替换为空格，并保持其他字符不变。然而，这个实现中还有一些意想不到的效果。第一个是函数没有检查result变量是否有足够的空间存储解码后的字符，当结果输出大于结果缓冲区的大小时，可能会导致缓冲区溢出。第二个函数使用空终止符作为循环条件，但不做检查地递增和解引用循环变量str，这会导致读写越界。
 
-这个函数中的Bug数量与审阅所花费的时间成正比。那么，让我们开始模糊测试。
+函数中的Bug数量与审阅所花费的时间成正比，让我们开始模糊测试吧。
 
-为了用AFL++模糊测试Bug，需要实现一个简单的驱动程序，就像我们在前面的libFuzzer示例中所做的那样。驱动程序使用我们的uri\_helper库，并将标准输入提供给decode。驱动程序的实现如下所示:
+为了用AFL++模糊测试Bug，需要实现一个简单的驱动程序。驱动程序使用uri\_helper库，并将标准输入提供给decode。实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 #include <library/uri_helper.hpp>
@@ -219,7 +218,7 @@ int main() {
 }
 \end{lstlisting}
 
-前面的驱动程序应用程序实现可以与AFL++一起使用。解决了这些问题之后，还需要注意最后一件事，那就是AFL++的初始语料库数据。
+前面的驱动程序应用程序实现可以与AFL++一起使用。解决了这些问题之后，还需要注意最后一件事，就是AFL++的初始语料库数据。
 
 与libFuzzer不同，AFL++需要一些示例输入来启动。示例输入应该看起来像测试单元所期望的输入。由于我们的目标是URI解码器，一些URI编码的字符串应该可以做到这一点。为此，在chapter\_11/ex02\_afl\_static\_lib/corpus文件夹下提供了一些URI编码的字符串。设置好所有内容后，通过运行以下命令来编译示例:
 
@@ -229,25 +228,25 @@ cmake --preset="ninja-debug-afl-gcc" -S ./ -B build/
 cmake --build build/
 \end{tcblisting}
 
-注意，这里使用ninja-debug-afl-gcc作为CMake配置预设。这个预设使用afl-gcc和afl-g++作为编译器。这允许afl++在编译后的代码上执行所需的插装，类似于libFuzzer的-fsanitize=fuzzer标志。构建完成后，对fuzzing驱动ch11\_ex02\_afl\_fuzz运行afl-fuzz命令，并使用以下命令:
+这里使用ninja-debug-afl-gcc作为CMake配置预设，这个预设使用afl-gcc和afl-g++作为编译器。这允许afl++在编译后的代码上执行所需的插装，类似于libFuzzer的-fsanitize=fuzzer标志。构建完成后，对fuzzing驱动ch11\_ex02\_afl\_fuzz运行afl-fuzz命令，并使用以下命令:
 
 \begin{tcblisting}{commandshell={}}
-afl-fuzz -i ex02_afl_static_lib/corpus/ -o build/FINDINGS -
-m none -- build/ex02_afl_static_lib/fuzz/ch11_ex02_afl_fuzz
+afl-fuzz -i ex02_afl_static_lib/corpus/ -o build/FINDINGS -m none
+   -- build/ex02_afl_static_lib/fuzz/ch11_ex02_afl_fuzz
 \end{tcblisting}
 
-\begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=重要的Note]
+\begin{tcolorbox}[colback=yellow!5!white,colframe=yellow!75!black,title=重要的Note]
 若看到关于核心转储通知的错误，那是因为系统使用了外部实用程序来处理核心转储通知。为了解决这个问题，要么应用afl-fuzz所推荐的操作，要么在执行afl-fuzz命令之前执行AFL\_I\_DONT\_CARE\_ABOUT\_MISSING\_CRASHES=1。注意，第二个选项仅推荐用于演示，不推荐用于日常使用。
 \end{tcolorbox}
 
-这个命令乍一看可能很吓人，但其实很简单，让我们将命令逐个解析为参数。-i ex02\_afl\_static\_lib/corpus/参数用于指定语料库数据，即前面讨论过的编码uri的示例。-o build/discoveries参数是保存afl++将生成的路径。所有导致奇怪行为(如崩溃和暂停)的输入都将保存在这里。最后，-m none参数用于指定运行的内存限制，其中none代表无限制。运行该命令后，应该会看到afl++的fuzzing进度报告的屏幕输出:
+这个命令乍一看可能很吓人，但其实很简单，让我们将命令进行一下解析。-i ex02\_afl\_static\_lib/corpus/参数用于指定语料库数据，即前面讨论过的编码uri的示例。-o build/discoveries参数是保存afl++将生成的路径。所有导致奇怪行为(如崩溃和暂停)的输入都将保存在这里。最后，-m none参数用于指定运行的内存限制，其中none代表无限制。运行该命令后，应该会看到afl++的fuzzing进度报告的屏幕输出:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/2/chapter11/images/1.jpg}\\
 图11.1  AFL++模糊测试的进度报告
 \end{center}
 
-屏幕上显示着一些有趣的统计数据，其中最突出的是uniq崩溃和uniq挂起。若这些数字非零，这意味着模糊测试器可能在待测单元上发现了一些Bug。模糊测试器会不断地生成新的输入，统计数据也会相应地更新。可能需要等待几分钟或几周才能发现一些问题。让这个工具运行几分钟后，它就发现了一些崩溃的情况，如下图所示:
+屏幕上显示着一些有趣的统计数据，其中最显著的是uniq崩溃和uniq挂起。若这些数字非零，这意味着模糊测试器可能在待测单元上发现了一些Bug。模糊测试器会不断地生成新的输入，统计数据也会相应地更新。可能需要等待几分钟或几周才能发现一些问题。让这个工具运行几分钟后，就发现了一些崩溃的情况，如下图所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/2/chapter11/images/2.jpg}\\
@@ -279,7 +278,7 @@ fuzz <<< x=x=%���%B9D0JJJJJJJJJJJJJJJJJJJJJ�����������
 Segmentation fault
 \end{tcblisting}
 
-测试驱动程序由于段错误而崩溃，所以程序正在访问一个程序不允许访问的内存位置，这可能是由decode()方法中的result数组中的缓冲区溢出引起的。似乎ADL++已经成功地发现了URL解码器中的一个bug。现在开始，这就是一个非常简单的bug修复过程。在调试器下运行程序，给定输入，并进行调试诊断。
+测试驱动程序由于段错误而崩溃，所以程序正在访问一个不允许访问的内存位置，这可能是由decode()方法中的result数组中的缓冲区溢出引起的。似乎ADL++已经成功地发现了URL解码器中的一个bug。现在开始，这就需要对bug进行修复了。在调试器下运行程序，给定输入，并进行调试诊断。
 
 
 
