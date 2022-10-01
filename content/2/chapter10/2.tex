@@ -1,3 +1,3 @@
-超级构建可以构建为构建多个项目的大型构建，也可以构建为处理依赖关系的项目内子模块，CMake已经有稳定的方法获取存储库。比如，\texttt{ExternalProject}和\texttt{FetchContent}是处理外部依赖的CMake模块。我们的例子中，将使用\texttt{FetchContent}模块。注意，使用CMake提供的方法不是严格的要求，而是一种方便。超级构建也可以通过使用版本控制系统工具来构建，比如git子模块或git子树。因为CMake是本书的重点，而且Git对\texttt{FetchContent}支持的很好，所以我们更喜欢使用它。
+超级构建可以构建为构建多个项目的大型构建，也可以构建为处理依赖关系的项目内子模块，CMake已经有稳定的方法获取存储库。比如，\texttt{ExternalProject}和\texttt{FetchContent}是处理外部依赖的CMake模块。我们的例子中，将使用\texttt{FetchContent}模块。使用CMake提供的方法不是严格的要求，超级构建也可以通过使用版本控制系统工具来构建，比如git子模块或git子树。因为CMake是本书的重点，而且git对\texttt{FetchContent}支持的很好，所以我们更喜欢使用它。
 
 让我们继续了解如何构建跨越多个代码库的项目。
