@@ -1,24 +1,24 @@
 
-工具链文件乍一看可能令人生畏，对于交叉编译工具链很难的误解可能源于这样一个事实:互联网上有许多过于复杂的工具链文件。其中许多是为CMake的早期版本编写的，因此实现需要许多额外的测试和检查，这些测试和检查现在已经内置为CMake的一部分。CMake工具链文件基本上做以下几件事:
+对于交叉编译工具链很难的误解可能源于这样一个事实，互联网上有许多过于复杂的工具链文件。其中许多是为CMake的早期版本编写的，因此实现需要许多额外的测试和检查，现在这些测试和检查现在已经内置为CMake的一部分。CMake工具链文件基本上做以下几件事:
 
 \begin{itemize}
 \item 
 定义目标系统和架构。
 
 \item 
-为已定义平台构建软件提供所需工具的路径，通常是编译器。
+为平台构建软件提供所需工具的路径，通常是编译器。
 
 \item 
 为编译器和链接器设置默认标志。
 
 \item 
-若是交叉编译，则指向sysroot和可能的暂存目录。
+若是交叉编译，则指向sysroot和暂存目录。
 
 \item 
-为CMake的\texttt{find\_}指令设置搜索顺序提示。更改搜索顺序是项目可以定义的，这属于工具链文件，还是应该由项目处理信息，目前是有争议的。有关\texttt{find\_}指令的详细信息，请参见第5章。
+为CMake的\texttt{find\_}指令设置搜索顺序提示。更改搜索顺序是项目可以定义的，这属于工具链文件，还是应该由项目处理信息，目前具有争议。
 \end{itemize}
 
-执行这些操作的工具链示例可能如下所示:
+执行这些操作的工具链示例如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -39,15 +39,15 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE BOTH)
 \end{lstlisting}
 
-本例将定义一个工具链，目标是在Advanced RISC Machine (ARM)处理器上运行的Linux操作系统的构建。要使用的C和C++编译器使用一个版本的GCC，并且安装在主机系统的/usr/bin/文件夹中。编译器用-pedantic标记严格的输出，国际标准组织(ISO) C和ISO C++标准化要求的所有警告。接下来，用于查找所需库的sysroot设置为/home/builder/raspi-sysroot/，交叉编译时安装程序的暂存目录设置为/home/builder/raspi-sysroot-staging/。最后，更改CMake的搜索行为，以便只在主机系统上搜索程序，而只在sysroot中搜索库(包括文件和包)。工具链文件是否应该影响搜索行为，目前存在争议。通常，只有项目知道要寻找什么，所以在工具链文件中做假设可能会破坏这一点。但只有工具链知道要使用哪个系统根目录，以及其中包含什么类型的文件，所以让工具链来定义这一点可能比较方便。一种中间方法是使用CMake预设来定义工具链和搜索行为，而不是将其放入项目或工具链文件中。
+本例将定义一个工具链，目标是在Advanced RISC Machine (ARM)处理器上运行的Linux操作系统的构建。要使用的C和C++编译器使用一个版本的GCC，并且安装在主机系统的/usr/bin/文件夹中。编译器用-pedantic标记严格的输出，输出国际标准组织(ISO) C和ISO C++标准化要求的所有警告。接下来，用于查找所需库的sysroot设置为/home/builder/raspi-sysroot/，交叉编译时安装程序的暂存目录设置为/home/builder/raspi-sysroot-staging/。最后，更改CMake的搜索行为，以便在主机系统上搜索程序，而在sysroot中搜索库(包括文件和包)。工具链文件是否应该影响搜索行为，目前存在争议。因为只有项目知道要寻找什么，所以在工具链文件中做假设可能会破坏项目结构。但只有工具链知道要使用哪个系统根目录，以及其中包含什么类型的文件，所以让工具链来定义可能比较方便。一种中间方法是使用CMake预设来定义工具链和搜索行为，而不是将其放入项目或工具链文件中。
 
 \subsubsubsection{12.3.1\hspace{0.2cm}定义目标系统}
 
 交叉编译的目标系统由以下三个变量定义:CMAKE\_SYSTEM\_NAME、CMAKE\_SYSTEM\_PROCESSOR和CMAKE\_SYSTEM\_VERSION。与它们对应的是CMAKE\_HOST\_SYSTEM\_NAME、CMAKE\_HOST\_SYSTEM\_PROCESSOR和CMAKE\_HOST\_SYSTEM\_VERSION变量，这些变量描述了执行构建的平台。
 
-CMAKE\_SYSTEM\_NAME变量描述要为其构建软件的目标操作系统。这个变量很重要，会让CMake将CMAKE\_CROSSCOMPILING设置为true。典型的值是Linux、Windows、Darwin、Android或QNX，也可以使用更具体的平台名称，如WindowsPhone、WindowsCE、WindowsStore等。对于裸板嵌入式设备，CMAKE\_SYSTEM\_NAME变量可设置为Generic。但在撰写本书时，CMake文档中还没有支持系统的官方列表。若真的需要，可以检查本地CMake安装中的/Modules/Platform文件夹中的文件。
+CMAKE\_SYSTEM\_NAME变量描述要为其构建软件的目标操作系统，会让CMake将CMAKE\_CROSSCOMPILING设置为true。典型的值是Linux、Windows、Darwin、Android或QNX，也可以使用更具体的平台名称，如WindowsPhone、WindowsCE、WindowsStore等。对于嵌入式设备，CMAKE\_SYSTEM\_NAME变量可设置为Generic。在撰写本书时，CMake文档中还没有支持系统的官方列表，可以检查本地CMake安装中的/Modules/Platform文件夹中的文件。
 
-CMAKE\_SYSTEM\_PROCESSOR变量用于描述平台的硬件架构。若没有指定，则设置为CMAKE\_HOST\_SYSTEM\_PROCESSOR变量的值。当64位平台交叉编译32位平台时，也应该设置目标处理器架构，即使处理器的类型相同。对于Android和Apple平台，处理器通常不指定。当对Apple目标进行交叉编译时，实际的设备由所使用的SDK定义，该SDK由CMAKE\_OSX\_SYSROOT变量指定。当交叉编译Android，有专门的变量，如CMAKE\_ANDROID\_ARCH\_ABI，CMAKE\_ANDROID\_ARM\_MODE和可选的CMAKE\_ANDROID\_ARM\_NEON来控制目标架构。
+CMAKE\_SYSTEM\_PROCESSOR变量用于描述平台的硬件架构，没有指定则设置为CMAKE\_HOST\_SYSTEM\_PROCESSOR变量的值。当64位平台交叉编译32位平台时，也应该设置目标处理器架构，即使处理器的类型相同。对于Android和Apple平台，处理器通常不指定。当对Apple目标进行交叉编译时，实际的设备由所使用的SDK定义，该SDK由CMAKE\_OSX\_SYSROOT变量指定。当交叉编译Android，有专门的变量，如CMAKE\_ANDROID\_ARCH\_ABI，CMAKE\_ANDROID\_ARM\_MODE和可选的CMAKE\_ANDROID\_ARM\_NEON来控制目标架构。
 
 定义目标系统的最后一个变量是CMAKE\_SYSTEM\_VERSION，其取决于所构建的系统。对于WindowsCE、WindowsStore和WindowsPhone，它将用于定义要使用的Windows SDK的哪个版本。在Linux上经常省略，或者可能包含目标系统的内核修订版(若与此相关)。
 
@@ -59,11 +59,11 @@ cmake -G "Visual Studio 2019" -A Win32 -T host=x64
 
 当使用预设时，架构设定可以在配置预设中使用，以达到同样的效果。当定义了目标系统，就等于定义了实际构建软件的工具。
 
-一些编译器，如Clang和QNX(非Unix GCC (QNX GCC))，本质上是交叉编译器，并以平台为参数。为了将参数传递给这些编译器，使用了CMAKE\_<LANG>\_COMPILER\_TARGET变量。对于Clang来说，该值是一个目标三元组，如arm-linux-gnueabihf，而对于QNX GCC，编译器名称和目标的值为gcc\_ntoarmv7le。Clang支持的三元组在其官方文档\url{https://clang.llvm.org/docs/CrossCompilation.html}中有描述。
+一些编译器，如Clang和QNX(非Unix GCC (QNX GCC))，本质上是交叉编译器以平台为参数。为了将参数传递给这些编译器，使用了CMAKE\_<LANG>\_COMPILER\_TARGET变量。对于Clang来说，该值是一个目标三元组，如arm-linux-gnueabihf，而对于QNX GCC，编译器名称和目标的值为gcc\_ntoarmv7le。Clang支持的三元组在其官方文档\url{https://clang.llvm.org/docs/CrossCompilation.html}中有描述。
 
-有关QNX的可用选项，可以参考\url{https://www.qnx.com/developers/docs/}上的QNX文档。
+有关QNX的可用选项，可以参考\url{https://www.qnx.com/developers/docs/}的QNX文档。
 
-因此，使用Clang的工具链文件可能看起来像这样:
+因此，使用Clang的工具链文件可能像这样:
 
 \begin{lstlisting}[style=styleCMake]
 set(CMAKE_SYSTEM_NAME Linux)
@@ -76,7 +76,7 @@ set(CMAKE_CXX_COMPILER /usr/bin/clang++)
 set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
 \end{lstlisting}
 
-本例中，Clang用于为运行在ARM处理器上的Linux系统编译C和C++代码，该系统具有硬件浮点支持。定义目标系统通常对要使用的构建工具有直接影响。下一节中，我们将研究如何选择编译器和相关工具进行交叉编译。
+本例中，Clang用于为运行在ARM处理器上的Linux系统编译C和C++代码，该系统支持硬件浮点。定义目标系统通常对要使用的构建工具有直接影响。下一节中，我们将研究如何选择编译器和相关工具进行交叉编译。
 
 \subsubsubsection{12.3.2\hspace{0.2cm}选择构建工具}
 
@@ -88,11 +88,11 @@ set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
 cmake -G "Visual Studio 2019" -A Win32 -T host=x64
 \end{tcblisting}
 
-这些值也可以通过工具链文件中的CMAKE\_GENERATOR\_TOOLSET变量来设置。这是不应该在项目内部设置的，因为它显然破坏了CMake项目文件不受生成器和平台影响的想法。
+这些值也可以通过工具链文件中的CMAKE\_GENERATOR\_TOOLSET变量来设置。这不应该在项目内部设置，因为它破坏了CMake项目文件不受生成器和平台影响的想法。
 
 对于Visual Studio用户来说，通过安装相同版本的预览版和正式发布版，可以安装同一Visual Studio版本的多个实例。若是这种情况，CMAKE\_GENERATOR\_INSTANCE变量可以设置为工具链文件中Visual Studio的绝对安装路径。
 
-通过指定要使用的编译器，CMake将为编译器和链接器选择默认标志，并通过设置CMAKE\_<LANG>\_FLAGS和CMAKE\_<LANG>\_FLAGS\_<CONFIG>使其在项目中可用，其中<LANG>代表各自的编程语言，<CONFIG>表示构建配置，如Debug或Release等。默认的链接器标志是由CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS和CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS\_<CONFIG>变量设置的，其中<TARGETTYPE>是EXE、STATIC、SHARED或MODULE。
+通过指定要使用的编译器，CMake将为编译器和链接器选择默认标志，并通过设置CMAKE\_<LANG>\_FLAGS和CMAKE\_<LANG>\_FLAGS\_<CONFIG>使其在项目中可用，其中<LANG>代表编程语言，<CONFIG>表示构建配置，如Debug或Release等。默认的链接器标志是由CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS和CMAKE\_<TARGETTYPE>\_LINKER\_FLAGS\_<CONFIG>变量设置的，其中<TARGETTYPE>是EXE、STATIC、SHARED或MODULE。
 
 要将自定义标志添加到默认标志中，每个变量都有一个\_INIT的变量——例如，CMAKE\_<LANG>\_FLAGS\_INIT。使用工具链文件时，使用\_INIT变量设置必要的标志。用GCC从64位主机为32位目标编译的工具链文件如下所示:
 
@@ -112,30 +112,30 @@ set(CMAKE_STATIC_LINKER_FLAGS_INIT -m32)
 set(CMAKE_MODULE_LINKER_FLAGS_INIT -m32)
 \end{lstlisting}
 
-对于简单的项目，设置目标系统和工具链可能已经足够开始创建二进制文件了，但是对于更复杂的项目，可能需要访问目标系统的库和头文件。对于这种情况，可以在工具链文件中指定sysroot。
+对于简单的项目，设置目标系统和工具链可能已经足够创建二进制文件了，但是对于更复杂的项目，可能需要访问目标系统的库和头文件，需要在工具链文件中指定sysroot。
 
 \subsubsubsection{12.3.3\hspace{0.2cm}设置sysroot}
 
-交叉编译时，所有链接的依赖项必须与目标平台匹配，处理此问题的常用方法是创建sysroot，它是文件夹中目标系统的根文件系统。虽然sysroot可能包含完整的系统，但它们通常被精简，只提供所需的内容。sysroot在第9章中有过详细描述。
+交叉编译时，所有链接的依赖项必须与目标平台匹配，处理此问题的常用方法是创建sysroot，它是文件夹中目标系统的根文件系统。虽然sysroot可能包含完整的系统，但它们只提供所需的内容。
 
-将CMAKE\_SYSROOT设置为sysroot的路径。若设置了该值，CMake将默认情况下首先在sysroot中查找库和头文件，除非另有指定，如第5章中所述。大多数情况下，CMake还会自动设置必要的编译器和链接器标志，使工具与sysroot一起工作。
+将CMAKE\_SYSROOT设置为sysroot的路径。若设置了该值，CMake将默认情况下首先在sysroot中查找库和头文件，除非另有指定。大多数情况下，CMake还会自动设置必要的编译器和链接器标志，使工具与sysroot一起工作。
 
-不应该直接在sysroot中安装构建构件的情况下，可以设置CMAKE\_STAGING\_PREFIX变量来提供另一种安装路径。当sysroot应该保持干净或者将其挂载为只读时，通常会出现这种情况。注意，CMAKE\_STAGING\_PREFIX设置不会将这个目录添加到CMAKE\_SYSTEM\_PREFIX\_PATH中，所以只有当工具链中的CMAKE\_FIND\_ROOT\_PATH\_MODE\_PACKAGE变量设置为BOTH或NEVER时，才会使用\texttt{find\_package()}来查找安装在暂存目录中的东西。
+不应该直接在sysroot中安装构建构件的情况下，可以设置CMAKE\_STAGING\_PREFIX变量来提供另一种安装路径。sysroot应该保持干净或者将其挂载为只读时，通常会出现这种情况。CMAKE\_STAGING\_PREFIX设置不会将这个目录添加到CMAKE\_SYSTEM\_PREFIX\_PATH中，所以只有当工具链中的CMAKE\_FIND\_ROOT\_PATH\_MODE\_PACKAGE变量设置为BOTH或NEVER时，才会使用\texttt{find\_package()}来查找安装在暂存目录中的东西。
 
 定义目标系统和设置工具链配置、sysroot和暂存目录通常是交叉编译所需的全部内容。两个例外是对Android和Apple的iOS、tvOS或watchOS的交叉编译。
 
 \subsubsubsection{12.3.4\hspace{0.2cm}交叉编译——Android}
 
-过去，Android的NDK和各种CMake版本之间的兼容性有时很不愉快，因为新版本的NDK突然之间不再像以前的版本那样与CMake工作。然而，现在已经有了很大的改善，因为r23版本的Android NDK现在将使用CMake(3.21或更高的版本)的内部支持来处理Android NDK。Android NDK与CMake集成的官方文档可以在这里看到:\url{https://developer.android.com/ndk/guides/cmake}。
+以前，Android的NDK和各种CMake版本之间的兼容性有时很不愉快，因为新版本的NDK突然之间不再像以前的版本那样与CMake工作。然而，现在已经有了很大的改善，因为r23版本的Android NDK现在将使用CMake(3.21或更高的版本)的内部支持来处理Android NDK。Android NDK与CMake集成的官方文档可以在这里看到:\url{https://developer.android.com/ndk/guides/cmake}。
 
-从r23起，NDK提供CMake工具链文件，位于<NDK\_ROOT>/build/cmake/android.toolchain.cmake，可以像任何常规的工具链文件一样使用。NDK还包括基于clang的工具链所需的所有工具，因此通常不需要定义进一步的工具。为了控制目标平台，以下CMake变量应该通过命令行或CMake预设设置:
+从r23起，NDK提供CMake工具链文件，位于<NDK\_ROOT>/build/cmake/android.toolchain.cmake，可以像常规的工具链文件一样使用。NDK还包括基于clang的工具链所需的所有工具，因此通常不需要定义进一步的工具。为了控制目标平台，以下CMake变量应该通过命令行或CMake预设设置:
 
 \begin{itemize}
 \item 
 ANDROID\_ABI: 指定要使用的目标应用程序二进制接口(ABI)。有效值为armeabi-v7a、arm64-v8a、x86和x86\_64。为Android交叉编译时，应该始终设置这个值。
 
 \item 
-ANDROID\_ARM\_NEON: 启用armeabi-v7a的NEON支持。此变量对其他ABI版本没有影响。当使用r21版本以上的NDK时，NEON支持默认是启用的，很少需要禁用。
+ANDROID\_ARM\_NEON: 启用armeabi-v7a的NEON支持。此变量对其他ABI版本没有影响。当使用r21版本以上的NDK时，NEON支持默认启用，很少需要禁用。
 
 \item 
 ANDROID\_ARM\_MODE: 指定是否为armeabi-v7a生成ARM或Thumb指令。有效值是thumb或arm。此变量对其他ABI版本没有影响。
@@ -144,10 +144,10 @@ ANDROID\_ARM\_MODE: 指定是否为armeabi-v7a生成ARM或Thumb指令。有效�
 ANDROID\_LD: 选择是使用默认链接器，还是使用llvm中的实验性的lld。有效值是默认值或lld，但由于lld处于实验状态，这个变量通常在生产构建中忽略。
 
 \item 
-ANDROID\_PLATFORM: 指定应用程序支持的最小API级别，格式为\$API\_LEVEL, android-\$API\_LEVEL，或android-\$API\_LETTER，其中\$API\_LEVEL是一个数字，\$API\_LETTER是平台的版本代码。ANDROID\_NATIVE\_API\_LEVEL是变量的别名。虽然没有必要严格地设置API级别，但通常都会这样做。
+ANDROID\_PLATFORM: 指定应用程序支持的最小API级别，格式为\$API\_LEVEL, android-\$API\_LEVEL，或android-\$API\_LETTER，其中\$API\_LEVEL是一个数字，\$API\_LETTER是平台的版本代码，ANDROID\_NATIVE\_API\_LEVEL是变量的别名。虽然没有必要严格地设置API级别，但通常都会这样做。
 
 \item 
-ANDROID\_STL: 指定用于此应用程序的标准模板库(STL)。这可以是c++\_static(这是默认值)，c++\_shared，none或system。无论是c++\_shared还是c++\_static都需要支持现代C++。系统库只为C库头提供new、delete和C++包装器，而没有库提供STL支持。
+ANDROID\_STL: 指定用于此应用程序的标准模板库(STL)。这可以是c++\_static(这是默认值)，c++\_shared，none或system。无论是c++\_shared还是c++\_static都需要支持现代C++。系统库只为C库头文件提供new、delete和C++包装器，而没有库提供STL支持。
 \end{itemize}
 
 使用CMake来配置Android版本可能像这样:
@@ -159,9 +159,9 @@ cmake -S . -B build --toolchain <NDK_DIR>/build/cmake/android
 
 这个调用将指定一个需要API级别23或更高的构建，这对应于32位ARM中央处理单元(CPU)的Android 6.0或更高。
 
-使用NDK提供的工具链的另一种选择是将CMake指向Android NDK的位置，对于r23版本或更高版本的NDK，这是推荐的方法。然后使用各自的CMake变量进行目标平台的配置。通过将CMAKE\_SYSTEM\_NAME变量设置为android，将CMAKE\_ANDROID\_NDK变量设置为android NDK的位置，就可以在CMake中使用NDK了。这既可以通过命令行进行，也可以在工具链文件中进行。或者，若ANDROID\_NDK\_ROOT或ANDROID\_NDK环境变量已经设置，将作为CMAKE\_ANDROID\_NDK的值。
+使用NDK提供工具链的另一种选择是将CMake指向Android NDK的位置，对于r23版本或更高版本的NDK，这是推荐的方法。然后使用各自的CMake变量进行目标平台的配置，将CMAKE\_SYSTEM\_NAME变量设置为android，将CMAKE\_ANDROID\_NDK变量设置为android NDK的位置，就可以在CMake中使用NDK了。这既可以通过命令行进行，也可以在工具链文件中进行。若ANDROID\_NDK\_ROOT或ANDROID\_NDK环境变量已经设置，将作为CMAKE\_ANDROID\_NDK的值。
 
-以这种方式使用NDK时，配置是在CMAKE\_变量上定义的，相当于直接调用NDK的工具链文件时使用的变量，如下所示:
+以这种方式使用NDK时，配置在CMAKE\_变量上定义，相当于直接调用NDK的工具链文件时使用的变量:
 
 \begin{itemize}
 \item 
@@ -184,7 +184,7 @@ set(CMAKE_ANDROID_NDK /path/to/the/android-ndk-r23b)
 set(CMAKE_ANDROID_STL_TYPE c++_static)
 \end{lstlisting}
 
-当使用Visual Studio生成器为Android交叉编译时，CMake需要安装NVIDIA Nsight Tegra的Visual Studio插件，或使用Android NDK的Visual Studio工具。当使用Visual Studio构建Android二进制文件时，可以通过将CMAKE\_ANDROID\_NDK变量设置为NDK的位置来使用CMake的Android NDK的内置支持。
+使用Visual Studio生成器为Android交叉编译时，CMake需要安装NVIDIA Nsight Tegra的Visual Studio插件，或使用Android NDK的Visual Studio工具。当使用Visual Studio构建Android二进制文件时，可以通过将CMAKE\_ANDROID\_NDK变量设置为NDK的位置来使用CMake的Android NDK的内置支持。
 
 CMake 3.20起，NDK的最新版本和CMake版本使得交叉编译Android本地代码变得更加容易。交叉编译的另一个特殊情况是针对Apple的iOS、tvOS或watchOS。
 

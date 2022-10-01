@@ -1,5 +1,5 @@
 
-能够毫不费力地为不同的架构交叉编译二进制文件，这为相关人员的开发人员工作带来了很多便利。但这些工作并不止步于构建二进制文件，还包括运行测试。若软件也在主机工具链上编译，并且测试足够通用，那么在主机上运行测试可能是测试软件的最简单方法，尽管在切换工具链和频繁地重新构建时可能会花费一些时间。若这是不可能的或太耗时，一种替代方法就是在真正的目标硬件上运行任何测试，但这取决于硬件的可用性和在硬件上设置测试的工作量，这也可能相当麻烦。因此，一个可行的中间方案是在目标平台的模拟器中运行测试(若这是可用的)。
+能够毫不费力地为不同的架构交叉编译二进制文件，这为相关人员的开发人员工作带来了很多便利。但这些工作并不只构建二进制文件，还包括运行测试。若软件也在主机工具链上编译，并且测试足够通用，那么在主机上运行测试可能是测试软件的最简单方法。尽管在切换工具链和频繁地重新构建时，可能会花费一些时间。若这不可能或太耗时，一种替代方法就是在真正的目标硬件上运行测试，但这取决于硬件的可用性和在硬件上设置测试的工作量。因此，中间方案是在目标平台的模拟器中运行测试(若这可用)。
 
 定义一个运行测试的模拟器，需要使用CROSSCOMPILING\_EMULATOR目标属性，既可以为单个目标设置，也可以通过设置CMAKE\_CROSSCOMPILING\_EMULATOR缓存变量全局设置，该缓存变量包含一个分号分隔的命令和参数列表，用于运行模拟器。若全局设置，该命令将添加到\texttt{add\_test()}、\texttt{add\_custom\_command()}和\texttt{add\_custom\_target()}中指定命令的前缀处，将用于运行\texttt{try\_run()}生成的可执行文件，所以用于构建的所有定制命令也必须在模拟器中访问和运行。CROSSCOMPILING\_EMULATOR属性并不一定是实际的模拟器——可以是任何程序，比如将二进制文件复制到目标计算机上，并在那里执行的脚本。
 
@@ -16,7 +16,7 @@ set(CMAKE_CXX_COMPILER_TARGET arm-linux-gnueabihf)
 set(CMAKE_CROSSCOMPILING_EMULATOR "qemu-arm;-L;${CMAKE_	SYSROOT}")
 \end{lstlisting}
 
-除了设置目标系统的信息和交叉编译示例中最后一行的工具链之外，还将模拟器命令设置为qemu-arm -L/path/to/arm/sysroot。我们假设CMakeLists.txt文件包含如下定义的测试:
+除了设置目标系统的信息和交叉编译示例中最后一行的工具链之外，还将模拟器命令设置为qemu-arm -L/path/to/arm/sysroot。假设CMakeLists.txt文件包含如下测试:
 
 \begin{lstlisting}[style=styleCMake]
 add_test(NAME exampleTest COMMAND exampleExe)
@@ -29,21 +29,21 @@ qemu-arm "-L" "/path/to/arm/sysroot/" "/path/to/build-dir/
   exampleExe"
 \end{tcblisting}
 
-在模拟器中运行测试可以大大加快开发人员的工作流程，因为它可能消除在主机工具链和目标工具链之间切换的需要，并且不需要为每个表面测试将构建构件移动到目标硬件。在持续集成(CI)构建中，使用这样的仿真器也很方便，因为在真正的目标硬件上构建可能很困难。
+模拟器中运行测试可以加快开发人员的工作流程，因为它消除了主机工具链和目标工具链之间切换的必要，并且不需要为每个表面测试将构建构件移动到目标硬件。在持续集成(CI)构建中，使用这样的仿真器也很方便。
 
-关于CMAKE\_CROSSCOMPILING\_EMULATOR，还可以用来将测试封装在诊断工具中，如Valgrind或类似的诊断工具。由于运行指定的模拟器可执行文件不依赖于CMAKE\_CROSSCOMPILING变量，CMAKE\_CROSSCOMPILING\_EMULATOR变量的缺点是，设置CMAKE\_CROSSCOMPILING\_EMULATOR变量将影响\texttt{try\_run()}，该指令通常用于测试工具链支持的特性或依赖，并且作为诊断实用程序可能导致编译器测试失败。可能有必要在已经缓存的构建上运行它，其中\texttt{try\_run()}的结果都已经缓存了。正因为如此，不应该永久地使用CMAKE\_CROSSCOMPILING\_EMULATOR变量来运行诊断程序执行，而应该在查找问题时在特定的开发场景下执行。
+关于CMAKE\_CROSSCOMPILING\_EMULATOR，还可以用来将测试封装在调试工具中，如Valgrind或类似的调试工具。由于运行指定的模拟器可执行文件不依赖于CMAKE\_CROSSCOMPILING变量，CMAKE\_CROSSCOMPILING\_EMULATOR变量的缺点是，设置CMAKE\_CROSSCOMPILING\_EMULATOR变量将影响\texttt{try\_run()}，该指令通常用于测试工具链支持的特性或依赖，并且作为调试实用程序，可能导致编译器测试失败。可能有必要在已经缓存的构建上运行，其中\texttt{try\_run()}的结果已经缓存。正因为如此，不应该永久地使用CMAKE\_CROSSCOMPILING\_EMULATOR变量来运行调试程序执行，而应该在查找问题时，在特定的开发场景下执行。
 
 本节中，提到了CMake的\texttt{try\_run()}指令，该指令与密切相关的\texttt{try\_compile()}指令一起使用，可以检查编译器或工具链中某些特性的可用性。下一节中，我们将更深入地研究这两个指令和测试工具链的特性。
 
 \subsubsubsection{12.4.1\hspace{0.2cm}测试工具链支持的功能}
 
-当CMake第一次在项目树上运行时，就会为编译器和语言特性执行各种测试。对\texttt{project()}或\texttt{enable\_language()}的使用都会触发测试，但结果可能已经从上一次运行中缓存了，这也是不建议在现有构建中切换工具链的原因。正如我们将在本节中看到的，CMake可以检查许多开箱即用的特性。
+当CMake第一次在项目树上运行时，就会为编译器和语言特性执行各种测试。对\texttt{project()}或\texttt{enable\_language()}的使用都会触发测试，但结果可能在上一次运行中缓存了，这也是不建议在现有构建中切换工具链的原因。
 
-大多数检查将在内部使用\texttt{try\_compile()}指令来执行这些测试。这个命令实际上是使用由用户检测，或工具链构建一个小的二进制文件。所有相关的全局变量，如CMAKE\_<LANG>\_FLAGS将转发至\texttt{try\_compile()}。
+大多数检查将在内部使用\texttt{try\_compile()}指令来执行这些测试。这个命令实际上是由用户进行检测，或工具链构建一个小的二进制文件。所有相关的全局变量，如CMAKE\_<LANG>\_FLAGS将转发至\texttt{try\_compile()}。
 
-与其密切相关的是\texttt{try\_run()}，该指令在内部调用\texttt{try\_compile()}，若成功，将尝试运行程序。对于常规编译器检查，不使用\texttt{try\_run()}，对它的使用通常都应在项目中定义。
+与其密切相关的是\texttt{try\_run()}，该指令在内部调用\texttt{try\_compile()}，若成功，将尝试运行程序。对于常规编译器检查，不使用\texttt{try\_run()}，对它的使用通常都会在项目中定义。
 
-要编写自定义检查，而不是直接调用\texttt{try\_compile()}和\texttt{try\_run()}，建议使用\texttt{checksourcecompile}或\texttt{CheckSourceRuns}模块的\texttt{check\_source\_compiles()}或\texttt{check\_source\_runs()}，这些命令自CMake 3.19起就已经可用了。大多数情况下，足以生成所需的信息，而不需要处理更复杂的\texttt{try\_compile()}或\texttt{try\_run()}。这两个指令的签名非常相似:
+要编写自定义检查，而不是直接调用\texttt{try\_compile()}和\texttt{try\_run()}，建议使用checksourcecompile或CheckSourceRuns模块的\texttt{check\_source\_compiles()}或\texttt{check\_source\_runs()}，这些指令自CMake 3.19起就已经可用了。大多数情况下，足以生成所需的信息，而不需要处理更复杂的\texttt{try\_compile()}或\texttt{try\_run()}。这两个指令的签名非常相似:
 
 \begin{lstlisting}[style=styleCMake]
 check_source_compiles(<lang> <code> <resultVar>
@@ -68,7 +68,7 @@ check_cxx_source_compiles(code resultVar
 )
 \end{lstlisting}
 
-假设有一个C++项目可以使用标准库的原子功能，若不支持，则退回到不同的实现。编译器对此的检查可能如下所示:
+假设C++项目可以使用标准库的原子功能，若不支持，则退回到不同的实现。编译器对此的检查如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 include(CheckSourceCompiles)
@@ -82,7 +82,7 @@ int main(){
 }" HAS_STD_ATOMIC)
 \end{lstlisting}
 
-包含模块后，使用小程序使用\texttt{check\_source\_compiles()}，在该程序中使用要检查的功能。若代码编译成功，HAS\_STD\_ATOMIC将设置为true;否则，设置为false。该测试在项目配置期间执行，会将打印如下状态消息:
+包含模块后，小程序使用\texttt{check\_source\_compiles()}，在该程序中使用要检查的功能。若代码编译成功，HAS\_STD\_ATOMIC将设置为true;否则，设置为false。该测试在项目配置期间执行，会将打印如下状态消息:
 
 \begin{tcblisting}{commandshell={}}
 [cmake] -- Performing Test HAS_STD_ATOMIC
@@ -142,15 +142,15 @@ endif()
 cmake_pop_check_state()
 \end{lstlisting}
 
-检查编译或运行测试程序的命令是更复杂的\texttt{try\_compile()}和\texttt{try\_run()}。虽然可以外部使用，但它们主要用于内部使用，因此我们建议参考命令的官方文档，就不在这里解释它们了。
+检查编译或运行测试程序的更复杂的\texttt{try\_compile()}和\texttt{try\_run()}。虽然可以外部使用，但它们主要用于内部使用，因此建议参考命令的官方文档，就不在这里解释它们了。
 
-通过编译和运行程序来检查编译器特性，是检查工具链特性的一种通用的方法。有些检查非常常见，以至于CMake为它们提供了专门的模块和功能。
+通过编译和运行程序来检查编译器特性，是检查工具链特性的一种通用方法。有些检查非常常见，以至于CMake为它们提供了专门的模块和功能。
 
 \subsubsubsection{12.4.2\hspace{0.2cm}工具链和语言特性的常规检查}
 
-对于一些常规的特性检查，例如检查是否支持编译器标志或是否存在头文件，CMake提供了自己的模块以方便。从CMake 3.19起，以该语言作为参数的通用模块就存在了，但相应的Check<LANG>…仍然可以使用于特定的语言模块。
+对于一些常规的特性检查，例如检查是否支持编译器标志或是否存在头文件，CMake提供了自己的模块。从CMake 3.19起，以该语言作为参数的通用模块就存在了，但相应的Check<LANG>…仍然可以使用于特定的语言模块。
 
-CheckLanguage模块是检查某一语言的编译器是否可用的一个非常基本的测试，若没有设置CMAKE\_<LANG>\_COMPILER变量，它可用来检查某一语言的编译器是否可用。检查Fortran是否可用的示例如下:
+CheckLanguage模块是检查某一语言的编译器是否可用的测试，若没有设置CMAKE\_<LANG>\_COMPILER变量，可用来检查某一语言的编译器是否可用。检查Fortran是否可用的示例如下:
 
 \begin{lstlisting}[style=styleCMake]
 Include(CheckLanguage)
@@ -161,16 +161,16 @@ support")endif()
 
 若检查成功，则设置相应的CMAKE\_<LANG>\_COMPILER变量。若变量是在检查之前设置的，则没有效果。
 
-CheckCompilerFlag提供了check\_compiler\_flag()来检查当前编译器是否支持某个标志。在内部，将编译一个非常简单的程序，并解析输出以获得诊断消息。检查编译器支持CMAKE\_<LANG>\_FLAGS的标志将成功运行;否则，check\_compiler\_flag()函数将失败。下面的例子就在检查C++编译器是否支持-Wall标志:
+CheckCompilerFlag提供了check\_compiler\_flag()来检查当前编译器是否支持某个标志。在内部，将编译一个非常简单的程序，并解析输出以获得诊断消息。检查编译器支持CMAKE\_<LANG>\_FLAGS的标志将成功运行;否则，check\_compiler\_flag()将失败。下面的例子就在检查C++编译器是否支持-Wall标志:
 
 \begin{lstlisting}[style=styleCMake]
 include(CheckCompilerFlag)
 check_compiler_flag(CXX -Wall WALL_FLAG_SUPPORTED)
 \end{lstlisting}
 
-若支持-Wall标志，WALL\_FLAG\_SUPPORTED缓存变量将为true;否则，将为false。
+若支持-Wall标志，WALL\_FLAG\_SUPPORTED缓存变量为true;否则，为false。
 
-检查链接器标志的相应模块称为CheckLinkerFlag，其工作原理类似于检查编译器标志，但链接器标志不会直接传递给链接器。由于通常会通过编译器调用链接器，因此向链接器传递附加标志可以使用-Wl或-Xlinker这样的前缀来告诉编译器将标志传递过去。由于该标志是特定于编译器的，CMake提供了LINKER:前缀来自动替代该命令。例如，要向链接器传递一个标志来生成关于执行时间和内存消耗的统计信息，可以使用以下命令:
+检查链接器标志的相应模块称为CheckLinkerFlag，其工作原理类似于检查编译器标志，但链接器标志不会直接传递给链接器。由于通常会通过编译器调用链接器，因此向链接器传递附加标志可以使用-Wl或-Xlinker这样的前缀来告诉编译器将标志传递过去。由于该标志是特定于编译器的，CMake提供了LINKER:前缀来自动替代该命令。例如，要向链接器传递标志，来生成关于执行时间和内存消耗的统计信息:
 
 \begin{lstlisting}[style=styleCMake]
 include(CheckLinkerFlag)
@@ -179,8 +179,8 @@ check_linker_flag(CXX LINKER:-stats LINKER_STATS_FLAG_SUPPORTED)
 
 若链接器支持-stats标志，则LINKER\_STATS\_FLAG\_SUPPORTED变量则为true。
 
-比较常用的检查模块有CheckLibraryExists、CheckIncludeFile和CheckIncludeFileCXX，它们用于检查某些库或包含文件是否存在于某些位置。
+比较常用的检查模块有CheckLibraryExists、CheckIncludeFile和CheckIncludeFileCXX，用于检查某些库或包含文件是否存在于某些位置。
 
 CMake提供了更详细的检查，可能非常特定于项目;例如，CheckSymbolExists和CheckSymbolExistsCXX模块检查某个符号是否作为预处理器定义、变量或函数存在。CheckStructHasMember将检查结构是否有某个成员，而CheckTypeSize可以使用CheckPrototypeDefinition检查非用户类型的大小，以及C和C++函数原型的定义。
 
-CMake提供了相当多的检查，而且可用的检查列表可能会随着CMake的进一步发展而增长。虽然检查在某些情况下有用，但是我们应该注意不要进行过多的测试。检查的数量和复杂性将对配置步骤的速度产生相当大的影响，但有时并没有提供太多的好处。在项目中进行大量的检查，也可能暗示项目有不必要的复杂性。
+CMake提供了相当多的检查，而且可用的检查列表可能会随着CMake的发展而增长。虽然检查在某些情况下有用，但应该注意不要进行过多的测试。检查的数量和复杂性将对配置步骤的速度产生相当大的影响，但有时并没有提供太多的好处。项目中进行大量的检查，也可能暗示项目有着不必要的复杂性。
