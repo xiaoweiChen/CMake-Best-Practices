@@ -1,5 +1,5 @@
 
-CMake成功的关键是它允许在多种平台上构建相同的软件。另一方面，这意味着CMakeLists.txt必须以一种不假定使用平台或编译器的方式编写。这很有挑战性，特别是在处理自定义任务时。cmake命令行程序支持-E标志，可以用于执行常见任务，如文件操作和创建哈希值。大多数cmake -E命令用于与文件相关的操作，如创建、复制、重命名和删除文件，以及创建目录。支持文件系统链接的系统，CMake还可以在文件之间创建符号链接或硬链接。此外，CMake可以使用tar命令创建文件包，并使用cat命令连接文本文件，还可以用于为文件创建各种哈希值。
+CMake成功的关键是它允许在多种平台上构建相同的软件，同样其也必须以一种不假定使用平台或编译器的方式编写。这很有挑战性，特别是在处理自定义任务时。cmake命令行程序支持-E标志，可以用于执行常见任务，如文件操作和创建哈希值。大多数cmake -E命令用于与文件相关的操作，如创建、复制、重命名和删除文件，以及创建目录。支持文件系统链接的系统，CMake还可以在文件之间创建符号软硬链接。此外，CMake可以使用tar命令创建文件包，并使用cat命令连接文本文件，还可以用于为文件创建各种哈希值。
 
 还有一些操作可以提供关于当前系统的信息。功能操作将打印出CMake的功能，例如：支持哪些生成器，以及CMake当前运行的版本。environment命令将打印已设置的环境变量的列表。
 
@@ -9,11 +9,11 @@ CMake成功的关键是它允许在多种平台上构建相同的软件。另一
 当文件操作必须由自定义任务执行时，可以使用cmake -E。
 \end{tcolorbox}
 
-在大多数情况下，可以用cmake -E。然而，有时需要进行更复杂的操作。为此，CMake可以以脚本模式运行。
+大多数情况下，可以用cmake -E，有时需要进行更复杂的操作。为此，CMake可以以脚本模式运行。
 
-\subsubsubsection{8.6.1\hspace{0.2cm}将CMake文件作为脚本执行}
+\subsubsubsection{8.6.1\hspace{0.2cm}CMake文件作为脚本执行}
 
-创建跨平台脚本时，CMake的脚本模式是非常强大的特性，因为它允许创建完全与平台无关的脚本。通过调用cmake -P <script>.cmake，则执行指定的CMake文件。脚本文件可能不包含定义构建目标的命令。参数可以作为带有-D标志的变量传递，但这必须在-P选项之前完成。或者，参数可能只是附加在脚本名称之后，这样就可以使用CMAKE\_ARGV[n]变量检索它们。参数的数量存储在CMAKE\_ARGC变量中。下面的脚本生成一个文件的散列并将其存储在另一个文件中，演示了如何使用位置参数:
+创建跨平台脚本时，CMake的脚本模式是非常强大的特性，因为允许创建完全与平台无关的脚本。通过调用cmake -P <script>.cmake，则执行指定的CMake文件。脚本文件可能不包含定义构建目标的命令。参数可以作为带有-D标志的变量传递，但这必须在-P选项之前完成。或者，参数可能只放在脚本名称之后，这样就可以使用CMAKE\_ARGV[n]检索它们，并且参数的数量存储在CMAKE\_ARGC变量中。下面的脚本生成一个文件的哈希码，并将其存储在另一个文件中:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -21,10 +21,13 @@ if(CMAKE_ARGC LESS 5)
 	message(FATAL_ERROR "Usage: cmake -P CreateSha256.cmake
 		file_to_hash target_file")
 endif()
+
 set(FILE_TO_HASH ${CMAKE_ARGV3})
 set(TARGET_FILE ${CMAKE_ARGV4})
+
 # Read the source file and generate the hash for it
 file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
+
 # write the hash to a new file
 file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
 \end{lstlisting}
@@ -37,13 +40,15 @@ if(NOT FILE_TO_HASH OR NOT TARGET_FILE)
 	message(FATAL_ERROR "Usage: cmake –DFILE_TO_HASH=<intput_file> 
 		-DTARGET_FILE=<target file> -P CreateSha256.cmake")
 endif()
+
 # Read the source file and generate the hash for it
 file(SHA256 "${FILE_TO_HASH}" GENERATED_HASH)
+
 # write the hash to a new file
 file(WRITE "${TARGET_FILE}" "${GENERATED_HASH}")
 \end{lstlisting}
 
-这种情况下，必须使用显式传递的变量调用脚本，如下所示:
+必须使用显式传递的变量调用脚本，如下所示:
 
 \begin{tcblisting}{commandshell={}}
 cmake –DFILE_TO_HASH=<input>
@@ -67,7 +72,7 @@ COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
 )
 \end{lstlisting}
 
-将CMake的脚本模式，与在项目的配置或构建阶段执行定制命令的各种方法相结合，可以在定义构建过程时提供很大的自由度，甚至可以针对不同的平台。然而，需要注意的是，在构建过程中添加太多的逻辑可能会使其难于维护。当需要编写脚本或向CMakeLists.txt文件添加自定义命令时，最好是考虑一下，并考虑这一步是否属于构建过程，还是最好在用户设置开发环境时让他们设置。
+将CMake的脚本模式，与在项目的配置或构建阶段执行定制命令的方法相结合，可以在定义构建过程时提供很大的自由度，甚至可以针对不同的平台。然而，在构建过程中添加太多的逻辑可能会使其难于维护。当需要编写脚本或向CMakeLists.txt文件添加自定义命令时，最好是考虑一下，这一步是否属于构建过程，还是在用户设置开发环境时让他们设置。
 
 
 

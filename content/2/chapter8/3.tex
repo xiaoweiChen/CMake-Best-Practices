@@ -1,7 +1,7 @@
 
 
 
-添加自定义任务的最通用方法是创建自定义目标，该目标以命令序列的形式执行外部任务。自定义目标的处理方式与任何其他库或可执行目标相同，不同的是不调用编译器和链接器，它们执行由用户定义的操作。可以使用\texttt{add\_custom\_target}定义自定义目标:
+添加自定义任务的通用方法是创建自定义目标，该目标以命令序列的形式执行外部任务。自定义目标的处理方式与其他库或可执行目标相同，不同的是不调用编译器和链接器，它们执行由用户定义的操作。可以使用\texttt{add\_custom\_target}定义自定义目标:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(Name [ALL] [command1 [args1...]]
@@ -16,21 +16,21 @@ add_custom_target(Name [ALL] [command1 [args1...]]
 				[SOURCES src1 [src2...]])
 \end{lstlisting}
 
-\texttt{add\_custom\_target}的核心是通过COMMAND选项传递的命令列表。虽然第一个命令可以不带这个选项传递，但最好在\texttt{add\_custom\_target}调用中添加COMMAND选项。默认情况下，定制目标只在显式请求时执行，除非指定了ALL选项。自定义目标总认为是过时的，因此总是运行指定的命令，而不管是否会反复产生相同的结果。使用DEPENDS关键字，可以使定制目标依赖于使用\texttt{add\_custom\_command}或其他目标定义的定制命令的文件和输出。要使自定义目标依赖于另一个目标，可以使用\texttt{add\_dependencies}。若使用自定义目标创建文件，可以在BYPRODUCTS选项下列出这些文件。列出的任何文件都将使用GENERATED属性标记，CMake使用该属性来确定构建是否过期，并找出需要清理的文件。但是，使用\texttt{add\_custom\_command}创建文件的任务可能更适合，如本节后面所述。
+\texttt{add\_custom\_target}的核心是通过COMMAND选项传递的命令列表。虽然第一个命令可以不带这个选项，但最好在\texttt{add\_custom\_target}中添加COMMAND选项。默认情况下，定制目标只在显式请求时执行，除非指定了ALL选项。自定义目标总认为是过时的，因此总是运行指定的命令，而不管是否会反复产生相同的结果。使用DEPENDS关键字，可以使定制目标依赖于使用\texttt{add\_custom\_command}或其他目标定义的定制命令的文件和输出。要使自定义目标依赖于另一个目标，可以使用\texttt{add\_dependencies}。若使用自定义目标创建文件，可以在BYPRODUCTS选项下列出这些文件。列出的文件都将使用GENERATED属性标记，CMake使用该属性来确定构建是否过期，并找出需要清理的文件，但使用\texttt{add\_custom\_command}创建文件的任务可能更适合。
 
-默认情况下，命令在当前二进制目录中执行，该目录存储在CMAKE\_CURRENT\_BINARY\_DIRECTORY缓存变量中。若需要修改，这可以通过WORKIN\_DIRECTORY选项来更改。该选项可以是绝对路径，也可以是相对路径(是当前二进制目录的相对路径)。
+通常，命令在当前二进制目录中执行，该目录在CMAKE\_CURRENT\_BINARY\_DIRECTORY缓存变量中。若需要修改，这可以通过WORKING\_DIRECTORY选项来更改。该选项可以是绝对路径，也可以是相对路径(当前二进制目录的相对路径)。
 
 COMMENT选项用于指定在命令运行之前打印的消息，若命令以静默方式运行，那么可以使用这个选项。但并不是所有的生成器都显示这些消息，因此使用它来显示关键信息不太可靠。
 
-VERBATIM标志使所有命令直接传递到平台，而无需进一步转义或由底层shell替换变量。CMake本身仍然会替换传递给命令或参数的变量。当转义可能出现问题时，建议使用VERBATIM标志。编写自定义任务，使其独立于底层平台也是一种很好的方式。可以在本章后面的“与平台无关命令”一节中找到更多关于如何创建平台无关命令的提示。
+VERBATIM标志使所有命令直接传递到平台，而无需进一步转义或由底层Shell替换变量。CMake本身仍然会替换传递给命令或参数的变量。当转义可能出现问题时，建议使用VERBATIM标志。编写自定义任务，使其独立于底层平台也是一种很好的方式。
 
 可能的话，USES\_TERMINAL选项指示CMake提供对终端的命令访问。若使用了Ninja生成器，则在终端作业池中运行。该池中的所有命令都是串行执行的。
 
-在使用Ninja生成文件时，可以使用JOB\_POOL选项来控制作业的并发性。它很少使用，并不能与USES\_TERMINAL标志一起使用。但开发者很少需要干预Ninja的工作池，并且处理它也不是一件小事。若想了解更多信息，可以在CMake的JOB\_POOLS属性的官方文档中找到更多信息。
+使用Ninja生成文件时，可以使用JOB\_POOL选项来控制作业的并发性。它很少使用，也不能与USES\_TERMINAL标志一起使用。但开发者很少需要干预Ninja的工作池，并且处理它也不是一件小事。若想了解更多信息，可以在CMake的JOB\_POOLS属性的官方文档中找到更多信息。
 
-SOURCES属性接受与自定义目标相关联的源文件列表。该属性不影响源文件，但可以帮助使文件在某些IDE中可见。若命令依赖于与项目一起交付的文件，如脚本，则应该在这里添加这些文件。
+SOURCES属性接受与自定义目标相关联的源文件列表。该属性不影响源文件，但可以使文件在某些IDE中可见。若命令依赖于与项目一起交付的文件，如脚本，则应该在这里添加这些文件。
 
-COMMAND\_EXPAND\_LISTS选项将列表传递给命令之前展开列表。有时这是必要的，因为在CMake中，列表只是由分号分隔的字符串，这可能会导致语法错误。当使用COMMAND\_EXPAND\_LISTS选项时，分号将替换为适当的空白字符，具体取决于平台。扩展包括使用\$<JOIN:的生成器表达式生成的列表。
+COMMAND\_EXPAND\_LISTS选项将列表传递给命令前展开列表。有时这是必要的，因为在CMake中，列表只是由分号分隔的字符串，这可能会导致语法错误。当使用COMMAND\_EXPAND\_LISTS选项时，分号将替换为适当的空白字符，具体取决于平台。扩展包括使用\$<JOIN:的生成器表达式生成的列表。
 
 下面是一个自定义目标的例子，使用一个叫做CreateHash的外部程序为另一个目标的输出哈希值:
 
@@ -40,20 +40,20 @@ add_custom_target(CreateHash ALL COMMAND Somehasher
 	$<TARGET_FILE:SomeExe>)
 \end{lstlisting}
 
-这个例子创建了一个名为CreateHash的自定义目标，它使用SomeExe目标的二进制文件作为参数调用外部SomeHasher程序。注意，二进制文件是使用\$<TARGET\_FILE:SomeExe>生成器表达式。这有两个目的:消除了用户跟踪目标二进制文件文件名的需要，并在两个目标之间添加了隐式依赖。CMake将识别这些隐式依赖关系，并按正确的顺序执行目标。若生成所需文件的目标还没有构建，CMake将自动构建。也可以使用\$<TARGET\_FILE:生成器直接执行由另一个目标创建的可执行文件。以下生成器表达式会导致目标之间的隐式依赖，生成器直接执行由另一个目标创建的可执行文件：
+这个例子创建了一个名为CreateHash的自定义目标，使用SomeExe目标的二进制文件作为参数调用外部SomeHasher程序。注意，二进制文件是使用\$<TARGET\_FILE:SomeExe>生成器表达式。这有两个目的:消除了用户跟踪目标二进制文件文件名的需要，并在两个目标之间添加了隐式依赖。CMake将识别这些隐式依赖关系，并按正确的顺序执行目标。若生成所需文件的目标还没有构建，CMake将自动构建。也可以使用\$<TARGET\_FILE:生成器直接执行由另一个目标创建的可执行文件。以下生成器表达式会导致目标之间的隐式依赖，生成器直接执行由另一个目标创建的可执行文件：
 
 \begin{itemize}
 \item 
 \$<TARGET\_FILE:target>: 包含目标的主二进制文件的完整路径，例如.exe、.so或.dll。
 
 \item 
-\$<TARGET\_LINKER\_FILE: target>: 包含用于链接到目标的文件的完整路径。这通常是库文件本身，除了在Windows上，它将是与DLL关联的.lib文件。
+\$<TARGET\_LINKER\_FILE: target>: 包含用于链接到目标的文件的完整路径。这通常是库文件本身，在Windows上，它将是与DLL关联的.lib文件。
 
 \item 
 \$<TARGET\_SONAME\_FILE: target>: 这包含库文件及其全名，包括SOVERSION属性设置的任何数字，例如.so.3。
 
 \item
-\$<TARGET\_PDB\_FILE: target>: 这包含用于调试的生成的程序数据库文件的完整路径。创建自定义目标是在构建时执行外部任务的一种方法。另一种方法是定义自定义命令。自定义命令可用于向现有目标(包括自定义目标)添加自定义任务。
+\$<TARGET\_PDB\_FILE: target>: 这包含用于调试的生成的程序数据库文件的完整路径。创建自定义目标是在构建时执行外部任务的一种方法。另一种方法是定义自定义命令，可用于向现有目标(包括自定义目标)添加自定义任务。
 \end{itemize}
 
 \subsubsubsection{8.3.1\hspace{0.2cm}向现有目标添加自定义任务}
@@ -72,11 +72,11 @@ add_custom_command(TARGET <target>
 					[COMMAND_EXPAND_LISTS])
 \end{lstlisting}
 
-大多数选项的工作原理类似于\texttt{add\_custom\_target}中的选项。TARGET属性可以是当前目录中定义的任何目标，这是该命令的一个限制。可以在以下时段将命令连接到构建中:
+大多数选项的工作原理类似于\texttt{add\_custom\_target}中的选项。TARGET属性可以是当前目录中定义的目标，这是该命令的一个限制。可以在以下时段将命令连接到构建中:
 
 \begin{itemize}
 \item 
-PRE\_BUILD: 在Visual Studio中，此命令在执行任何其他构建步骤之前执行。当使用其他生成器时，会在PRE\_LINK命令之前运行。
+PRE\_BUILD: 在Visual Studio中，此命令在执行其他构建步骤之前执行。当使用其他生成器时，会在PRE\_LINK命令之前运行。
 
 \item 
 PRE\_LINK: 此命令将在编译源代码之后运行，在可执行文件或存档工具链接到静态库之前运行。
@@ -87,7 +87,7 @@ POS\_BUILD: 这将在执行所有其他构建规则后运行该命令。
 
 执行自定义步骤最常见的方法是使用POST\_BUILD;其他两个选项很少使用，要么是因为支持有限，要么是因为它们既不能影响链接，也不能影响构建。
 
-向现有目标添加自定义命令相对简单。下面的代码添加了一个命令，在每次编译后生成并存储构建文件的哈希码:
+向现有目标添加自定义命令相对简单。下面的代码添加了一个命令，在每次编译后生成并存储构建文件的哈希值:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(MyExecutable)
@@ -100,13 +100,13 @@ add_custom_command(TARGET MyExecutable
 )
 \end{lstlisting}
 
-在这个例子中，一个名为hashher的自定义可执行文件用来生成myexecutable目标的输出文件的哈希码。
+这个例子中，名为hashher的自定义可执行文件，用来生成myexecutable目标输出文件的哈希值。
 
-通常，需要在构建之前执行某些操作的原因是更改文件或生成信息。为此，第二个签名通常是更好的选择。
+需要在构建之前，执行某些操作的原因是更改文件或生成信息。为此，第二个签名通常是更好的选择。
 
 \subsubsubsection{8.3.2\hspace{0.2cm}使用自定义任务生成文件}
 
-通常，希望自定义任务产生特定的输出文件。这可以通过定义自定义目标，并在目标之间设置必要的依赖项来实现，或者通过与构建步骤挂钩。不幸的是，PRE\_BUILD不可靠，因为只有Visual Studio生成器正确地支持。因此，更好的方法是创建一个自定义命令，通过使用add\_custom\_command函数的第二个签名来创建文件:
+通常，希望自定义任务产生特定的输出文件。这可以通过定义自定义目标，并在目标之间设置必要的依赖项来实现，或者通过与构建步骤挂钩，但PRE\_BUILD不可靠，因为只有Visual Studio生成器正确地支持它。因此，更好的方法是创建一个自定义命令，通过使用add\_custom\_command函数的第二个签名来创建文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT output1 [output2 ...]
@@ -125,13 +125,13 @@ add_custom_command(OUTPUT output1 [output2 ...]
 					[COMMAND_EXPAND_LISTS])
 \end{lstlisting}
 
-\texttt{add\_custom\_command}的这个签名定义了一个生成OUTPUT中指定的文件的命令。该命令的大多数选项都非常类似于\texttt{add\_custom\_target}和将自定义任务挂钩到构建步骤的签名。DEPENDS选项可用于手动指定文件或目标的依赖项。相比之下，自定义目标的DEPENDS选项只能指向文件。若构建或CMake更新了任何依赖项，则会再次运行自定义命令。MAIN\_DEPENDENCY选项与此密切相关，指定命令的主要输入文件，工作原理与DEPENDS选项类似，只不过它只接受一个文件。MAIN\_DEPENDENCY主要用来告诉Visual Studio在哪里添加自定义命令。
+\texttt{add\_custom\_command}的这个签名定义了一个生成OUTPUT中指定的文件的命令。该命令的大多数选项都非常类似于\texttt{add\_custom\_target}和将自定义任务挂钩到构建步骤的签名。DEPENDS选项可用于手动指定文件或目标的依赖项。相比之下，自定义目标的DEPENDS选项只能指向文件。若构建或CMake更新了依赖项，则会再次运行自定义命令。MAIN\_DEPENDENCY选项与此密切相关，指定命令的主要输入文件，工作原理与DEPENDS选项类似，只不过它只接受一个文件。MAIN\_DEPENDENCY主要用来告诉Visual Studio在哪里添加自定义命令。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-若源文件出现在MAIN\_DEPENDENCY中，那么自定义命令将取代所列文件的正常编译，这可能导致链接器错误。
+若源文件出现在MAIN\_DEPENDENCY中，那么自定义命令将取代所列文件的正常编译，这可能导致链接器报错。
 \end{tcolorbox}
 
-其他两个与依赖相关的选项IMPLICIT\_DEPENDS和DEPFILE很少使用，因为它们的支持仅限于Makefile生成器。IMPLICT\_DEPENDS告诉CMake使用C或C++扫描器来检测所列文件的任何编译时依赖项，并从中创建依赖项。另一个选项DEPFILE可以用来指向一个.d依赖文件，该文件是由Makefile项目生成的.d文件最初起源于GNU make项目，用起来很强大，但也很复杂，不应该对大多数项目进行手动管理。下面的例子说明了如何使用自定义命令在常规目标文件运行之前生成一个源文件，基于另一个用于输入的文件:
+其他两个与依赖相关的选项IMPLICIT\_DEPENDS和DEPFILE很少使用，因为它们的支持仅限于Makefile生成器。IMPLICT\_DEPENDS告诉CMake使用C或C++扫描器来检测所列文件的任何编译时依赖项，并从中创建依赖项。另一个选项DEPFILE可以用来指向.d依赖文件，该文件是由Makefile项目生成的.d文件最初起源于GNU make项目，用起来很强大也很复杂，不应该对大多数项目进行手动管理。下面的例子说明了如何使用自定义命令，在常规目标文件运行前生成一个源文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
@@ -148,9 +148,9 @@ add_executable(
 )
 \end{lstlisting}
 
-这个例子中发生了几件事。首先，自定义命令将当前二进制指令中的main.cpp文件定义为OUTPUT文件。然后，定义生成该文件的命令——这里使用一个名为sourceFileGenerator的程序——将消息文件转换为.cpp文件。DEPENDS部分说明，每次message.txt文件更改时都应该重新运行此命令。
+首先，自定义命令将当前二进制指令中的main.cpp文件定义为OUTPUT文件。然后，定义生成该文件的命令——这里使用名为sourceFileGenerator的程序——将消息文件转换为.cpp文件。DEPENDS部分说明，每次message.txt文件更改时都应该重新运行此命令。
 
-稍后，为可执行文件创建目标。由于可执行文件引用自定义命令的OUTPUT部分中指定的main.cpp文件，CMake将隐式地在命令和目标之间添加必要的依赖关系。因为它适用于所有生成器，所以以这种方式使用自定义命令比使用PRE\_BUILD指令更加可靠和可移植。有时，为了创建所需的输出，需要多个命令。如果存在产生相同输出的前一个命令，则可以使用APPEND选项将命令链接起来。使用APPEND的自定义命令可能只定义额外的COMMAND和DEPENDS选项，其他选项被忽略。若两个命令产生相同的输出文件，CMake将输出错误，除非指定了APPEND。若命令只是可选执行，这很有用。看看下面的例子:
+之后，为可执行文件创建目标。由于可执行文件引用自定义命令的OUTPUT部分中指定的main.cpp文件，CMake将隐式地在命令和目标之间添加必要的依赖关系。因为适用于所有生成器，所以以这种方式使用自定义命令比使用PRE\_BUILD指令更加可靠和可移植。有时为了创建所需的输出，需要多个命令。若存在产生相同输出的前一个命令，则可以使用APPEND选项将命令链接起来。使用APPEND的自定义命令只需要COMMAND和DEPENDS选项，忽略其他选项。若两个命令产生相同的输出文件，CMake将输出错误，除非指定了APPEND。若命令是可选执行，这很有用。看看下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT archive.tar.gz
@@ -168,7 +168,7 @@ add_custom_command(OUTPUT archive.tar.gz
 )
 \end{lstlisting}
 
-这个例子中，目标的输出文件MyTarget被添加到tar.gz文件中。之后，另一个文件添加到相同的文件中。注意，第一个命令自动依赖于MyTarget，因为其使用命令创建相应的二进制文件，但它不会由构建自动执行。第二个自定义命令列出与第一个命令相同的输出文件，但将压缩文件添加为第二个输出。通过指定APPEND，在执行第一个命令时自动执行第二个命令。若缺少APPEND关键字，CMake将输出类似于下面的错误:
+目标的输出文件MyTarget添加到tar.gz文件中，另一个文件添加到相同的文件中。注意，第一个命令自动依赖于MyTarget，因为其使用命令创建相应的二进制文件，但不会由构建自动执行。第二个自定义命令列出与第一个命令相同的输出文件，但将压缩文件添加为第二个输出。通过指定APPEND，在执行第一个命令时自动执行第二个命令。若缺少APPEND关键字，CMake将输出类似于下面的错误:
 
 \begin{tcblisting}{commandshell={}}
 CMake Error at CMakeLists.txt:30 (add_custom_command):
@@ -177,7 +177,7 @@ CMake Error at CMakeLists.txt:30 (add_custom_command):
   which already has a custom rule.
 \end{tcblisting}
 
-正如前面提到的，本例中的定制命令隐式地依赖于MyTarget，但不会自动执行。要执行它们，建议创建一个依赖于输出文件的自定义目标:
+本例中的定制命令隐式地依赖于MyTarget，但不会自动执行。要执行它们，建议创建一个依赖于输出文件的自定义目标:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(create_archive ALL DEPENDS
@@ -185,7 +185,7 @@ add_custom_target(create_archive ALL DEPENDS
 )
 \end{lstlisting}
 
-这里，创建了一个名为create\_archive的自定义目标它作为All构建的一部分执行。因为它依赖于自定义命令的输出，所以构建目标将调用自定义命令，依赖于MyTarget。若压缩包不是新的，则构建create\_archive也会触发MyTarget的构建。
+这里，创建了一个名为create\_archive的自定义目标它作为All构建的一部分执行。因为依赖于自定义命令的输出，所以构建目标将调用自定义命令，依赖于MyTarget。若压缩包不是新的，则构建create\_archive也会触发MyTarget的构建。
 
-\texttt{add\_custom\_command}和\texttt{add\_custom\_target}自定义任务都在CMake的构建步骤中执行。若需要，可以在配置时添加任务。我们将在下一节中讨论这个问题。
+\texttt{add\_custom\_command}和\texttt{add\_custom\_target}自定义任务都在CMake的构建步骤中执行，可以在配置时添加任务。我们将在下一节中讨论这个问题。
 

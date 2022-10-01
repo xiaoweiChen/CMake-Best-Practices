@@ -1,4 +1,4 @@
-构建软件时，常见的任务是在构建之前必须将一些文件复制到特定位置或进行修改。在配置时执行自定义任务一节中，看到了一个示例，其中检索Git提交，并将其作为预处理器定义传递给编译器。一种更好的方法是生成一个包含必要信息的头文件。虽然只是回显代码片段，并将其写入文件是可能的，但这可能导致特定于平台的代码，因此很危险。CMake对此的解决方案是使用\texttt{configure\_file}指令，可以将文件从一个位置复制到另一个位置，并在此过程中修改其内容，其签名如下:
+构建软件时，常见的任务是在构建前将一些文件复制到特定位置或进行修改。在配置时执行自定义任务一节中，示例会检索Git提交，并将其作为宏定义传递给编译器。一种更好的方法是生成一个包含必要信息的头文件。虽然只是代码片段，并将其写入文件可能导致代码特定于平台，从而很危险。CMake对此的解决方案是使用\texttt{configure\_file}指令，可以将文件从一个位置复制到另一个位置，并在此过程中修改其内容，其签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 configure_file(<input> <output>
@@ -8,9 +8,9 @@ configure_file(<input> <output>
 				[NEWLINE_STYLE [UNIX|DOS|WIN32|LF|CRLF] ])
 \end{lstlisting}
 
-\texttt{configure\_file}将<input>文件复制到<output>文件。若需要，将创建到输出文件的路径，路径可以是相对路径或绝对路径。若使用相对路径，则将从当前源目录搜索输入文件，但输出文件的路径将相对于当前构建目录。若不能写入输出文件，命令将失败，配置停止。默认情况下，输出文件与目标文件具有相同的权限，若当前用户与输入文件所属的用户不同，所有权可能会发生变化。若添加了NO\_SOURCE\_PERMISSION，则权限不会转移，输出文件将获得默认权限：rw-r-{}-r-{}-。也可以使用FILE\_PERMISSIONS选项手动指定权限，该选项接受一个三位数的数字作为参数。USE\_SOURCE\_PERMISSION已经是默认选项，这个选项只是为了更明确地进行说明。
+\texttt{configure\_file}将<input>文件复制到<output>文件，将创建输出文件的路径，路径可以是相对路径或绝对路径。若使用相对路径，则将从当前源目录搜索输入文件，但输出文件的路径将相对于当前构建目录。若不能写入输出文件，命令失败，配置停止。通常，输出文件与目标文件具有相同的权限，若当前用户与输入文件所属的用户不同，所有权可能会发生变化。若添加了NO\_SOURCE\_PERMISSION，则权限不会转移，输出文件将获得默认权限：rw-r-{}-r-{}-。也可以使用FILE\_PERMISSIONS选项手动指定权限，该选项接受一个三位数的数字作为参数。USE\_SOURCE\_PERMISSION已经是默认选项，这个选项只是为了更明确地进行说明。
 
-除非传递COPYONLY，否则\texttt{configure\_file}也会在复制到输出路径时替换输入文件的部分内容。默认情况下，\texttt{configure\_file}将用同名变量的值替换所有引用为\$\{SOME\_VARIABLE\}或@SOME\_VARIABLE@的变量。若在CMakeLists.txt中定义了一个变量，当使用\texttt{configure\_file}时，相应的值会写入输出文件。若未指定变量，则输出文件将在相应的位置包含一个空字符串。若有一个hello.txt.in文件，包含以下信息:
+除非传递COPYONLY，否则\texttt{configure\_file}也会在复制到输出路径时替换输入文件的部分内容，\texttt{configure\_file}将用同名变量的值替换所有引用为\$\{SOME\_VARIABLE\}或@SOME\_VARIABLE@的变量。若在CMakeLists.txt中定义了一个变量，当使用\texttt{configure\_file}时，相应的值会写入输出文件。若未指定变量，则输出文件将在相应的位置包含一个空字符串。若有一个hello.txt.in文件，包含以下信息:
 
 \begin{lstlisting}[style=styleCMake]
 Hello ${GUEST} from @GREETER@
@@ -24,9 +24,11 @@ set(GREETER "The Universe")
 configure_file(hello.txt.in hello.txt)
 \end{lstlisting}
 
-生成的hello.txt文件将包含来自the Universe的Hello World。若@ONLY选项传递给\texttt{configure\_file}，则只替换@GREETER@，结果内容将是Hello \$\{GUEST\}。转换CMake文件时，@ONLY很有用，因为CMake文件可能包含不应该被括号括起来的变量。ESCAPE\_QUOTES将用反斜杠转义目标文件中的引号。默认情况下，\texttt{configure\_file}将转换换行符，以便目标文件与当前平台匹配。默认的行为可以通过NEWLINE\_STYLE来改变。UNIX或LF将使用\verb|\|n作为换行符，而DOS、WIN32和CRLF将使用\verb|\|r\verb|\|n。同时设置NEWLINE\_STYLE和COPYONLY选项会导致错误，而设置COPYONLY不会影响换行符的样式。
+生成的hello.txt文件的内容为Hello World from The
+Universe。若使用@ONLY选项，则只替换@GREETER@，结果内容将是Hello \$\{GUEST\} from The
+Universe。转换CMake文件时，@ONLY很有用，因为CMake文件可能包含不应该被括号括起来的变量。ESCAPE\_QUOTES将用反斜杠转义目标文件中的引号。\texttt{configure\_file}将转换换行符，以便目标文件与当前平台匹配。默认的行为可以通过NEWLINE\_STYLE来改变。UNIX或LF将使用\verb|\|n作为换行符，而DOS、WIN32和CRLF将使用\verb|\|r\verb|\|n。同时设置NEWLINE\_STYLE和COPYONLY选项会导致错误，而设置COPYONLY不会影响换行符的样式。
 
-回到使用Git提交编译为可执行文件的示例。这里，我们将写一个头文件作为输入:
+回到示例，我们将写哈希值写入一个头文件作为输入:
 
 \begin{lstlisting}[style=styleCMake]
 #define CMAKE_BEST_PRACTICES_VERSION "@GIT_REVISION@"
@@ -42,7 +44,7 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src
 	/version.h @ONLY)
 \end{lstlisting}
 
-如上一节示例所示，版本信息作为编译定义传递，Git提交首先使用\texttt{execute\_process}进行检索。之后，\texttt{configure\_file}复制文件，@GIT\_REVISION@会替换为当前提交的短哈希值。
+版本信息作为宏定义传递，Git哈希信息首先使用\texttt{execute\_process}进行检索。之后，\texttt{configure\_file}复制文件，@GIT\_REVISION@会替换为当前提交的短哈希值。
 
 使用预处理器定义时，\texttt{configure\_file}将替换所有以\#cmakedefine VAR…形式出现的行。使用\#define VAR或/* undef VAR */，这取决于VAR是否包含解释为true或false的值。
 
@@ -77,7 +79,7 @@ configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/
 #define CMAKE_BEST_PRACTICES_VERSION "c030d83"
 \end{lstlisting}
 
-若关闭GIT\_REVISION\_ENABLE，生成的文件将包含以下内容:
+若关闭GIT\_REVISION\_ENABLE，生成文件将包含以下内容:
 
 \begin{lstlisting}[style=styleCXX]
 /* #undef GIT_VERSION_ENABLE */

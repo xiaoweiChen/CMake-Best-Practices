@@ -1,7 +1,7 @@
 
-要在配置时执行自定义任务，可以使用\texttt{execute\_process}。这方面的需求是:构建在构建之前需要额外的信息，或者需要更新文件以重新运行CMake。另一个情况是在配置步骤中生成CMakeLists.txt文件或其他输入文件，这也可以通过\texttt{configure\_file}实现。
+要在配置时执行自定义任务，可以使用\texttt{execute\_process}:生成在构建前需要的信息，或者需要更新文件以重新运行CMake。另一个情况是在配置步骤中生成CMakeLists.txt文件或其他输入文件，也可以通过\texttt{configure\_file}实现。
 
-\texttt{execute\_process}的工作原理与前面看到的\texttt{add\_custom\_target}和\texttt{add\_custom\_command}非常相似。然而，区别是\texttt{execute\_process}可以在变量或文件中捕获到stdout和stderr的输出。\texttt{execute\_process}的签名如下:
+\texttt{execute\_process}的工作原理与\texttt{add\_custom\_target}和\texttt{add\_custom\_command}非常相似。然而，区别是\texttt{execute\_process}可以在变量或文件中捕获到stdout和stderr的输出。\texttt{execute\_process}的签名如下:
 
 \begin{lstlisting}[style=styleCMake]
 execute_process(COMMAND <cmd1> [<arguments>]
@@ -26,7 +26,7 @@ execute_process(COMMAND <cmd1> [<arguments>]
 				[COMMAND_ERROR_IS_FATAL <ANY|LAST>])
 \end{lstlisting}
 
-\texttt{execute\_process}接受要在WORKING\_DIRECTORY中执行的COMMAND列表。最后一个要执行的命令的返回代码可以存储在RESULT\_VARIABLE定义的变量中，或可以将使用分号分隔的变量列表传递给RESULTS\_VARIABLE。若使用的是列表，则命令将按与已定义的变量相同的顺序存储命令的返回代码。若定义的变量比命令少，那么多余的返回代码都将忽略。若定义了TIMEOUT，并且若有子进程都无法结束，则结果变量将包含超时。自CMake版本3.19以来，COMMAND\_ERROR\_IS\_FATAL选项可用，任何进程失败(或是最后一个)时中止执行。这比检索所有返回代码后，分别检查要方便得多。下面的例子中，若命令返回非零值，CMake的配置步骤将失败并出现错误:
+\texttt{execute\_process}接受在WORKING\_DIRECTORY中执行的COMMAND列表。最后一个要执行的命令的返回代码可以存储在RESULT\_VARIABLE定义的变量中，或可以将使用分号分隔的变量列表传递给RESULTS\_VARIABLE。若使用的是列表，则命令将按与已定义的变量相同的顺序存储命令的返回代码。若定义的变量比命令少，那么多余的返回代码都将忽略。若定义了TIMEOUT，有子进程都无法结束时，结果变量将包含超时。自CMake版本3.19以来，COMMAND\_ERROR\_IS\_FATAL选项可用，进程失败(或是最后一个)时中止执行。下面的例子中，若命令返回非零值，CMake的配置步骤将失败并出现错误:
 
 \begin{lstlisting}[style=styleCMake]
 execute_process(
@@ -36,9 +36,9 @@ execute_process(
 )
 \end{lstlisting}
 
-stdout或stderr的输出可以分别使用OUTPUT\_VARIABLE或ERROR\_VARIABLE捕获。一种替代方案是，可以通过使用OUTPUT\_FILE或ERROR\_FILE重定向到文件，也可以通过传递OUTPUT\_QUIET或ERROR\_QUIET忽略。在变量和文件中不可能捕获输出，这将导致两者中的一个为空。哪些保留，哪些丢弃取决于平台。若不重定向，OUTPUT\_*选项可以将指定输出发送给CMake进程。
+stdout或stderr的输出可以使用OUTPUT\_VARIABLE或ERROR\_VARIABLE捕获。一种替代方案是，通过使用OUTPUT\_FILE或ERROR\_FILE重定向到文件，也可以通过传递OUTPUT\_QUIET或ERROR\_QUIET忽略。在变量和文件中不可能捕获输出，这将导致两者中的一个为空。哪些保留，哪些丢弃取决于平台。若不重定向，OUTPUT\_*选项可以将指定输出发送给CMake进程。
 
-若使用变量捕获输出，但仍然需要显示，可以添加ECHO\_<STREAM>\_VARIABLE。CMake还可以通过向COMMAND\_ECHO选项传递STDOUT、STDERR或NONE来输出命令。但若输出在文件中捕获，这将没有任何效果。若为stdout和stderr指定了相同的变量或文件，则将合并结果。若有必要，可以通过INPUT\_FILE选项传递一个文件来控制第一个命令的输入流。
+若使用变量捕获输出，但仍然需要显示，可以添加ECHO\_<STREAM>\_VARIABLE。CMake还可以通过向COMMAND\_ECHO选项传递STDOUT、STDERR或NONE来输出命令。但若输出在文件中捕获，这将没有效果。若为stdout和stderr指定了相同的变量或文件，则将合并结果，并且可以通过INPUT\_FILE选项传递一个文件来控制第一个命令的输入流。
 
 变量的输出可以使用<STREAM>\_STRIP\_TRAILING\_WHITESPACE选项的方式控制，该选项将消除输出末尾的空白。当将输出重定向到文件时，这个选项无效。Windows上，ENCODING选项可用于控制输出，并接受以下值:
 
@@ -59,7 +59,7 @@ OEM: 使用平台定义的编码。
 UTF8或UTF-8: 强制使用UTF-8编码。
 \end{itemize}
 
-使用\texttt{execute\_process}的原因是收集构建所需的信息，然后将其传递给项目。假设希望通过传递预处理器定义来将Git修订编译为可执行文件。这种方法的缺点是，对于要执行的定制任务，必须调用CMake，而不仅仅是构建系统。因此，使用带OUTPUT参数的使用\texttt{add\_custom\_command}可能是更现实的解决方案，但出于演示目的，这个示例应该足够了。以下是在配置时读取Git哈希码，并将其作为编译定义传递给目标的示例:
+使用\texttt{execute\_process}的原因是收集构建所需的信息，然后将其传递给项目。假设希望通过传递宏定义来将Git修订编译为可执行文件。这种方法的缺点是，对于要执行的定制任务，必须调用CMake，而不仅仅是构建系统。因此，使用带OUTPUT参数的使用\texttt{add\_custom\_command}可能是更现实的解决方案，但出于演示目的，这个示例应该足够了。以下是在配置时读取Git哈希值，并将其作为编译定义传递给目标的示例:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Git REQUIRED)
@@ -75,9 +75,9 @@ target_compile_definitions(SomeExe PRIVATE VERSION=
 	\"${GIT_REVISION}\")
 \end{lstlisting}
 
-这个例子中，传递给\texttt{execute\_process}的git命令将在当前执行CMakeLists.txt文件的目录中执行。生成的哈希存储在GIT\_REVISION变量中，若命令因任何原因失败，配置过程将停止并出现错误。
+传递给\texttt{execute\_process}的git命令将在当前执行CMakeLists.txt文件的目录中执行。生成的哈希存储在GIT\_REVISION变量中，若命令因任何原因失败，配置过程将停止并出现错误。
 
-通过使用预处理器定义将信息从\texttt{execute\_process}传递到编译器，并不是最优的方式。更好的解决方案是，可以生成一个包含此信息的头文件。CMake还有另一个\texttt{configure\_file}指令可以用于此目的，我们将在下一节中看到。
+通过宏定义将信息从\texttt{execute\_process}传递到编译器，并不是最优的方式。更好的解决方案是，生成一个包含此信息的头文件。CMake还有\texttt{configure\_file}指令可以用于此目的，我们将在下一节中看到。
 
 
 
