@@ -1,11 +1,11 @@
 
-我们讨论了诸如Debug、Release、RelWithDebInfo和MinSizeRel等构建类型，这些都是由CMake默认提供的。这些构建类型可以通过将全局标志传递给所有目标的自定义构建类型进行扩展。对于依赖于某些编译器标志的代码质量工具，提供自定义构建类型可以大大简化CMakeLists.txt，特别是对于大型项目。创建自定义构建类型也可以直接影响全局CMAKE\_<LANG>\_FLAGS。
+我们讨论了Debug、Release、RelWithDebInfo和MinSizeRel等构建类型，这些都是由CMake默认提供的。这些构建类型可以通过将全局标志传递给所有目标的自定义构建类型进行扩展。对于依赖于某些编译器标志的代码质量工具，提供自定义构建类型可以简化CMakeLists.txt，特别是对于大型项目。创建自定义构建类型也可以直接影响全局CMAKE\_<LANG>\_FLAGS。
 
 \begin{tcolorbox}[colback=blue!5!white,colframe=blue!75!black,title=别覆盖CMAKE\_<LANG>\_FLAGS]
-设置全局编译器选项优先于CMakeLists.txt中的CMAKE\_<LANG>\_FLAGS。这些标志旨在在项目外部设置，可以通过命令行传递，也可以通过工具链文件提供。在项目内部修改很有可能会影响从外部设置的情况。
+设置全局编译器选项优先于CMakeLists.txt中的CMAKE\_<LANG>\_FLAGS。这些标志可在项目外部设置，可以通过命令行传递，也可以通过工具链文件提供。在项目内部修改很有可能会影响从外部设置的情况。
 \end{tcolorbox}
 
-对于多配置生成器，如MSVC或Ninja Multi-Config，可用的构建类型存储在CMAKE\_CONFIGURATION\_TYPES缓存变量中。对于单个配置生成器，如Make或Ninja，当前构建类型存储在CMAKE\_BUILD\_TYPE变量中。应该在顶级项目上定义自定义构建类型。
+对于多配置生成器，如MSVC或Ninja Multi-Config，可用的构建类型存储在CMAKE\_CONFIGURATION\_TYPES缓存变量中。对于单个配置生成器，如Make或Ninja，当前构建类型存储在CMAKE\_BUILD\_TYPE变量中。应该在顶层项目上定义自定义构建类型。
 
 Coverage的自定义构建类型可以像这样添加到CMakeLists.txt:
 
@@ -26,20 +26,20 @@ if(NOT CMAKE_BUILD_TYPE IN_LIST KNOWN_BUILD_TYPES)
 endif()
 \end{lstlisting}
 
-看看在前面的例子中发生了什么:
+看看例子中发生了什么:
 
 \begin{itemize}
 \item 
 首先，确定当前生成器是多配置，还是单配置，存储在GENERATOR\_IS\_MULTI\_CONFIG全局属性中。由于该属性不能直接在if语句中使用，因此该属性检索并存储在IS\_MULTI\_CONFIG变量中。
 
 \item 
-若当前生成器确实是多配置生成器，则将名为Coverage的自定义构建配置添加到CMAKE\_CONFIGURATION\_TYPES中，并使生成器可用，但只有在它还不存在的情况下可用。
+若当前生成器确实是多配置生成器，则将名为Coverage的自定义构建配置添加到CMAKE\_CONFIGURATION\_TYPES中，并使生成器可用，但只有在不存在的情况下可用。
 
 \item 
 若生成器是单配置生成器，则通过设置CMAKE\_BUILD\_TYPE缓存变量的STRINGS属性来添加Coverage构建存在的提示。这将在CMake GUI中创建一个带有有效选项的下拉菜单。为方便起见，支持的构建类型存储在KNOWN\_BUILD\_TYPES变量中。
 
 \item 
-由于当前生成类型通常从外部提供给单个配置生成器，因此谨慎的做法是检查未知的生成类型，若指定了未知的生成类型，则中止配置。打印FATAL\_ERROR消息将使CMake停止构建。
+由于当前生成类型通常从外部提供给单配置生成器，因此谨慎的做法是检查未知的生成类型，若指定了未知的生成类型，则中止配置。打印FATAL\_ERROR消息将使CMake停止构建。
 \end{itemize}
 
 这样，Coverage构建类型就添加到CMake中了，但构建类型还没有配置为向构建中添加自定义编译器和链接器标志。要定义标志，需要使用两组缓存变量:
@@ -82,7 +82,7 @@ mark_as_advanced(CMAKE_C_FLAGS_COVERAGE
 )
 \end{lstlisting}
 
-有时库文件名应该反映它们是用特殊的构建类型创建的。为自定义构建类型设置CMAKE\_<CONFIGURATION>\_POSTFIX将实现此目的。这是Debug版本的常见方式，因此当打包在一起时，可以将文件与发布版本版本区分开来。与此相关的是DEBUG\_CONFIGURATIONS全局属性，包含认为是未优化的配置，并用于调试。若自定义构建视为非发布构建，则应考虑向属性中添加如下内容:
+有时库文件名应该反映它们是用特殊的构建类型创建的。为自定义构建类型设置CMAKE\_<CONFIGURATION>\_POSTFIX将实现此目的。这是Debug版本的常见方式，因此当打包在一起时，可以将文件与发布版本版本区分开来。与此相关的是DEBUG\_CONFIGURATIONS全局属性，包含认为是未优化的配置，并用于调试。若自定义构建视为非Release构建，则应考虑向属性中添加如下内容:
 
 \begin{lstlisting}[style=styleCMake]
 set_property(GLOBAL APPEND PROPERTY DEBUG_CONFIGURATIONS Coverage)
@@ -90,7 +90,7 @@ set_property(GLOBAL APPEND PROPERTY DEBUG_CONFIGURATIONS Coverage)
 
 DEBUG\_CONFIGURATION属性应该在调用\texttt{target\_link\_libraries}之前在顶层项目中设置。DEBUG\_CONFIGURATIONS属性目前只有\texttt{target\_link\_libraries}使用，由于历史原因，这些库可以以DEBUG作为前缀，或者进行优化，以表明应该链接到各自的构建配置中。现在，这很少使用了，因为生成器表达式的控制粒度更细。
 
-本章就到此结束。我们已经了解了测试和质量工具最常见的方面，并希望可以为您的卓越软件质量之旅做出贡献。
+本章就到此结束。我们已经了解了测试和质量工具最常用的方式，并希望可以为您的卓越软件质量之旅做出贡献。
 
 
 

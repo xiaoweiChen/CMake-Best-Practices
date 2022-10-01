@@ -1,52 +1,52 @@
-今天的编译器通常不仅仅是将文本转换为二进制的程序，它们是复杂的软件套件，具有确保代码质量的内置功能。对于编译器对代码质量问题的了解程度的关注急剧增加，特别是随着LLVM和Clang的出现。这些质量工具通常称为消毒器，通过将某些标志传递给编译器和链接器来启用它们。
+如今的编译器不仅可以将文本转换为二进制，还是一组复杂的软件套件，具有确保代码质量的内置功能。特别是随着LLVM和Clang的出现，对于编译器对代码质量问题的了解程度显得非常重要。这些质量工具通常称为消毒器，通过将某些标志传递给编译器和链接器来启用。
 
-代码消毒器是一种将质量检查引入代码的方法，使用编译器用注释和钩子装饰二进制代码，以检测各种运行时问题。当执行代码时，检查并确认注释是否有任何违规行为。消毒程序相对较快，它们显然会对任何程序的运行时行为产生影响。若消毒程序进行了捕获，则会使用abort()终止程序并返回非零错误码。这在测试中特别有用，任何违反消毒器的测试都将标记为失败。
+代码消毒器是将质量检查引入代码的方法，编译器用注释和钩子装饰二进制代码，以检测各种运行时问题。当执行代码时，检查并确认注释是否有任何违规行为。消毒程序相对较快，会对程序的运行时行为产生影响。若消毒程序进行了捕获，则会使用abort()终止程序并返回非零错误码。这在测试中特别有用，任何违反消毒器的测试都将标记为失败。
 
 以下是最常见的消毒器:
 
 \begin{itemize}
 \item 
-地址杀毒程序(ASan)检测内存访问错误，如越界和释放后使用错误。
+地址消毒程序(ASan)检测内存访问错误，如越界和释放后使用错误。
 
 \item 
-泄漏杀毒器(LSan)是ASan的一部分，可用于检测内存泄漏。
+泄漏消毒器(LSan)是ASan的一部分，可用于检测内存泄漏。
 
 \item 
-GCC和Clang中，有一些通用ASan的定制版本，例如用于检测Linux内核中的内存错误的内核地址杀毒程序(KASAN)。
+GCC和Clang中，有一些通用ASan的定制版本，例如用于检测Linux内核中的内存错误的内核地址消毒程序(KASAN)。
 
 \item 
 某些平台上，ASans甚至可以在硬件辅助下运行。
 
 \item 
-内存杀毒器(MSan)检测未初始化的内存读取。
+内存消毒器(MSan)检测未初始化的内存读取。
 
 \item 
-线程杀毒器(TSan)将报告数据竞争。由于TSan的工作方式，不能与ASan和LSan一起运行。
+线程消毒器(TSan)将报告数据竞争。由于TSan的工作方式，不能与ASan和LSan一起运行。
 
 \item 
-未定义行为杀毒器(UBSan)检测并报告代码导致未定义行为的情况，初始化之前使用变量或操作符优先级不明确是常见的例子。
+未定义行为消毒器(UBSan)检测并报告代码导致未定义行为的情况，初始化前使用变量或操作符优先级不明确是常见的例子。
 \end{itemize}
 
-Clang套件在消毒器可用性方面非常领先，GCC紧随其后。微软在适应这些特性方面有点慢，但他们已经开始在编译器中包括消毒程序。撰写本书时，Visual Studio 19附带的MSVC版本16.9是第一个包含对ASan的支持的版本。关于各自的杀毒器的作用以及如何详细配置它们的详细信息，各种编译器的文档非常有帮助。
+Clang套件在消毒器可用性方面非常领先，GCC紧随其后。微软在适应这些特性方面有点慢，但也已经开始在编译器中包括消毒程序。撰写本书时，Visual Studio 19附带的MSVC版本16.9是第一个包含对ASan的支持的版本。关于各自的消毒器的作用以及如何详细配置它们的详细信息，各种编译器的文档非常有帮助。
 
-通过传递各种编译器标志来启用消毒器，这些标志导致编译器向二进制文件添加额外的调试信息。当执行二进制文件时，消毒程序代码将执行检查，并将错误信息输出到stderr。由于需要为消毒器执行代码，以查找任何潜在的错误，因此拥有较高的代码覆盖率会提高杀毒器的可靠性。
+通过传递各种编译器标志来启用消毒器，这些标志导致编译器向二进制文件添加额外的调试信息。当执行二进制文件时，消毒程序代码将执行检查，并将错误信息输出到stderr。由于需要为消毒器执行代码，以查找潜在的错误，因此拥有较高的代码覆盖率会提高消毒器的可靠性。
 
 要在GCC或Clang中启用ASan，必须传递-fsanitize=<sanitizer>编译器标志。对于MSVC，对应的选项是/fsanitize=<sanitize>。
 
-编译器标志通过CMAKE\_CXX\_FLAGS缓存变量传入CMake。因此，在启用消毒器的情况下，从命令行调用CMake就像这样:
+编译器标志通过CMAKE\_CXX\_FLAGS缓存变量传入CMake。因此，启用消毒器的情况下，从命令行调用CMake就像这样:
 
 \begin{tcblisting}{commandshell={}}
 cmake -S <sourceDir> -B <BuildDir> -DCMAKE_CXX_FLAGS=-
   fsanitize=<sanitizer>
 \end{tcblisting}
 
-当使用CMake预设时，可以在那里定义包含编译器标志的缓存变量。全局设置消毒器选项也会影响在设置标志后使用\texttt{FetchContent}或\texttt{ExternalProject}包含的任何项目，所以在这里要谨慎。对于ASan，在GCC和Clang上使用-fsanitizer=address，在MSVC上使用/fsanitizer=address。MSan使用-fsanitize=memory，LSan使用-fsanitize=leak，TSan使用-fsanitize=thread，UBSan仅在编写本书时使用-fsanitize=undefined来启用GCC和Clang。要为ASan、LSan和MSan获得更简洁的输出，请告诉编译器显式地保留帧指针。这是通过在GCC和Clang中设置-fno-忽略-framepointer来实现的。MSVC只支持x86版本的/Oy-选项。
+当使用CMake预设时，可以在那里定义包含编译器标志的缓存变量。全局设置消毒器选项也会影响在设置标志后使用\texttt{FetchContent}或\texttt{ExternalProject}的项目，所以要谨慎。对于ASan，在GCC和Clang上使用-fsanitizer=address，在MSVC上使用/fsanitizer=address。MSan使用-fsanitize=memory，LSan使用-fsanitize=leak，TSan使用-fsanitize=thread，UBSan仅在编写本书时使用-fsanitize=undefined来启用GCC和Clang。要为ASan、LSan和MSan获得更简洁的输出，请告诉编译器显式地保留帧指针。这是通过在GCC和Clang中设置-fno-omit-framepointer来实现的。MSVC只支持x86版本的/Oy-选项。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
-不建议在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量来启用消毒程序，因为杀毒程序既不是构建的，也没有使用项目定义目标。此外，在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量可能与用户可能从命令行传递的内容发生冲突。
+不建议在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量来启用消毒程序，因为消毒程序既不是构建的，也没有使用项目定义目标。此外，在CMakeLists.txt中设置CMAKE\_CXX\_FLAGS变量可能与用户可能从命令行传递的内容发生冲突。
 \end{tcolorbox}
 
-消毒器是提高代码质量的一个非常强大的工具。与单元测试和覆盖率报告一起，提供了确保代码质量的四个主要概念中的三个。自动确保代码质量的第四个选项是使用静态代码分析器。
+消毒器是提高代码质量的一个非常强大的工具。与单元测试和覆盖率报告一起，提供了确保代码质量的四个主要方式中的三个。确保代码质量的第四个选项是使用静态代码分析器。
 
 
 
