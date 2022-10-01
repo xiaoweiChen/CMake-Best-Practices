@@ -1,4 +1,4 @@
-CMake模块包含CMake代码、函数和宏，它们放在一起以服务于特定的目的。模块可以为其他CMake代码提供函数和宏，并在包含时执行CMake命令。通常，CMake附带了许多预先制作好的模块。这些模块提供了额外的实用程序来使用CMake代码，并允许发现第三方工具和依赖项(Find*.cmake模块)。CMake默认提供的模块列表可在\url{https://cmake.org/cmake/help/latest/manual/cmakemodules.7.html}获得。官方文档将模块分为以下两类:
+CMake模块包含CMake代码、函数和宏，放在一起以服务于特定的目的。模块可以为其他CMake代码提供函数和宏，并在包含时执行CMake命令。通常，CMake内置了许多预先制作好的模块。这些模块提供了实用程序来使用CMake代码，并允许发现第三方工具和依赖项(Find*.cmake模块)。CMake默认提供的模块列表可在\url{https://cmake.org/cmake/help/latest/manual/cmakemodules.7.html}获得。官方文档将模块分为以下两类:
 
 \begin{itemize}
 \item 
@@ -10,7 +10,7 @@ CMake模块包含CMake代码、函数和宏，它们放在一起以服务于特�
 
 实用工具模块提供相应的工具，而查找模块用于搜索系统中的第三方软件。我们已经在第4章和第5章中详细介绍了查找模块。因此，在本章中专门关注实用工具模块。前面的章节中使用了一些CMake提供的实用模块，其中一些模块是GNUInstallDirs、CPack、FetchContent和ExternalProject，这些模块位于CMake安装文件夹下。
 
-为了更好地理解实用工具模块的概念，先从研究CMake提供的实用程序模块开始，先来看看ProcessorCount实用程序模块。可以在\url{https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake}找到这个模块的源文件。ProcessorCount模块可在CMake代码中检索系统的CPU核心计数的模块。ProcessorCount.cmake定义了名为ProcessorCount的函数，它接受一个名为var的参数。该函数的实现大致如下:
+为了更好地理解实用工具模块的概念，先从研究CMake提供的实用程序模块开始，先来看看ProcessorCount实用程序模块。可以在\url{https://github.com/Kitware/CMake/blob/master/Modules/ProcessorCount.cmake}找到这个模块的源文件。ProcessorCount模块可在CMake代码中检索系统的CPU核心计数的模块。ProcessorCount.cmake定义了名为ProcessorCount的函数，其接受名为var的参数。该函数的实现大致如下:
 
 \begin{lstlisting}[style=styleCMake]
 function(ProcessorCount var)
@@ -41,7 +41,7 @@ ProcessorCount(CORE_COUNT)
 message(STATUS "Core count: ${CORE_COUNT}")
 \end{lstlisting}
 
-使用CMake模块非常简单，只需将该模块包含到所需的CMake文件中即可。\texttt{include()}具有传递性，因此行之后的代码可以使用模块中包含的所有CMake定义。
+使用CMake模块非常简单，只需将该模块包含到所需的CMake文件中即可。\texttt{include()}具有传递性，此行之后的代码可以使用模块中包含的所有CMake定义。
 
 现在我们对实用工具模块有了大致的了解。继续了解更多关于实用程序模块的基本构建模块:函数和宏。
 

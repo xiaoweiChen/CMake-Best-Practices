@@ -5,16 +5,16 @@
 
 \begin{enumerate}
 \item 
-在项目中创建一个<module\_name>.cmake文件。
+创建一个<module\_name>.cmake文件。
 
 \item 
-在<module\_name>.cmake文件中定义宏/函数。
+<module\_name>.cmake文件中定义宏/函数。
 
 \item 
 将<module\_name>.cmake文件包含在必要的文件当中
 \end{enumerate}
 
-好了，让我们按照这些步骤一起创建一个模块。作为上一个git分支名称示例的后续，我们扩展范围编写一个CMake模块，该模块通过使用git命令提供检索分支名称、HEAD提交哈希、当前作者名称和当前作者电子邮件信息的能力。这一部分中，将遵循chapter\_13/ex01\_git\_utility的示例。示例文件夹包含一个CMakeLists.txt文件和一个git.cmake文件。文件存放在.cmake文件夹下。先来看看.cmake/git.cmake文件。文件内容如下:
+按照这些步骤一起创建一个模块，作为上一个git分支名称示例的后续，我们扩展范围编写一个CMake模块，该模块通过使用git命令提供检索分支名称、HEAD提交哈希、当前作者名称和当前作者电子邮件信息的能力。这一部分中，将使用chapter\_13/ex01\_git\_utility的示例。示例文件夹包含一个CMakeLists.txt文件和一个git.cmake文件，文件存放在.cmake文件夹下。先来看看.cmake/git.cmake:
 
 \begin{lstlisting}[style=styleCMake]
 # …
@@ -95,14 +95,14 @@ cmake -S ./ -B ./build
 
 \subsubsubsection{13.4.1\hspace{0.2cm}案例研究——处理项目元数据文件}
 
-继续看另一个例子。假设有一个每行包含键值对的环境文件，项目中包含一些关于项目的元数据(例如，项目版本和依赖项)的外部文件并不罕见。该文件可以是不同的格式，例如：JSON或换行分隔的“键-值”对。当前的任务是创建一个实用工具模块，该模块读取环境变量文件，并在文件中为每个“键-值”对定义一个CMake变量。文件的内容如下所示:
+假设有一个每行包含键值对的环境文件，项目中包含一些关于项目的元数据(例如，项目版本和依赖项)的外部文件并不罕见。该文件可以是不同的格式，例如：JSON或换行分隔的“键-值”对。当前的任务是创建一个实用工具模块，该模块读取环境变量文件，并在文件中为每个“键-值”对定义一个CMake变量。文件的内容如下所示:
 
 \begin{lstlisting}[style=styleCMake]
 KEY1="Value1"
 KEY2="Value2"
 \end{lstlisting}
 
-本节中，将遵循chapter\_13/ex02\_envfile\_utility的示例。从了解.cmake/envfile-utils.cmake的内容开始:
+本节中，将遵循chapter\_13/ex02\_envfile\_utility的示例。从.cmake/envfile-utils.cmake开始:
 
 \begin{lstlisting}[style=styleCMake]
 include_guard(DIRECTORY)
@@ -131,7 +131,7 @@ function(read_environment_file ENVIRONMENT_FILE_NAME)
 endfunction()
 \end{lstlisting}
 
-envfile-utils.cmake实用工具模块包含一个函数read\_environment\_file，它以键值对列表的格式读取一个环境文件。这个函数将文件中的所有行读入KVP\_LIST变量，然后遍历所有行。每一行都用(=)等号标记分隔，然后等号的左侧作为变量名，而右侧作为变量值，将每个“键-值”对定义为CMake变量，空行和注释行将跳过。关于模块的使用，让我们看看chapter\_13/ex02\_envfile\_utility/CMakeLists.txt:
+envfile-utils.cmake实用工具模块包含函数read\_environment\_file，以键值对列表的格式读取一个环境文件。这个函数将文件中的所有行读入KVP\_LIST变量，然后遍历所有行。每一行都用(=)等号标记分隔，然后等号的左侧作为变量名，而右侧作为变量值，将每个“键-值”对定义为CMake变量，空行和注释行将跳过。关于模块的使用，来看看chapter\_13/ex02\_envfile\_utility/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 # Add .cmake folder to the module path, so subsequent 
@@ -143,7 +143,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
 add_subdirectory(test-executable)
 \end{lstlisting}
 
-可能已经注意到，.cmake文件夹现在添加到CMAKE\_MODULE\_PATH变量中。CMAKE\_MODULE\_PATH变量是\texttt{include(…)}指令将搜索的路径集合。默认情况下，是空的。这允许我们直接在当前和子CMakeLists.txt中使用名称包含envfile-utils模块。最后，让我们看看chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt:
+可能已经注意到，.cmake文件夹现在添加到CMAKE\_MODULE\_PATH变量中，该变量是\texttt{include(…)}指令将搜索的路径集合，默认情况下是空。所以现在可以直接在当前和子CMakeLists.txt中使用名称包含envfile-utils模块。最后，看看chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 # ....
@@ -161,7 +161,7 @@ target_compile_definitions(ch13_ex02_envfile_utility_test
 		PROJECT_AUTHOR="${TEST_PROJECT_AUTHOR}")
 \end{lstlisting}
 
-可以按名称包含envfile-utils环境文件读取器模块，这是因为包含envfile-utils.cmake的文件夹已经添加到CMAKE\_MODULE\_PATH变量中。read\_environment\_file()函数用来读取同文件夹下的variables.env文件。variables.env文件包含以下键值对:
+可以按名称包含envfile-utils环境文件读取器模块，因为包含envfile-utils.cmake的文件夹已经添加到CMAKE\_MODULE\_PATH变量中。read\_environment\_file()函数用来读取同文件夹下的variables.env文件，包含以下键值对:
 
 \begin{lstlisting}[style=styleCMake]
 # This file contains some metadata about the project
@@ -169,7 +169,7 @@ TEST_PROJECT_VERSION="1.0.2"
 TEST_PROJECT_AUTHOR="CBP Authors"
 \end{lstlisting}
 
-因此，使用read\_environment\_file()之后，期望TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量在当前的CMake作用域中定义，并在文件中指定各自的值。为了验证这一点，定义了一个名为ch13\_ex02\_envfile\_utility\_test的可执行目标，并将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量作为宏定义传递给目标。最后，目标的源文件test.cpp将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR宏定义打印到控制台:
+因此，使用read\_environment\_file()之后，期望TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量在当前的CMake作用域中定义，并在文件中指定各自的值。为验证这一点，定义了一个名为ch13\_ex02\_envfile\_utility\_test的可执行目标，并将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR变量作为宏定义传递给目标。最后，目标的源文件test.cpp将TEST\_PROJECT\_VERSION和TEST\_PROJECT\_AUTHOR宏定义打印到控制台:
 
 \begin{lstlisting}[style=styleCXX]
 #include <cstdio>
@@ -179,7 +179,7 @@ int main(void) {
 }
 \end{lstlisting}
 
-好了，让我们编译并运行应用程序，看看这是否有效:
+好了，让我们编译并运行应用程序:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_13/ex02_envfile_utility
@@ -189,7 +189,7 @@ cmake --build build
 # Will output: Version '1.0.2', author 'CBP Authors'
 \end{tcblisting}
 
-如我们所见，我们已经成功地从源树中读取了键值对格式的文件，将每个键值对定义为CMake变量，然后将这些变量作为宏定义公开给应用程序。
+我们已经成功地从源树中读取了键值对格式的文件，将每个键值对定义为CMake变量，然后将这些变量作为宏定义公开给应用程序。
 
 尽管编写CMake模块非常简单，但这里有一些建议:
 
@@ -216,15 +216,15 @@ cmake --build build
 为简单的命令包装器使用宏，其他的都使用函数。
 \end{itemize}
 
-这样，我们就结束本章的这一部分。接下来，我们将探讨在项目之间共享CMake模块的方法。
+接下来，我们将探讨在项目之间共享CMake模块的方法。
 
 \subsubsubsection{13.4.2\hspace{0.2cm}项目间共享CMake模块的建议}
 
 共享CMake模块的推荐方法是为CMake模块维护一个单独的项目，然后将该项目作为外部资源合并，可以直接通过Git子模块/子树或CMake的FetchContent/ExternalProject。这样，所有可重用的CMake实用程序都可以维护在单个项目下，并可以传播到所有下游项目。将CMake模块放入在线Git托管平台(如GitHub或GitLab)的存储库中，将使大多数人使用该模块更加方便。因为CMake支持直接从Git获取内容，所以使用共享库将非常简单。
 
-为了演示如何使用外部CMake模块项目，我们将使用一个名为Hadouken的开源CMake实用模块项目。该项目可从\url{https://github.com/mustafakemalgilor/hadouken}访问。该项目包含用于工具集成、目标创建和特性检查的CMake实用工具模块。
+为了演示如何使用外部CMake模块项目，我们将使用名为Hadouken的开源CMake实用模块项目。该项目可从\url{https://github.com/mustafakemalgilor/hadouken}访问。该项目包含用于工具集成、目标创建和特性检查的CMake实用工具模块。
 
-这一部分中，使用chapter\_13/ex03\_hadouken的例子。用这个例子将获取Hadouken，然后使用Hadouken项目的目标创建助手实用程序。先来看看CMakeLists.txt文件:
+这里，使用chapter\_13/ex03\_hadouken的例子。用这个例子获取Hadouken，然后使用Hadouken项目的目标创建助手实用程序。先来看看CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
@@ -254,9 +254,9 @@ include(core/MakeTarget)
 make_target(TYPE EXECUTABLE)
 \end{lstlisting}
 
-前面的例子中，使用了FetchContent\_Declare和FetchContent\_MakeAvailable将Hadouken检索到项目中。然后，Hadouken项目的模块目录添加到CMAKE\_MODULE\_PATH中，通过\texttt{include(…)}指令使用Hadouken项目的CMAKE实用模块。因此，包含了Log、Utility、MakeCompilationUnit和MakeTarget模块。最后，使用make\_target()函数确保我们可以使用外部CMake模块项目的函数。
+前面的例子中，使用了\texttt{FetchContent\_Declare}和\texttt{FetchContent\_MakeAvailable}将Hadouken检索到项目中。然后，Hadouken项目的模块目录添加到CMAKE\_MODULE\_PATH中，通过\texttt{include(…)}指令使用Hadouken项目的CMake实用模块，从而包含了Log、Utility、MakeCompilationUnit和MakeTarget模块。最后，使用make\_target()函数确保我们可以使用外部CMake模块项目的函数。
 
-make\_target(…)函数是由Hadouken项目的核心/MakeTarget模块提供的，是\texttt{add\_executable}和\texttt{add\_library}指令的包装函数。make\_target(TYPE EXECUTABLE)将囊括src/文件夹下的所有源文件，并通过\texttt{add\_executable(…)}创建一个可执行目标。让我们来配置和构建项目，看看情况是否如此:
+make\_target(…)函数是由Hadouken项目的核心/MakeTarget模块提供的，是\texttt{add\_executable}和\texttt{add\_library}指令的包装函数。make\_target(TYPE EXECUTABLE)将包括src/文件夹下的所有源文件，并通过\texttt{add\_executable(…)}创建一个可执行目标。让我们来配置和构建项目，看看情况是否如此:
 
 \begin{tcblisting}{commandshell={}}
 cd chapter_13/ex03_hadouken
