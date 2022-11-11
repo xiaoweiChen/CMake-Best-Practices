@@ -40,8 +40,8 @@ execute_process(
 	COMMAND_ERROR_IS_FATAL ANY
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
-configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src
-	/version.h @ONLY)
+configure_file(version.h.in
+	${CMAKE_CURRENT_SOURCE_DIR}/src/version.h @ONLY)
 \end{lstlisting}
 
 版本信息作为宏定义传递，Git哈希信息首先使用\texttt{execute\_process}进行检索。之后，\texttt{configure\_file}复制文件，@GIT\_REVISION@会替换为当前提交的短哈希值。
@@ -68,8 +68,8 @@ if(GIT_VERSION_ENABLE)
 	)
 endif()
 
-configure_file(version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/src/
-	version.h @ONLY)
+configure_file(version.h.in
+	${CMAKE_CURRENT_SOURCE_DIR}/src/version.h @ONLY)
 \end{lstlisting}
 
 配置结束后，若GIT\_REVISION\_ENABLE处于启用状态，结果文件将包含以下内容:

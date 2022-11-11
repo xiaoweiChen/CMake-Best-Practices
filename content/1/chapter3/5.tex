@@ -1,4 +1,4 @@
-我们已经创建了三个不同的库——一个要静态或动态库，一个接口或头文件库，以及一个预编译但没有链接的对象库。
+我们已经创建了三个不同的库——一个静态或动态库，一个接口或头文件库，以及一个预编译但没有链接的对象库。
 
 了解如何在共享项目的可执行文件中使用它们。将它们安装为系统库或使用它们作为外部依赖，将在第5章中介绍。
 
@@ -46,8 +46,7 @@ C++编译器有很多选项来设置一些常见的标志，从外部设置预�
 target_compile_options(
 	hello
 	PRIVATE $<$<CXX_COMPILER_ID:MSVC>:/SomeOption>
-			$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-
-			someOption>
+			$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-someOption>
 )
 \end{lstlisting}
 
@@ -75,14 +74,13 @@ target_compile_options(
 {
 	"directory": "/workspaces/CMake-Best-Practices/build",
 	"command": "/usr/bin/g++ -I/workspaces/CMake-Best-Practices/
-	chapter_3/hello_header_only/include
-    -I/workspaces/CMake-BestPractices/chapter_3/hello_lib/include
-    -I/workspaces/CMakeBest-Practices/chapter_3/hello_object_lib/include
+	chapter03/hello_header_only/include
+    -I/workspaces/CMake-Best-Practices/chapter03/hello_lib/include
+    -I/workspaces/CMake-Best-Practices/chapter03/hello_object_lib/include
     -g -fopenmp -o
-	chapter_3/CMakeFiles/chapter3.dir/src/main.cpp.o -c /
-	workspaces/CMake-Best-Practices/chapter_3/src/main.cpp",
-	"file": "/workspaces/CMake-Best-Practices/chapter_3/src/
-	main.cpp"
+	chapter03/CMakeFiles/chapter03.dir/src/main.cpp.o -c /
+	workspaces/CMake-Best-Practices/chapter03/src/main.cpp",
+	"file": "/workspaces/CMake-Best-Practices/chapter03/src/main.cpp"
 },
 \end{lstlisting}
 

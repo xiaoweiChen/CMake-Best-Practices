@@ -272,17 +272,16 @@ ExternalProject_Add(ProjectA
 ExternalProject_Add(ProjectB
 ... # various options
 )
-ExternalProject_Add_StepDependencies(ProjectB configure
-	ProjectA)
+ExternalProject_Add_StepDependencies(ProjectB configure ProjectA)
 \end{lstlisting}
 
 最后，还可以创建插入到外部项目中的自定义步骤。添加步骤可以通过\texttt{ExternalProject\_Add\_Step}指令完成。自定义步骤的名称不能与预定义步骤相同(例如创建文件夹、下载、更新、补丁、配置、构建、安装或测试)。下面的示例将创建一个步骤，构建后将外部项目的许可信息添加到特定的tar文件中:
 
 \begin{lstlisting}[style=styleCMake]
 ExternalProject_Add_Step(bertrand_downloaded copy_license
-	COMMAND ${CMAKE_COMMAND} -E tar "cvzf" ${CMAKE_CURRENT_
-		BINARY_DIR}/licenses.tar.gz <SOURCE_DIR>/LICENSE
-			DEPENDEES build
+	COMMAND ${CMAKE_COMMAND} -E tar "cvzf"
+		${CMAKE_CURRENT_BINARY_DIR}/licenses.tar.gz <SOURCE_DIR>/LICENSE
+	DEPENDEES build
 )
 \end{lstlisting}
 

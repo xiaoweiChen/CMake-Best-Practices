@@ -1,15 +1,15 @@
 打包文档与打包软件及其工件没有什么不同——文档是项目的工件。因此，我们将使用在第4章中学到的知识来打包文档。若还没有阅读第4章，强烈建议在阅读本节之前阅读。
 
-这一节，我们使用第6章的例01，将使在此示例中生成的文档可安装和可打包。让我们回顾 CMakeLists.txt文件，它位于chapter\_6/ex01\_doxdocgen/文件夹中。使用以下代码，将使HTML和MAN文档可安装:
+这一节，我们使用第6章的例01，将使在此示例中生成的文档可安装和可打包。让我们回顾 CMakeLists.txt文件，它位于chapter06/ex01\_doxdocgen/文件夹中。使用以下代码，将使HTML和MAN文档可安装:
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/html/"
-	DESTINATION "${CMAKE_INSTALL_DOCDIR}" COMPONENT
-		ch6_ex01_html)
+	DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+	COMPONENT ch6_ex01_html)
 install(DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/docs/man/"
-	DESTINATION "${CMAKE_INSTALL_MANDIR}" COMPONENT
-		ch6_ex01_man)
+	DESTINATION "${CMAKE_INSTALL_MANDIR}"
+	COMPONENT ch6_ex01_man)
 \end{lstlisting}
 
 第4章中使用\texttt{install(DIRECTORY…)}来安装文件夹，同时保留其结构。我们通过将docs/html和docs/man安装到GNUInstallDirs模块提供的默认文档和手册页目录中，使生成的文档可安装。另外，若是可安装的，就意味着也是可打包的，因为CMake能够从\texttt{install(…)}生成所需的打包代码。因此，包含CPack模块来为这个示例启用打包。代码如下所示:
@@ -25,13 +25,13 @@ include(CPack)
 就这么简单。尝试使用以下命令来构建和打包示例项目:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_6/
+cd chapter06/
 cmake -S . -B build/
 cmake --build build/
 cpack --config build/CPackConfig.cmake -B build/pak
 \end{tcblisting}
 
-这里，配置并构建了chapter\_6/的代码，并使用CPack来使用生成的CPackConfig.cmake将项目打包到build/pak文件夹中。为了检查是否一切正常，通过使用以下命令将生成的包的内容提取到/tmp/ch6-ex01目录中:
+这里，配置并构建了chapter06/的代码，并使用CPack来使用生成的CPackConfig.cmake将项目打包到build/pak文件夹中。为了检查是否一切正常，通过使用以下命令将生成的包的内容提取到/tmp/ch6-ex01目录中:
 
 \begin{tcblisting}{commandshell={}}
 dpkg -x build/pak/cbp_chapter6_example01-1.0-Linux.deb

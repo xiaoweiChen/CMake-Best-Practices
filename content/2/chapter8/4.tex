@@ -71,8 +71,7 @@ execute_process(COMMAND ${GIT_EXECUTABLE} "rev-parse" "--short"
 	WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(SomeExe src/main.cpp)
-target_compile_definitions(SomeExe PRIVATE VERSION=
-	\"${GIT_REVISION}\")
+target_compile_definitions(SomeExe PRIVATE VERSION=\"${GIT_REVISION}\")
 \end{lstlisting}
 
 传递给\texttt{execute\_process}的git命令将在当前执行CMakeLists.txt文件的目录中执行。生成的哈希存储在GIT\_REVISION变量中，若命令因任何原因失败，配置过程将停止并出现错误。

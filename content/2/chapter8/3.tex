@@ -40,7 +40,7 @@ add_custom_target(CreateHash ALL COMMAND Somehasher
 	$<TARGET_FILE:SomeExe>)
 \end{lstlisting}
 
-这个例子创建了一个名为CreateHash的自定义目标，使用SomeExe目标的二进制文件作为参数调用外部SomeHasher程序。注意，二进制文件是使用\$<TARGET\_FILE:SomeExe>生成器表达式。这有两个目的:消除了用户跟踪目标二进制文件文件名的需要，并在两个目标之间添加了隐式依赖。CMake将识别这些隐式依赖关系，并按正确的顺序执行目标。若生成所需文件的目标还没有构建，CMake将自动构建。也可以使用\$<TARGET\_FILE:生成器直接执行由另一个目标创建的可执行文件。以下生成器表达式会导致目标之间的隐式依赖，生成器直接执行由另一个目标创建的可执行文件：
+这个例子创建了一个名为CreateHash的自定义目标，使用SomeExe目标的二进制文件作为参数调用外部SomeHasher程序。注意，二进制文件是使用\$<TARGET\_FILE:SomeExe>生成器表达式。这有两个目的:消除了用户跟踪目标二进制文件文件名的需要，并在两个目标之间添加了隐式依赖。CMake将识别这些隐式依赖关系，并按正确的顺序执行目标。若生成所需文件的目标还没有构建，CMake将自动构建。也可以使用\$<TARGET\_FILE:生成器直接执行由另一个目标创建的可执行文件。以下生成器表达式会导致目标之间的隐式依赖：
 
 \begin{itemize}
 \item 
@@ -100,7 +100,7 @@ add_custom_command(TARGET MyExecutable
 )
 \end{lstlisting}
 
-这个例子中，名为hashher的自定义可执行文件，用来生成myexecutable目标输出文件的哈希值。
+这个例子中，名为hasher的自定义可执行文件，用来生成MyExecutable目标输出文件的哈希值。
 
 需要在构建之前，执行某些操作的原因是更改文件或生成信息。为此，第二个签名通常是更好的选择。
 
@@ -131,14 +131,13 @@ add_custom_command(OUTPUT output1 [output2 ...]
 若源文件出现在MAIN\_DEPENDENCY中，那么自定义命令将取代所列文件的正常编译，这可能导致链接器报错。
 \end{tcolorbox}
 
-其他两个与依赖相关的选项IMPLICIT\_DEPENDS和DEPFILE很少使用，因为它们的支持仅限于Makefile生成器。IMPLICT\_DEPENDS告诉CMake使用C或C++扫描器来检测所列文件的任何编译时依赖项，并从中创建依赖项。另一个选项DEPFILE可以用来指向.d依赖文件，该文件是由Makefile项目生成的.d文件最初起源于GNU make项目，用起来很强大也很复杂，不应该对大多数项目进行手动管理。下面的例子说明了如何使用自定义命令，在常规目标文件运行前生成一个源文件:
+其他两个与依赖相关的选项IMPLICIT\_DEPENDS和DEPFILE很少使用，因为它们的支持仅限于Makefile生成器。IMPLICT\_DEPENDS告诉CMake使用C或C++扫描器来检测所列文件的任何编译时依赖项，并从中创建依赖项。另一个选项DEPFILE可以用来指向.d依赖文件，该文件是由Makefile项目生成的.d文件，最初起源于GNU make项目，用起来很强大也很复杂，不应该对大多数项目进行手动管理。下面的例子说明了如何使用自定义命令，在常规目标文件运行前生成一个源文件:
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/main.cpp
-	COMMAND sourceFileGenerator ${CMAKE_CURRENT_SOURCE_DIR}/
-		message.txt
+	COMMAND sourceFileGenerator ${CMAKE_CURRENT_SOURCE_DIR}/message.txt
 	${CMAKE_CURRENT_BINARY_DIR}/main.cpp
-	COMMENT "Creating main.cpp frommessage.txt"
+	COMMENT "Creating main.cpp from message.txt"
 	DEPENDS message.txt
 	VERBATIM
 )
@@ -161,8 +160,7 @@ add_custom_command(OUTPUT archive.tar.gz
 )
 
 add_custom_command(OUTPUT archive.tar.gz
-	COMMAND cmake -E tar czf ${CMAKE_CURRENT_BINARY_DIR}/archive.
-	tar.gz
+	COMMAND cmake -E tar czf ${CMAKE_CURRENT_BINARY_DIR}/archive.tar.gz
 	${CMAKE_CURRENT_SOURCE_DIR}/SomeFile.txt
 	APPEND
 )

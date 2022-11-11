@@ -7,23 +7,23 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(
-	ch3.hello_lib
-	VERSION 1.0
+	ch3_hello
+	VERSION 1.0.0
 	DESCRIPTION
-	"A simple C++ project to demonstrate creating executables
-	and libraries in CMake"
+		"A simple C++ project to demonstrate creating executables
+		and libraries in CMake"
 	LANGUAGES CXX)
 	
 add_library(hello)
 
 target_sources(
-	hello
+	ch3_hello
 	PRIVATE src/hello.cpp src/internal.cpp)
 	
-target_compile_features(hello PUBLIC cxx_std_17)
+target_compile_features(ch3_hello PUBLIC cxx_std_17)
 
 target_include_directories(
-	hello
+	ch3_hello
 	PRIVATE src/hello
 	PUBLIC include)
 \end{lstlisting}
@@ -34,7 +34,7 @@ target_include_directories(
 
 若省略了库的类型，则BUILD\_SHARED\_LIBS将决定库是默认构建为动态库还是静态库。这个变量不应该在项目的CMake文件中设置，应该由构建者传递。
 
-使用\texttt{target\_sources}为库添加源文件。第一个参数是目标名称，后面跟PRIVATE、PUBLIC或INTERFACE关键字分隔相应源文件。实践中，源文件使用PRIVATE添加，PRIVATE和PUBLIC关键字指定在何处使用源代码进行编译。PRIVATE指定的源文件将只在目标hello中使用。若使用PUBLIC，那么源文件也会将附加到hello和依赖hello的目标上，这通常不是我们想要的结果。INTERFACE关键字说明源文件不会添加到hello目标中，而是会添加到依赖到hello的目标上。通常，为目标指定为PRIVATE的内容都可以视为构建需求。最后，包含目录使用\texttt{target\_include\_directories}设置。该指令指定的文件夹内的所有文件都可以使用\#include <file.hpp>(带尖括号)来访问。
+使用\texttt{target\_sources}为库添加源文件。第一个参数是目标名称，后面跟PRIVATE、PUBLIC或INTERFACE关键字分隔相应源文件。实践中，源文件使用PRIVATE添加，PRIVATE和PUBLIC关键字指定在何处使用源代码进行编译。PRIVATE指定的源文件将只在目标ch3\_hello中使用。若使用PUBLIC，那么源文件也会将附加到ch3\_hello和依赖ch3\_hello的目标上，这通常不是我们想要的结果。INTERFACE关键字说明源文件不会添加到ch3\_hello目标中，而是会添加到依赖到ch3\_hello的目标上。通常，为目标指定为PRIVATE的内容都可以视为构建需求。最后，包含目录使用\texttt{target\_include\_directories}设置。该指令指定的文件夹内的所有文件都可以使用\#include <file.hpp>(带尖括号)来访问。
 
 PRIVATE包含不会包含目标属性中的路径，也就是INTERFACE\_INCLUDE\_DIRECTORIES。当目标依赖于该库时，CMake将读取该属性以确定哪些包含目录可见。
 
@@ -129,16 +129,25 @@ HELLO\_EXPORT将包含这样的信息:当编译库时，该符号是否导出，
 下面的例子中，hello库的符号默认设置为隐藏。然后，通过使用\texttt{generate\_export\_header}宏再次单独启用。另外，本例将VISIBILITY\_INLINES\_HIDDEN属性设置为TRUE，通过隐藏内联类成员函数进一步减少导出的符号表。并不严格要求设置内联的可见性，但通常在设置了默认可见性后才会这样做:
 
 \begin{lstlisting}[style=styleCMake]
-add_library(hello SHARED)
-set_property(TARGET hello PROPERTY CXX_VISIBILITY_PRESET "hidden")
-set_property(TARGET hello PROPERTY VISIBILITY_INLINES_HIDDEN TRUE)
+add_library(ch3_hello_shared SHARED)
+set_property(
+	TARGET ch3_hello_shared
+	PROPERTY CXX_VISIBILITY_PRESET "hidden")
+set_property(
+	TARGET ch3_hello_shared
+	PROPERTY VISIBILITY_INLINES_HIDDEN TRUE)
 include(GenerateExportHeader)
-generate_export_header(hello EXPORT_FILE_NAME export/hello/	export_hello.hpp)
+generate_export_header(
+	ch3_hello_shared
+	EXPORT_FILE_NAME
+	export/hello/export_hello.hpp)
 
-target_include_directories(hello PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/export")
+target_include_directories(
+	ch3_hello_shared PUBLIC
+	"${CMAKE_CURRENT_BINARY_DIR}/export")
 \end{lstlisting}
 
-\texttt{generate\_export\_header}的调用在CMAKE\_CURRENT\_BINARY\_DIR/export/hell目录中创建了一个名为export\_hello.hpp的文件，该文件可以包含在库的文件中。将这些生成的文件放在构建目录的子文件夹中是一个好做法，这样只将目录的一部分添加到包含路径中。生成文件的include结构应该与库的其他部分的include结构匹配。在这个例子中，通过\#include <hello a\_public\_header.h>来包含所有公共头文件，那么导出头文件也应该放在名为hello的文件夹中。生成的文件也必须添加到安装说明中。此外，要创建导出文件，必须将用于导出符号的必要编译器标志设置为目标。
+\texttt{generate\_export\_header}的调用在CMAKE\_CURRENT\_BINARY\_DIR/export/hello目录中创建了一个名为export\_hello.hpp的文件，该文件可以包含在库的文件中。将这些生成的文件放在构建目录的子文件夹中是一个好做法，这样只将目录的一部分添加到包含路径中。生成文件的include结构应该与库的其他部分的include结构匹配。在这个例子中，通过\#include<hello\_public\_header.h>来包含所有公共头文件，那么导出头文件也应该放在名为hello的文件夹中。生成的文件也必须添加到安装说明中。此外，要创建导出文件，必须将用于导出符号的必要编译器标志设置为目标。
 
 因为生成的头文件必须包含在声明要导出的类、函数和类型的文件中，所以CMAKE\_CURRENT\_BINARY\_DIR/export/添加到\texttt{target\_include\_directories}中。注意，必须是PUBLIC，这样依赖库才可以找到该文件。
 
@@ -154,7 +163,7 @@ target_include_directories(hello PUBLIC "${CMAKE_CURRENT_BINARY_DIR}/export")
 project(
 	ch3_hello_header_only
 	VERSION 1.0
-	DESCRIPTION "Chapter 3 header-only example"
+	DESCRIPTION "Chapter 3 header only example"
 	LANGUAGES CXX)
 
 add_library(hello_header_only INTERFACE)

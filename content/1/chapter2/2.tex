@@ -299,7 +299,7 @@ RAM: 32 GB
 图2.17 四个任务的并行构建时间结果
 \end{center}
 
-即使是一个非常简单的项目，也可以清楚地看到多个任务并行可以减少构建时间。从一个作业到两个任务减少了0.3秒的构建时间，而从两个任务到三个任务则增加了0.2秒。但是，从3个作业到4个任务只会产生0.01秒的差异，这意味着已经达到了这个项目的构建并行性的极限，增加更多的工作将不会在构建时间上实现显著的差异。
+即使是一个非常简单的项目，也可以清楚地看到多个任务并行可以减少构建时间。从一个作业到两个任务减少了0.3秒的构建时间，而从两个任务到三个任务则减少了0.2秒。但是，从3个作业到4个任务只会产生0.01秒的差异，这意味着已经达到了这个项目的构建并行性的极限，增加更多的工作将不会在构建时间上实现显著的差异。
 
 \hspace*{\fill} \\ %插入空行
 \noindent
@@ -354,7 +354,7 @@ cmake --build ./build/ -- --trace
 \noindent
 \textbf{通过CLI安装项目}
 
-CMake允许在环境中进行安装，CMake代码必须使用\texttt{install()}指令来指定当调用\texttt{cmake -{}-install}(或构建系统等效)时安装什么。chapter\_2的内容已经以这样的方式配置用于说明指令。我们将在第4章中学习如何使CMake目标可安装。
+CMake允许在环境中进行安装，CMake代码必须使用\texttt{install()}指令来指定当调用\texttt{cmake -{}-install}(或构建系统等效)时安装什么。chapter2的内容已经以这样的方式配置用于说明指令。我们将在第4章中学习如何使CMake目标可安装。
 
 \texttt{cmake -{}-install}需要一个已经配置和生成的项目，执行\texttt{cmake -{}-install <project\_binary\_dir>}来安装工程。我们的例子中，build作为项目二进制目录，所以<project\_binary\_dir>将为build。
 
@@ -422,7 +422,7 @@ cmake --install build --strip
 \noindent
 \textbf{安装特定组件(基于组件的安装)}
 
-若项目在\texttt{install()}中使用了CMake的COMPONENT特性，可以通过指定组件名称来安装特定的组件。组件特性允许将安装分离为子部分，为了说明这个功能，chapter\_2示例构造成两个组件，分别是库和可执行文件。
+若项目在\texttt{install()}中使用了CMake的COMPONENT特性，可以通过指定组件名称来安装特定的组件。组件特性允许将安装分离为子部分，为了说明这个功能，chapter2示例构造成两个组件，分别是库和可执行文件。
 
 为了安装特定的组件，\texttt{cmake -{}-install}需要附加-{}-component参数:
 

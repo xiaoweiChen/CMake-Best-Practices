@@ -96,7 +96,7 @@ The following tests FAILED:
          1 - example_test (Failed)
 Errors while running CTest
 Output from these tests are in:
-     /workspaces/CMake-BestPractices/build/Testing/Temporary/LastTest.log
+     /workspaces/CMake-Best-Practices/build/Testing/Temporary/LastTest.log
 Use "--rerun-failed --output-on-failure" to re-run the failed
      cases verbosely.
 \end{tcblisting}
@@ -123,7 +123,8 @@ add_test(NAME labeled_test_2 COMMAND anotherTest)
 set_tests_properties(labeled_test_2 PROPERTIES LABELS "will_fail" )
 
 add_test(NAME labeled_test_3 COMMAND YetAnotherText)
-set_tests_properties(labeled_test_3 PROPERTIES LABELS "example;will_fail")
+set_tests_properties(labeled_test_3
+	PROPERTIES LABELS "example;will_fail")
 \end{lstlisting}
 
 -L命令行选项接受一个正则表达式来过滤标签:
@@ -202,7 +203,7 @@ The following tests FAILED:
          5 - Fibonacci (Failed)
 \end{tcblisting}
 
-这对找出哪个测试用例失败没什么帮助，但在Catch2和GoogleTest中，有一种方法可以将内部测试公开给CTest，从而将它们作为常规测试执行。对于GoogleTest，这样做的模块是由CMake本身提供的;Catch2在自己的CMake集成中提供了这个功能。使用Catch2发现测试由\texttt{catch\_discover\_tests}完成，而对于GoogleTest，则使用\texttt{gtest\_discover\_tests}。以下示例在Catch2框架中编写的测试，并添加到CTest:
+这对找出哪个测试用例失败没什么帮助，但在Catch2和GoogleTest中，有一种方法可以将内部测试公开给CTest，从而将它们作为常规测试执行。对于GoogleTest，这样做的模块是由CMake本身提供的；Catch2在自己的CMake集成中提供了这个功能。使用Catch2发现测试由\texttt{catch\_discover\_tests}完成，而对于GoogleTest，则使用\texttt{gtest\_discover\_tests}。以下示例在Catch2框架中编写的测试，并添加到CTest:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Catch2)
@@ -356,8 +357,8 @@ set_tests_properties(concurrency_test PROPERTIES PROCESSORS 2)
 concurrency\_test测试需要两个CPU才能运行。当使用-j 8并行运行测试时，concurrency\_test将占用八个可用的并行执行“槽”中的两个。本例中，若PROCESSORS属性设置为8，则没有其他测试可以与concurrency\_test并行运行。当为PROCESSORS设置的值高于系统上可用的并行槽数或CPU数时，就会在有CPU空闲的时候，立即运行测试。有时，有些测试不仅需要特定数量的处理器，而且需要在不运行其他测试的情况下单独运行。为了实现这一点，RUN\_SERIAL属性可以在测试中设置为true。这会对整体测试性能产生严重影响，因此要谨慎使用。更细粒度的控制方法是使用RESOURCE\_LOCK属性，该属性包含一个字符串列表。字符串没有特殊含义，除非CTest阻止两个测试并列运行(若列出的字符串相同)。通过这种方式，可以在不停止整个测试执行的情况下实现部分序列化，这也是指定测试是否需要特定的唯一资源的好方法，例如对某个文件、数据库或类似的东西进行测试时。考虑下面的例子:
 
 \begin{lstlisting}[style=styleCMake]
-set_tests_properties(database_test_1 database_test_2 database_
-	test_3 PROPERTIES RESOURCE_LOCK database)
+set_tests_properties(database_test_1 database_test_2
+	database_test_3 PROPERTIES RESOURCE_LOCK database)
 set_tests_properties(some_other_test PROPERTIES RESOURCE_LOCK
 	fileX)
 set_tests_properties(yet_another_test PROPERTIES RESOURCE_LOCK
@@ -455,7 +456,7 @@ set_property(TEST SomeTest PROPERTY RESOURCE_GROUPS
 \begin{tcblisting}{commandshell={}}
 ctest –j $(nproc) --resource-spec-file ../resources.json
 
-Test project /workspaces/CMake-Best-Practices/chapter_7
+Test project /workspaces/CMake-Best-Practices/chapter07
   /resource_group_example/build
      Start 2: resource_test_2
                   Start 3: resource_test_3

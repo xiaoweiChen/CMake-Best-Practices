@@ -14,28 +14,30 @@ int main(int, char **) {
 cmake_minimum_required(VERSION 3.21)
 
 project(
-	hello_world_standalone
+	ch3_hello_world_standalone
 	VERSION 1.0
-	DESCRIPTION"A simple C++ project"
-	HOMEPAGE_URL https://github.com/PacktPublishing/CMake-BestPractices
+	DESCRIPTION
+		"A simple C++ project to demonstrate creating a standalone
+		executables"
+	HOMEPAGE_URL https://github.com/PacktPublishing/CMake-Best-Practices
 	LANGUAGES CXX
 )
 
-add_executable(hello_world)
-target_sources(hello_world PRIVATE src/main.cpp)
+add_executable(ch3_hello_world_standalone)
+target_sources(ch3_hello_world_standalone PRIVATE src/main.cpp)
 \end{lstlisting}
 
 第一行，\texttt{cmake\_minimum\_required(VERSION 3.21)}，期望看到的CMake的版本，以及CMake将启用哪些特性。本书的例子中都使用CMake 3.21，但是出于兼容性的原因，读者们可以选择一个较低的版本。
 
 对于本例，3.1版本将是绝对的最小值，因为在此之前，\texttt{target\_sources}不可用。将\texttt{cmake\_minimum\_required}指令放在每个CMakeLists.txt文件的顶部是一个很好的做法。
 
-接下来，使用\texttt{project()}指令设置项目。第一个参数是项目的名称——我们的例子中为“hello\_world\_standalone”。
+接下来，使用\texttt{project()}指令设置项目。第一个参数是项目的名称——我们的例子中为“ch3\_hello\_world\_standalone”。
 
 接下来，版本设置为1.0。下面是一个简短的描述和主页的URL。最后，LANGUAGES CXX属性指定正在构建一个C++项目。除了项目名称之外，所有参数都可选。
 
-调用\texttt{add\_executable(hello\_world)}指令，会创建一个名为hello\_world的目标。这也将是可执行的文件名。
+调用\texttt{add\_executable(ch3\_hello\_world\_standalone)}指令，会创建一个名为ch3\_hello\_world\_standalone的目标。这也将是可执行的文件名。
 
-现在已经创建了目标，使用\texttt{target\_sources}完成了向目标添加C++源文件。\texttt{Chapter3}是目标名，在\texttt{add\_executable}中指定。PRIVATE定义源仅用于构建此目标，而不用于依赖的目标。在范围说明符之后，有一个相对于当前CMakeLists.txt文件路径的源文件列表。如果需要，当前处理的CMakeLists txt文件的位置可以通过CMAKE\_CURRENT\_SOURCE\_DIR得到。
+现在已经创建了目标，使用\texttt{target\_sources}完成了向目标添加C++源文件。\texttt{ch3\_hello\_world\_standalone}是目标名，在\texttt{add\_executable}中指定。PRIVATE定义源仅用于构建此目标，而不用于依赖的目标。在范围说明符之后，有一个相对于当前CMakeLists.txt文件路径的源文件列表。如果需要，当前处理的CMakeLists txt文件的位置可以通过CMAKE\_CURRENT\_SOURCE\_DIR得到。
 
 源码可以直接添加到\texttt{add\_executable}，也可以单独使用\texttt{target\_sources}，将它们与\texttt{target\_sources}一起添加。通过使用PRIVATE、PUBLIC或INTERFACE，可以显式地定义在何处使用源码。但是，指定PRIVATE以外的内容只对库目标有意义。
 

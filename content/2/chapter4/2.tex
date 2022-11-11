@@ -46,7 +46,7 @@ RUNTIME (可执行文件和dll):
 \end{itemize}
 \end{itemize}
 
-使目标可安装之后，CMake将生成必要的安装代码，以安装输出的构件，这里先将可执行目标安装在一起。要查看\texttt{install(…)}指令的运行情况，可以看看第4章示例1的CMakeLists.txt文件，可以在chapter4/ex01\_executable文件夹中找到:
+使目标可安装之后，CMake将生成必要的安装代码，以安装输出的构件，这里先将可执行目标安装在一起。要查看\texttt{install(…)}指令的运行情况，可以看看第4章示例1的CMakeLists.txt文件，可以在chapter04/ex01\_executable文件夹中找到:
 
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch4_ex01_executable)
@@ -123,7 +123,7 @@ install(TARGETS ch4_ex01_executable
 -- Installing: /tmp/install-test/qbin/ch4_ex01_executable
 \end{tcblisting}
 
-现在，来看另一个例子，这次将安装STATIC库。回顾一下第4章示例2的CMakeLists.txt文件，可以在chapter4/ex02\_static文件夹中找到。由于空格的原因，注释和\texttt{project(…)}省略:
+现在，来看另一个例子，这次将安装STATIC库。回顾一下第4章示例2的CMakeLists.txt文件，可以在chapter04/ex02\_static文件夹中找到。由于空格的原因，注释和\texttt{project(…)}省略:
 
 \begin{lstlisting}[style=styleCMake]
 add_library(ch4_ex02_static STATIC)
@@ -179,16 +179,16 @@ DIRECTORY参数中末尾的斜杠会导致CMake复制文件夹的内容，而不
 
 另一种形式的\texttt{install(FILES...)}是\texttt{install(PROGRAMS...)}，这与\texttt{install(FILES...)}相同，但需要为安装文件设置OWNER\_EXECUTE，GROUP\_EXECUTE和WORLD\_EXECUTE权限。这对最终用户执行的二进制文件或脚本文件是有意义的。
 
-为了理解\texttt{install(FILES|PROGRAMS…)}，来看一个示例，第4章的例3(chapter\_4/ex03\_file)。其包含三个文件:chapter4\_greeter\_content、chapter4\_greeter.py和CMakeLists.txt。首先，看看CMakeLists.txt:
+为了理解\texttt{install(FILES|PROGRAMS…)}，来看一个示例，第4章的例3(chapter04/ex03\_file)。其包含三个文件:chapter4\_greeter\_content、chapter4\_greeter.py和CMakeLists.txt。首先，看看CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 install(FILES "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter_content"
 	DESTINATION "${CMAKE_INSTALL_BINDIR}")
-	install(PROGRAMS "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter.py"
+install(PROGRAMS "${CMAKE_CURRENT_LIST_DIR}/chapter4_greeter.py"
 	DESTINATION "${CMAKE_INSTALL_BINDIR}" RENAME chapter4_greeter)
 \end{lstlisting}
 
-第一个\texttt{install(…)}中，CMake在当前的CMakeLists.txt(chapter4/ex03\_file)中安装了chapter4\_greeter\_content文件，在系统默认BIN目录下。第二个\texttt{install(…)}中，CMake在默认BIN目录中安装chapter4\_greeter.py，名称为chapter4\_greeter。
+第一个\texttt{install(…)}中，CMake在当前的CMakeLists.txt(chapter04/ex03\_file)中安装了chapter4\_greeter\_content文件，在系统默认BIN目录下。第二个\texttt{install(…)}中，CMake在默认BIN目录中安装chapter4\_greeter.py，名称为chapter4\_greeter。
 
 \begin{tcolorbox}[colback=webgreen!5!white,colframe=webgreen!75!black,title=Note]
 RENAME参数只对单文件的\texttt{install(…)}有效。
@@ -229,20 +229,20 @@ cmake --install ./build --prefix /tmp/install-test
 install(DIRECTORY dir1 dir2 dir3 TYPE LOCALSTATE)
 \end{lstlisting}
 
-前面的示例将把dir1和dir2目录安装到\$\{CMAKE\_INSTALL\_PREFIX\}/var目录中，以及所有子文件夹和文件。有时，不能直接安装文件夹的全部内容。幸运的是，CMake允许安装命令根据通配符模式和正则表达式包含或排除目录内容。这次我们有选择地安装dir1、dir2和dir3:
+前面的示例将把dir1、dir2 和 dir3目录安装到\$\{CMAKE\_INSTALL\_PREFIX\}/var目录中，以及所有子文件夹和文件。有时，不能直接安装文件夹的全部内容。幸运的是，CMake允许安装命令根据通配符模式和正则表达式包含或排除目录内容。这次我们有选择地安装dir1、dir2和dir3:
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
-install(DIRECTORY dir1 DESTINATION ${CMAKE_INSTALL_
-	LOCALSTATEDIR} FILES_MATCHING PATTERN "*.x")
-install(DIRECTORY dir2 DESTINATION ${CMAKE_INSTALL_
-	LOCALSTATEDIR} FILES_MATCHING PATTERN "*.hpp"
+install(DIRECTORY dir1 DESTINATION
+	${CMAKE_INSTALL_LOCALSTATEDIR} FILES_MATCHING PATTERN "*.x")
+install(DIRECTORY dir2 DESTINATION
+	${CMAKE_INSTALL_LOCALSTATEDIR} FILES_MATCHING PATTERN "*.hpp"
 EXCLUDE PATTERN "*")
-install(DIRECTORY dir3 DESTINATION ${CMAKE_INSTALL_
-	LOCALSTATEDIR} PATTERN "bin" EXCLUDE)
+install(DIRECTORY dir3 DESTINATION
+	${CMAKE_INSTALL_LOCALSTATEDIR} PATTERN "bin" EXCLUDE)
 \end{lstlisting}
 
-前面的例子中，使用FILES\_MATCHING参数来定义文件选择的条件。FILES\_MATCHING后面可以跟PATTERN或REGEX参数。PATTERN可以定义通配符模式，而REGEX可以定义正则表达式。通常，这些表达式用于包含文件。若希望排除匹配条件的文件，可以将EXCLUDE参数附加到模式中。由于FILES\_MATCHING参数，这些过滤器没有应用于子目录名。我们还在最后一个\texttt{install(…)}指令中使用了PATTERN，并且没有添加FILES\_MATCHING前缀，这可以过滤子目录而不是文件。这将只安装dir1中扩展名为.x的文件，dir2中没有扩展名为.hpp的文件，以及dir3中除bin文件夹外的所有内容。这个例子可以在第4章找到，在chapter4/ex04\_directory文件夹中。让我们编译并安装，看看是否符合我们的预期:
+前面的例子中，使用FILES\_MATCHING参数来定义文件选择的条件。FILES\_MATCHING后面可以跟PATTERN或REGEX参数。PATTERN可以定义通配符模式，而REGEX可以定义正则表达式。通常，这些表达式用于包含文件。若希望排除匹配条件的文件，可以将EXCLUDE参数附加到模式中。由于FILES\_MATCHING参数，这些过滤器没有应用于子目录名。我们还在最后一个\texttt{install(…)}指令中使用了PATTERN，并且没有添加FILES\_MATCHING前缀，这可以过滤子目录而不是文件。这将只安装dir1中扩展名为.x的文件，dir2中没有扩展名为.hpp的文件，以及dir3中除bin文件夹外的所有内容。这个例子可以在第4章找到，在chapter04/ex04\_directory文件夹中。让我们编译并安装，看看是否符合我们的预期:
 
 \begin{tcblisting}{commandshell={}}
 cmake –S . -B ./build

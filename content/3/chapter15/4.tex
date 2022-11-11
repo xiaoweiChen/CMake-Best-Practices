@@ -109,16 +109,16 @@ ExternalProject_Add(SubProjectXYZ_ext
 )
 add_library(SubProjectXYZ::SubProjectXYZ IMPORTED SHARED)
 set_target_properties(SubProjectXYZ::SubProjectXYZ
-	PROPERTIES IMPORTED_LOCATION " ${CMAKE_CURRENT_LIST_DIR}
-		/SubProjectXYZ/lib/libSubProjectXYZ.so"
-	INTERFACE_INCLUDE_DIRECTORIES "${CMAKE_CURRENT_LIST_DIR}
-		/SubProjectXYZ/include"
+	PROPERTIES IMPORTED_LOCATION
+		"${CMAKE_CURRENT_LIST_DIR}/SubProjectXYZ/lib/libSubProjectXYZ.so"
+	INTERFACE_INCLUDE_DIRECTORIES
+		"${CMAKE_CURRENT_LIST_DIR}/SubProjectXYZ/include"
 	
 	IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 )
 ...
 add_dependencies(SomeTarget SubProjectXZY_ext)
-target_link_libraries(SomeTarget SubProjectXYZ:: SubProjectXYZ)
+target_link_libraries(SomeTarget SubProjectXYZ::SubProjectXYZ)
 \end{lstlisting}
 
 因为\texttt{ExternalProject}只在构建时提供内容，所以这种方法只适用于本地文件夹中可用的子项目。因为包含导入目标的目录，当在\texttt{target\_link\_libraries}中使用时，必须在配置时存在，导出位置应该指向源目录，而不是外部项目的安装位置。

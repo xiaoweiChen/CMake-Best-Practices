@@ -60,7 +60,7 @@ public:
 }; // class calculator
 \end{lstlisting}
 
-calculator类实现了在calculator\_interface类中定义的类接口，以Javadoc格式进行了正确的文档记录。我们期望Doxygen为calculator和calculator\_interface类生成应用程序编程接口(API)文档。类定义在calculator.hpp文件中，可以在chapter6/ex01\_doxdocgen目录的include/chapter6/ex01子目录下找到。另外，这里有一个Markdown文件README.md。在chapter6/ex01\_doxdocgen目录中这包含了关于示例项目布局的基本信息，我们希望这个文件成为文档的主页。输入材料准备好后，通过检查示例的CMakeLists.txt文件也就是chapter6/ex01\_doxdocgen/CMakeLists.txt来进一步了解这个示例。CMakeLists.txt文件从寻找Doxygen包开始:
+calculator类实现了在calculator\_interface类中定义的类接口，以Javadoc格式进行了正确的文档记录。我们期望Doxygen为calculator和calculator\_interface类生成应用程序编程接口(API)文档。类定义在calculator.hpp文件中，可以在chapter06/ex01\_doxdocgen目录的include/chapter6/ex01子目录下找到。另外，这里有一个Markdown文件README.md。在chapter06/ex01\_doxdocgen目录中这包含了关于示例项目布局的基本信息，我们希望这个文件成为文档的主页。输入材料准备好后，通过检查示例的CMakeLists.txt文件也就是chapter06/ex01\_doxdocgen/CMakeLists.txt来进一步了解这个示例。CMakeLists.txt文件从寻找Doxygen包开始:
 
 \begin{lstlisting}[style=styleCMake]
 find_package(Doxygen)
@@ -133,7 +133,8 @@ target_compile_features(ch6_ex01_doxdocgen_lib PRIVATE cxx_std_11)
 \begin{lstlisting}[style=styleCMake]
 add_executable(ch6_ex01_doxdocgen_exe src/main.cpp)
 target_compile_features(ch6_ex01_doxdocgen_exe PRIVATE cxx_std_11)
-target_link_libraries(ch6_ex01_doxdocgen_exe PRIVATE ch6_ex01_doxdocgen_lib)
+target_link_libraries(
+	ch6_ex01_doxdocgen_exe PRIVATE ch6_ex01_doxdocgen_lib)
 \end{lstlisting}
 
 最后，使用\texttt{doxygen\_add\_docs(…)}来生成文档:
@@ -143,8 +144,8 @@ doxygen_add_docs(
 	ch6_ex01_doxdocgen_generate_docs
 	"${CMAKE_CURRENT_LIST_DIR}"
 	ALL
-	COMMENT "Generating documentation for Chapter 6 - Example
-		01 with Doxygen"
+	COMMENT
+		"Generating documentation for Chapter 6 - Example 01 with Doxygen"
 )
 \end{lstlisting}
  
@@ -161,10 +162,10 @@ doxygen_add_docs(targetName
 
 对\texttt{doxygen\_add\_docs(…)}进行了简单的介绍后，回到示例代码，并解释\texttt{doxygen\_add\_docs(…)}在场景中做了什么。其创建了一个名为ch6\_ex01\_doxdocgen\_generate\_docs的目标，将\$\{CMAKE\_CURRENT\_LIST\_DIR\}添加到文档生成目录，请求ALL元目标依赖于它，并指定在构建目标时打印COMMENT参数。
 
-好了，是时候测试一下这个是否有效了。进入chapter\_6/目录，在build/目录中使用以下命令配置项目:
+好了，是时候测试一下这个是否有效了。进入chapter06/目录，在build/目录中使用以下命令配置项目:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_6/
+cd chapter06/
 cmake –S . -B build/
 \end{tcblisting}
 
@@ -291,7 +292,7 @@ Doxygen需要dot工具来渲染图表，dot在Graphviz软件包中。
 图6.4  main.cpp文档页面
 \end{center}
 
-从上图的依赖关系图可以看出，main.cpp文件直接依赖于iostream和chapter6/ex06/calculator.hpp文件，间接依赖于chapter6/ex06/calculator\_interface.hpp文件。文档中提供的依赖信息非常有用，使用者可以确切地知道文件的依赖关系。若再向下滚动一点，会看到main()函数的调用图:
+从上图的依赖关系图可以看出，main.cpp文件直接依赖于iostream和chapter6/ex01/calculator.hpp文件，间接依赖于chapter6/ex01/calculator\_interface.hpp文件。文档中提供的依赖信息非常有用，使用者可以确切地知道文件的依赖关系。若再向下滚动一点，会看到main()函数的调用图:
 
 \begin{center}
 \includegraphics[width=0.6\textwidth]{content/2/chapter6/images/5.jpg}\\
@@ -304,7 +305,7 @@ Doxygen需要dot工具来渲染图表，dot在Graphviz软件包中。
 
 前一节中，学习了如何利用Doxygen为CMake项目生成图表和文档，但是并不是每个图表都可以从代码中推断出来。我们可能需要绘制自定义图像，来说明实体与代码上下文中不可用的外部系统之间的关系。要解决这个问题，需要在代码或注释中提供该上下文，以便再次使用文档生成。这可以通过Doxygen实现，Doxygen允许将PlantUML图表嵌入到注释中，这使我们能够绘制PlantUML支持的图表。但在开始将PlantUML代码放入Doxygen注释前，有一件事必须注意:在Doxygen中需要启用PlantUML。
 
-在Doxygen中启用PlantUML支持非常简单。Doxygen需要将PLANTUML\_JAR\_PATH变量设置为PLANTUML.jar文件的位置，所以得找出文件的位置。可以使用\texttt{find\_path(…)}，\texttt{find\_path(…)}和\texttt{find\_program(…)}类似，指定用于定位文件的路径。使用本节第6章的例02，看一下示例代码的CMakeLists文件，它位于chapter\_6/ex02\_doxplantuml/CMakeLists.txt。从\texttt{find\_path(…)}开始:
+在Doxygen中启用PlantUML支持非常简单。Doxygen需要将PLANTUML\_JAR\_PATH变量设置为PLANTUML.jar文件的位置，所以得找出文件的位置。可以使用\texttt{find\_path(…)}，\texttt{find\_path(…)}和\texttt{find\_program(…)}类似，指定用于定位文件的路径。使用本节第6章的例02，看一下示例代码的CMakeLists文件，它位于chapter06/ex02\_doxplantuml/CMakeLists.txt。从\texttt{find\_path(…)}开始:
 
 \begin{lstlisting}[style=styleCMake]
 find_path(PLANTUML_JAR_PATH NAMES plantuml.jar HINTS
@@ -344,7 +345,7 @@ int main(void) {
 @startuml和@enduml Doxygen注释关键字分别用于指示PlantUML图的开始和结束。普通的PlantUML代码可以放在@startuml - @enduml块中。示例中，简单的应用程序系统交互图。若一切按计划进行，应该在main()函数的文档中看到嵌入的PlantUML图。可以用下面所示的代码构建示例来生成文档:
  
 \begin{tcblisting}{commandshell={}}
-cd chapter_6/
+cd chapter06/
 cmake -S ./ -B build/
 cmake --build build/
 \end{tcblisting}

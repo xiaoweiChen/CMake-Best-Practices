@@ -5,7 +5,7 @@
 
 libFuzzer是LLVM项目中的模糊测试库。若项目可以使用LLVM工具链进行编译，那么libFuzzer是默认的模糊测试器，使用libFuzzer需要额外的编译器/链接器标志和定义一个函数。通过一个示例来深入了解更多的细节。
 
-为了在实践中进行模糊测试，先从chapter\_11/ex01\_libfuzzer\_static\_lib开始。例子中，假设有一个易受攻击的静态库目标，名为message\_printer。这是一个简单的库，只有一个接口函数print()，接受const char*和length参数。假设这个库存在的漏洞，是因为没有意识到的边界情况而触发的。函数实现如下所示:
+为了在实践中进行模糊测试，先从chapter11/ex01\_libfuzzer\_static\_lib开始。例子中，假设有一个易受攻击的静态库目标，名为message\_printer。这是一个简单的库，只有一个接口函数print()，接受const char*和length参数。假设这个库存在的漏洞，是因为没有意识到的边界情况而触发的。函数实现如下所示:
 
 \begin{lstlisting}[style=styleCXX]
 void message_printer::print(const char *msg, std::uint32_t len) {
@@ -32,10 +32,12 @@ print()解引空指针会导致未定义行为，当msg输入恰好包含在a变
 add_executable(ch11_ex01_libfuzzer_fuzz)
 target_sources(ch11_ex01_libfuzzer_fuzz PRIVATE	fuzz_library.cpp)
 target_compile_features(ch11_ex01_libfuzzer_fuzz PRIVATE cxx_std_11)
-target_link_libraries(ch11_ex01_libfuzzer_fuzz PRIVATE 
-	ch11_ex01_libfuzzer_static)
-target_compile_options(ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
-target_link_libraries(ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
+target_link_libraries(
+	ch11_ex01_libfuzzer_fuzz PRIVATE ch11_ex01_libfuzzer_static)
+target_compile_options(
+	ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
+target_link_libraries(
+	ch11_ex01_libfuzzer_fuzz PRIVATE -fsanitize=fuzzer)
 \end{lstlisting}
 
 我们定义了一个名为ch11\_ex01\_libfuzzer\_fuzz的可执行目标，它链接到模糊测试目标ch11\_ex01\_libfuzzer\_static。这里，需要将-fsanitize=fuzzer参数同时传递给编译器和链接器，为LLVM工具链启用libFuzzer。但libFuzzer是特定于llvm的，目前还不能用于GCC。以上就是模糊测试驱动程序CMake端的全部了。
@@ -49,16 +51,15 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t
 }
 \end{lstlisting}
 
-libFuzzer以字节跨度的形式生成模糊测试数据，并用生成的字节跨度调用LLVMFuzzerTestOneInput。字节范围从\&data[0]到\&data[size-1]，跨度应在函数体中输入模糊目标。这个函数在驱动程序的应用如chapter\_11/ex01\_libfuzzer\_static\_lib/fuzz/fuzz\_library.cpp所示:
+libFuzzer以字节跨度的形式生成模糊测试数据，并用生成的字节跨度调用LLVMFuzzerTestOneInput。字节范围从\&data[0]到\&data[size-1]，跨度应在函数体中输入模糊目标。这个函数在驱动程序的应用如chapter11/ex01\_libfuzzer\_static\_lib/fuzz/fuzz\_library.cpp所示:
 
 \begin{lstlisting}[style=styleCXX]
 #include <cstdint>
 #include <library/library.hpp>
-extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t
-*data,std::size_t size) {
+extern "C" int LLVMFuzzerTestOneInput(
+	const std::uint8_t *data,std::size_t size) {
 	chapter11::ex01::message_printer printer;
-	printer.print(reinterpret_cast<const char *>(data),
-		size);
+	printer.print(reinterpret_cast<const char *>(data), size);
 	return 0;
 }
 \end{lstlisting}
@@ -68,7 +69,7 @@ extern "C" int LLVMFuzzerTestOneInput(const std::uint8_t
 现在来看看驱动程序应用的实际情况，用以下命令配置和构建示例:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_11/
+cd chapter11/
 cmake --preset="ninja-debug-clang-13" -S ./ -B build/
 cmake --build build/
 \end{tcblisting}
@@ -99,10 +100,10 @@ unknown address 0x000000000000 (pc 0x000000464194 bp
 ==228856==Hint: address points to the zero page.
     #0 0x464194 in chapter11::ex01::message_printer::
     print(char const*, unsigned int) /home/mustafa
-    /workspace/personal/CMake-Best-Practices/chapter_11
+    /workspace/personal/CMake-Best-Practices/chapter11
     /ex01_libfuzzer_static_lib/src/library.cpp:26:14
     #1 0x4640ea in LLVMFuzzerTestOneInput /home/mustafa
-    /workspace/personal/CMake-Best-Practices/chapter_11
+    /workspace/personal/CMake-Best-Practices/chapter11
     /ex01_libfuzzer_static_lib/fuzz/fuzz_library.cpp:7:11
 /* ... */
 \end{tcblisting}
@@ -220,10 +221,10 @@ int main() {
 
 前面的驱动程序应用程序实现可以与AFL++一起使用。解决了这些问题之后，还需要注意最后一件事，就是AFL++的初始语料库数据。
 
-与libFuzzer不同，AFL++需要一些示例输入来启动。示例输入应该看起来像测试单元所期望的输入。由于我们的目标是URI解码器，一些URI编码的字符串应该可以做到这一点。为此，在chapter\_11/ex02\_afl\_static\_lib/corpus文件夹下提供了一些URI编码的字符串。设置好所有内容后，通过运行以下命令来编译示例:
+与libFuzzer不同，AFL++需要一些示例输入来启动。示例输入应该看起来像测试单元所期望的输入。由于我们的目标是URI解码器，一些URI编码的字符串应该可以做到这一点。为此，在chapter11/ex02\_afl\_static\_lib/corpus文件夹下提供了一些URI编码的字符串。设置好所有内容后，通过运行以下命令来编译示例:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_11/
+cd chapter11/
 cmake --preset="ninja-debug-afl-gcc" -S ./ -B build/
 cmake --build build/
 \end{tcblisting}
@@ -253,7 +254,7 @@ afl-fuzz -i ex02_afl_static_lib/corpus/ -o build/FINDINGS -m none
 图11.2 发现一些崩溃后的AFL++模糊测试的进度报告
 \end{center}
 
-通过按键盘上的Ctrl + C取消运行，并查看导致报告崩溃的输入。导致崩溃的输入应该保存在chapter\_11/build/FINDINGS/default/crashes文件夹下。对于演示的运行，crashes/文件夹中有4个崩溃日志，如下所示:
+通过按键盘上的Ctrl + C取消运行，并查看导致报告崩溃的输入。导致崩溃的输入应该保存在chapter11/build/FINDINGS/default/crashes文件夹下。对于演示的运行，crashes/文件夹中有4个崩溃日志，如下所示:
 
 \begin{center}
 \includegraphics[width=0.8\textwidth]{content/2/chapter11/images/3.jpg}\\
