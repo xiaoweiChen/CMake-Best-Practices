@@ -67,8 +67,8 @@ ccmake -G "Unix Makefiles" -S . -B ./build
 
 \begin{lstlisting}[style=styleCMake]
 # Option to exclude driver application from build.
-set(CHAPTER2_BUILD_DRIVER_APPLICATION TRUE CACHE BOOL "Whether
-to include driver application in build. Default: True")
+set(CHAPTER2_BUILD_DRIVER_APPLICATION TRUE CACHE BOOL
+	"Whether to include driver application in build. Default: True")
 # Hide this option from GUI's by default.
 mark_as_advanced(CHAPTER2_BUILD_DRIVER_APPLICATION)
 \end{lstlisting}

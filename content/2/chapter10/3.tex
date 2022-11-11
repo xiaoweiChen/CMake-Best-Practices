@@ -46,7 +46,7 @@ add_library(GTest::Main ALIAS gtest_main)
 通过调用以下命令来配置和构建这个示例:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_10/ex01_external_deps
+cd chapter10/ex01_external_deps
 cmake -S ./ -B build -DCH10_EX01_USE_SUPERBUILD:BOOL=ON
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}
@@ -87,8 +87,8 @@ SET(CATCH2_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}
 file(MAKE_DIRECTORY ${CATCH2_INCLUDE_DIR})
 add_library(catch2 IMPORTED INTERFACE GLOBAL)
 add_dependencies(catch2 catch2_download)
-set_target_properties(catch2 PROPERTIES "INTERFACE_INCLUDE_
-	DIRECTORIES" "${CATCH2_INCLUDE_DIR}")
+set_target_properties(catch2 PROPERTIES
+	"INTERFACE_INCLUDE_DIRECTORIES" "${CATCH2_INCLUDE_DIR}")
 \end{lstlisting}
 
 superbuild.cmake模块包括\texttt{ExternalProject}模块，使用\texttt{ExternalProject\_Add}，用GIT\_REPOSITORY、GIT\_TAG、INSTALL\_COMMAND和CMAKE\_ARGS参数声明一个名为catch2\_download的目标。\texttt{ExternalProject\_Add}可以从不同的源获取依赖项，示例试图通过使用Git获取依赖项。GIT\_REPOSITORY和GIT\_TAG参数分别用于指定目标git库URL和在git克隆后要检出的标记。因为Catch2是一个CMake项目，需要提供给\texttt{ExternalProject\_Add}的参数量最小。\texttt{ExternalProject\_Add}默认知道如何配置、构建和安装CMake项目，因此不需要CONFIGURE\_COMMAND或BUILD\_COMMAND参数。空的INSTALL\_COMMAND参数用于在构建之后禁用并安装依赖项。最后一个参数，CMAKE\_ARGS，用于将CMAKE参数传递给外部项目的配置步骤。我们使用它来静默关于Catch2编译中的语法警告(作为错误处理)。
@@ -98,7 +98,7 @@ superbuild.cmake模块包括\texttt{ExternalProject}模块，使用\texttt{Exter
 试着配置和构建来检查以上设置是否有效:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_10/ex02_external_deps_with_extproject
+cd chapter10/ex02_external_deps_with_extproject
 cmake -S ./ -B build
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}
@@ -175,16 +175,15 @@ target_compile_features(ch10_ex03_simple_qt_app PRIVATE cxx_std_11)
 target_link_libraries(ch10_ex03_simple_qt_app Qt6::Core Qt6::Widgets)
 \end{lstlisting}
 
-与第一个示例类似，CMakeLists.txt文件包括superbuild.cmake文件，取决于选项标志。若用户选择为该示例使用超级构建，那么将包括超级构建模块。否则，依赖将尝试使用\texttt{find\_package(…)}在系统中定位。最后三行中，定义了一个可执行目标，设置了目标的C++标准，并将定义的目标链接到QT6::Core和QT6::Widgets目标。这些目标要么由超级构建定义，要么由\texttt{find\_package(…)}定义，这取决于用户是否选择使用超级构建。继续来看superbuild.cmake:
+与第一个示例类似，CMakeLists.txt文件包括superbuild.cmake文件，取决于选项标志。若用户选择为该示例使用超级构建，那么将包括超级构建模块。否则，依赖将尝试使用\texttt{find\_package(…)}在系统中定位。最后三行中，定义了一个可执行目标，设置了目标的C++标准，并将定义的目标链接到Qt6::Core和Qt6::Widgets目标。这些目标要么由超级构建定义，要么由\texttt{find\_package(…)}定义，这取决于用户是否选择使用超级构建。继续来看superbuild.cmake:
 
 \begin{lstlisting}[style=styleCMake]
 include(FetchContent)
 message(STATUS "Chapter 10, example 03 superbuild enabled.
 	Will try to satisfy dependencies for the example.")
-set(FETCHCONTENT_QUIET FALSE) # Enable message output for
-	FetchContent commands
-set(QT_BUILD_SUBMODULES "qtbase" CACHE STRING "Submodules
-	to build")
+# Enable message output for FetchContent commands
+set(FETCHCONTENT_QUIET FALSE)
+set(QT_BUILD_SUBMODULES "qtbase" CACHE STRING "Submodules to build")
 set(QT_WILL_BUILD_TOOLS on)
 set(QT_FEATURE_sql off)
 set(QT_FEATURE_network off)
@@ -209,7 +208,7 @@ FetchContent_MakeAvailable(qt6)
 superbuild.cmake文件使用\texttt{FetchContent}模块来获取Qt依赖。由于Qt的获取和准备过程可能很长，一些未使用的Qt框架特性会禁用。为了更好地跟踪进度，启用了\texttt{FetchContent}消息输出。让我们试着通过运行以下命令来配置和编译这个示例:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_10/ex03_simple_qt_app/
+cd chapter10/ex03_simple_qt_app/
 cmake -S ./ -B build -DCH10_EX03_USE_SUPERBUILD:BOOL=ON
 cmake --build build/ --parallel $(nproc)
 \end{tcblisting}

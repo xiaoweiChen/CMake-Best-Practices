@@ -21,10 +21,10 @@ link what you use (lwyu)是CMake的内置特性，若可执行文件链接了未
 
 对于所有工具，<LANG>不是C就是CXX。属性是一个列表，其中包含各自的可执行参数和命令行参数。CMake 3.21中，静态代码分析器只支持Ninja和Makefile生成器的自动执行。Visual Studio在IDE的设置上处理静态代码分析器，这是CMake无法控制的。Lwyu是一个特例，因为其为LDD或ld链接器使用了特殊的标志，所以LINK\_WHAT\_YOU\_USE属性只是一个布尔值，从而说明只有使用ELF平台才能支持lwyu。
 
-如覆盖报告和消毒器一样，静态代码分析工具是通过通过命令行，将各自变量中的命令传递给CMake或使用预设来启用的。若设置了该变量，则在编译源文件时将自动执行静态代码分析器。为构建启用clang-tidy如下所示:
+如覆盖报告和消毒器一样，静态代码分析工具是通过命令行，将各自变量中的命令传递给CMake或使用预设来启用的。若设置了该变量，则在编译源文件时将自动执行静态代码分析器。为构建启用clang-tidy如下所示:
 
 \begin{tcblisting}{commandshell={}}
-cmake -S <sourceDir> -B <buildDir>-DCMAKE_CXX_CLANG_
+cmake -S <sourceDir> -B <buildDir> -DCMAKE_CXX_CLANG_
   TIDY="clang-tidy;-checks=*;-header-filter=<sourceDir>/*"
 \end{tcblisting}
 

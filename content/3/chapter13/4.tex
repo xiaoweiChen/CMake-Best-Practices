@@ -14,7 +14,7 @@
 将<module\_name>.cmake文件包含在必要的文件当中
 \end{enumerate}
 
-按照这些步骤一起创建一个模块，作为上一个git分支名称示例的后续，我们扩展范围编写一个CMake模块，该模块通过使用git命令提供检索分支名称、HEAD提交哈希、当前作者名称和当前作者电子邮件信息的能力。这一部分中，将使用chapter\_13/ex01\_git\_utility的示例。示例文件夹包含一个CMakeLists.txt文件和一个git.cmake文件，文件存放在.cmake文件夹下。先来看看.cmake/git.cmake:
+按照这些步骤一起创建一个模块，作为上一个git分支名称示例的后续，我们扩展范围编写一个CMake模块，该模块通过使用git命令提供检索分支名称、HEAD提交哈希、当前作者名称和当前作者电子邮件信息的能力。这一部分中，将使用chapter13/ex01\_git\_utility的示例。示例文件夹包含一个CMakeLists.txt文件和一个git.cmake文件，文件存放在cmake文件夹下。先来看看cmake/git.cmake:
 
 \begin{lstlisting}[style=styleCMake]
 # …
@@ -33,20 +33,19 @@ endmacro()
 
 git.cmake文件是cmake实用工具模块文件，包含三个宏，分别名为git\_get\_branch\_name、git\_get\_head\_commit\_hash和git\_get\_config\_value。此外，文件的顶部有include\_guard(DIRECTORY)。这类似于C/C++中的\#pragma once预处理器指令，防止文件多次包含。DIRECTORY参数表示include\_guard在目录范围内定义，该文件最多只能在当前目录内或以下包含一次。另外，可以指定GLOBAL参数(而不是DIRECTORY)，以限制只包含一次文件，而不考虑范围。
 
-看看如何使用git.cmake模块文件，研究下chapter\_13/ex01\_git\_utility中的CMakeLists.txt文件:
+看看如何使用git.cmake模块文件，研究下chapter13/ex01\_git\_utility中的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
 project(
 	ch13_ex01_git_module
 	VERSION 1.0
-	DESCRIPTION "Chapter 13 Example 01, git utility module
-		example"
+	DESCRIPTION "Chapter 13 Example 01, git utility module example"
 	LANGUAGES CXX)
 # Include the git.cmake module.
-# Full relative path is given, since .cmake/ is not in the 
+# Full relative path is given, since cmake/ is not in the 
 # CMAKE_MODULE_PATH
-include(.cmake/git.cmake)
+include(cmake/git.cmake)
 git_get_branch_name(current_branch_name)
 git_get_head_commit_hash(current_head)
 git_get_config_value("user.name" current_user_name)
@@ -64,7 +63,7 @@ message(STATUS "-----------------------------------------")
 通过指定模块文件的完整相对路径，CMakeLists.txt文件包含git.cmake文件。模块提供的git\_get\_branch\_name、git\_get\_head\_commit\_hash和git\_get\_config\_value宏分别用于检索分支名称、提交哈希、作者名和电子邮件到current\_branch\_name、current\_head、current\_user\_name和current\_user\_email。最后，通过\texttt{message(…)}指令将这些变量打印在屏幕上。配置示例项目，看看刚编写的git模块是否能如预期的那样工作:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_13/ex01_git_utility/
+cd chapter13/ex01_git_utility/
 cmake -S ./ -B ./build
 \end{tcblisting}
 
@@ -79,7 +78,7 @@ cmake -S ./ -B ./build
 -- Detecting CXX compile features - done
 -- -------------------------------------------
 -- VCS (git) info:
--- Branch: chapter-development/chapter-13
+-- Branch: chapter-development/chapter13
 -- Commit hash: 1d5a32649e74e4132e7b66292ab23aaeed327fdc
 -- Author name: Mustafa Kemal GILOR
 -- Author e-mail: mustafagilor@gmail.com
@@ -87,7 +86,7 @@ cmake -S ./ -B ./build
 -- Configuring done
 -- Generating done
 -- Build files have been written to:
-/home/toor/workspace/CMake-Best-Practices/chapter_13
+/home/toor/workspace/CMake-Best-Practices/chapter13
 /ex01_git_utility/build
 \end{tcblisting}
 
@@ -102,7 +101,7 @@ KEY1="Value1"
 KEY2="Value2"
 \end{lstlisting}
 
-本节中，将遵循chapter\_13/ex02\_envfile\_utility的示例。从.cmake/envfile-utils.cmake开始:
+本节中，将遵循chapter13/ex02\_envfile\_utility的示例。从cmake/envfile-utils.cmake开始:
 
 \begin{lstlisting}[style=styleCMake]
 include_guard(DIRECTORY)
@@ -131,29 +130,28 @@ function(read_environment_file ENVIRONMENT_FILE_NAME)
 endfunction()
 \end{lstlisting}
 
-envfile-utils.cmake实用工具模块包含函数read\_environment\_file，以键值对列表的格式读取一个环境文件。这个函数将文件中的所有行读入KVP\_LIST变量，然后遍历所有行。每一行都用(=)等号标记分隔，然后等号的左侧作为变量名，而右侧作为变量值，将每个“键-值”对定义为CMake变量，空行和注释行将跳过。关于模块的使用，来看看chapter\_13/ex02\_envfile\_utility/CMakeLists.txt:
+envfile-utils.cmake实用工具模块包含函数read\_environment\_file，以键值对列表的格式读取一个环境文件。这个函数将文件中的所有行读入KVP\_LIST变量，然后遍历所有行。每一行都用(=)等号标记分隔，然后等号的左侧作为变量名，而右侧作为变量值，将每个“键-值”对定义为CMake变量，空行和注释行将跳过。关于模块的使用，来看看chapter13/ex02\_envfile\_utility/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
-# Add .cmake folder to the module path, so subsequent 
+# Add cmake folder to the module path, so subsequent 
 # include() calls
-# can directly include modules under .cmake/ folder by
+# can directly include modules under cmake/ folder by
 # specifying the name only.
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH}
-	${PROJECT_SOURCE_DIR}/.cmake/)
+	${PROJECT_SOURCE_DIR}/cmake/)
 add_subdirectory(test-executable)
 \end{lstlisting}
 
-可能已经注意到，.cmake文件夹现在添加到CMAKE\_MODULE\_PATH变量中，该变量是\texttt{include(…)}指令将搜索的路径集合，默认情况下是空。所以现在可以直接在当前和子CMakeLists.txt中使用名称包含envfile-utils模块。最后，看看chapter\_13/ex02\_envfile\_utility/test-executable/CMakeLists.txt:
+可能已经注意到，cmake文件夹现在添加到CMAKE\_MODULE\_PATH变量中，该变量是\texttt{include(…)}指令将搜索的路径集合，默认情况下是空。所以现在可以直接在当前和子CMakeLists.txt中使用名称包含envfile-utils模块。最后，看看chapter13/ex02\_envfile\_utility/test-executable/CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 # ....
 # Include the module by name
 include(envfile-utils)
-read_environment_file("${PROJECT_SOURCE_DIR}/
-	variables.env")
+read_environment_file("${PROJECT_SOURCE_DIR}/variables.env")
 add_executable(ch13_ex02_envfile_utility_test)
-target_sources(ch13_ex02_envfile_utility_test PRIVATE
-	test.cpp)
+target_sources(ch13_ex02_envfile_utility_test
+	PRIVATE test.cpp)
 target_compile_features(ch13_ex02_envfile_utility_test
 	PRIVATE cxx_std_11)
 target_compile_definitions(ch13_ex02_envfile_utility_test
@@ -182,7 +180,7 @@ int main(void) {
 好了，让我们编译并运行应用程序:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_13/ex02_envfile_utility
+cd chapter13/ex02_envfile_utility
 cmake -S ./ -B ./build
 cmake --build build
 ./build/test-executable/ch13_ex02_envfile_utility_test
@@ -224,21 +222,20 @@ cmake --build build
 
 为了演示如何使用外部CMake模块项目，我们将使用名为Hadouken的开源CMake实用模块项目。该项目可从\url{https://github.com/mustafakemalgilor/hadouken}访问。该项目包含用于工具集成、目标创建和特性检查的CMake实用工具模块。
 
-这里，使用chapter\_13/ex03\_hadouken的例子。用这个例子获取Hadouken，然后使用Hadouken项目的目标创建助手实用程序。先来看看CMakeLists.txt:
+这里，使用chapter13/ex03\_hadouken的例子。用这个例子获取Hadouken，然后使用Hadouken项目的目标创建助手实用程序。先来看看CMakeLists.txt:
 
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
 project(
 	ch13_ex03_hadouken
 	VERSION 1.0
-	DESCRIPTION "Chapter 13 Example 03, external CMake
-		modules (hadouken) example"
+	DESCRIPTION
+		"Chapter 13 Example 03, external CMake modules (hadouken) example"
 	LANGUAGES CXX)
 include(FetchContent)
 # Declare hadouken dependency details.
 FetchContent_Declare(hadouken
-	GIT_REPOSITORY https://github.com/mustafakemalgilor
-		/hadouken.git
+	GIT_REPOSITORY https://github.com/mustafakemalgilor/hadouken.git
 	GIT_TAG 7d0447fcadf8e93d25f242b9bb251ecbcf67f8cb
 	SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.hadouken"
 )
@@ -259,7 +256,7 @@ make_target(TYPE EXECUTABLE)
 make\_target(…)函数是由Hadouken项目的核心/MakeTarget模块提供的，是\texttt{add\_executable}和\texttt{add\_library}指令的包装函数。make\_target(TYPE EXECUTABLE)将包括src/文件夹下的所有源文件，并通过\texttt{add\_executable(…)}创建一个可执行目标。让我们来配置和构建项目，看看情况是否如此:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_13/ex03_hadouken
+cd chapter13/ex03_hadouken
 cmake -S ./ -B build/
 cmake --build build
 \end{tcblisting}

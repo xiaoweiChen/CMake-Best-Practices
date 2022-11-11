@@ -59,16 +59,16 @@ cmake –DFILE_TO_HASH=<input>
 
 \begin{lstlisting}[style=styleCMake]
 add_custom_target(Create_hash_target ALL
-COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/
-	CreateSha256.cmake $<TARGET_FILE:SomeTarget>
-		${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
+COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CreateSha256.cmake
+	$<TARGET_FILE:SomeTarget>
+	${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
 )
 
 add_custom_command(TARGET SomeTarget
 POST_BUILD
-COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake
-	/CreateSha256.cmake $<TARGET_FILE:SomeTarget>
-		${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
+COMMAND cmake -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/CreateSha256.cmake
+	$<TARGET_FILE:SomeTarget>
+	${CMAKE_CURRENT_BINARY_DIR}/hash_example.sha256
 )
 \end{lstlisting}
 

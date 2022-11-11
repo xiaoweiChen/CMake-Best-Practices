@@ -20,7 +20,7 @@ set(Foo_LIBRARIES ${PREFIX}/lib/foo-1.2/libfoo.a)
 
 与包配置文件类似，包版本文件可以命名为<ProjectName>ConfigVersion.cmake或<projectname>-config-version.cmake。CMake期望包配置和包版本文件出现在\texttt{find\_package(…)}的搜索路径中，可以在CMake的帮助下创建这些文件。搜索包时，\texttt{find\_package(…)}会查找<CMAKE\_PREFIX\_PATH>/cmake目录。我们的示例中，将把Config-file包配置文件放到这个文件夹中。
 
-要创建config-file包，需要学习一些东西，比如导出目标和CmakePackageConfigHelpers模块。为了了解它，这里需要一个实际的例子。我们将使用第4章示例5，使其成为具有config-file包，这个例子位于chapter4/ex05\_config\_file\_package文件夹。来看看chapter4/ex05\_config\_file\_package目录下的CMakeLists.txt文件(注释和项目命令在空格处被省略;另外，与主题无关的行这里不会再提及):
+要创建config-file包，需要学习一些东西，比如导出目标和CmakePackageConfigHelpers模块。为了了解它，这里需要一个实际的例子。我们将使用第4章示例5，使其成为具有config-file包，这个例子位于chapter04/ex05\_config\_file\_package文件夹。来看看chapter04/ex05\_config\_file\_package目录下的CMakeLists.txt文件(注释和项目命令在空格处被省略;另外，与主题无关的行这里不会再提及):
 
 \begin{lstlisting}[style=styleCMake]
 include(GNUInstallDirs)
@@ -81,12 +81,11 @@ include(CMakePackageConfigHelpers)
 write_basic_package_version_file(
 	"ch4_ex05_lib-config-version.cmake"
 	# Package compatibility strategy. SameMajorVersion is
-	essentially 'semantic versioning'.
+	#	essentially 'semantic versioning'.
 	COMPATIBILITY SameMajorVersion
 )
 install(FILES
-	"${CMAKE_CURRENT_BINARY_DIR}/ch4_ex05_lib-config-version.
-	cmake"
+	"${CMAKE_CURRENT_BINARY_DIR}/ch4_ex05_lib-config-version.cmake"
 	DESTINATION "${ch4_ex05_lib_INSTALL_CMAKEDIR}"
 )
 /* end of the file */
@@ -114,35 +113,35 @@ cmake
 /*…*/
 \end{tcblisting}
 
-可以看到包配置文件已经成功安装在/tmp/install-test/cmake目录下。我将检查这些文件内容的工作留给读者作为练习。为了使用这个包，再来看下chapter4/ex05\_consumer示例中的CMakeLists.txt文件:
+可以看到包配置文件已经成功安装在/tmp/install-test/cmake目录下。我将检查这些文件内容的工作留给读者作为练习。为了使用这个包，再来看下chapter04/ex05\_consumer示例中的CMakeLists.txt文件:
 
 \begin{lstlisting}[style=styleCMake]
 if(NOT PROJECT_IS_TOP_LEVEL)
-	message(FATAL_ERROR "The chapter-4, ex05_consumer project is
+	message(FATAL_ERROR "The chapter 4, ex05_consumer project is
 		intended to be a standalone, top-level project. Do not
 			include this directory.")
 endif()
 find_package(ch4_ex05_lib 1 CONFIG REQUIRED)
 add_executable(ch4_ex05_consumer src/main.cpp)
 target_compile_features(ch4_ex05_consumer PRIVATE cxx_std_11)
-target_link_libraries(ch4_ex05_consumer ch4_ex05_lib::ch4_ex05_
-	lib)
+target_link_libraries(
+	ch4_ex05_consumer ch4_ex05_lib::ch4_ex05_lib)
 \end{lstlisting}
 
-前几行中，可以看到关于项目是否是顶层项目的验证。这个示例是一个外部应用程序，所以不应该是根示例项目的一部分。因此，可以保证用包导出的目标，而不是根项目的目标，根项目也不包括ex05\_consumer文件夹。接下来，有一个\texttt{find\_package(…)}，其中ch4\_ex05\_lib作为包名给出。还明确要求包的主版本为1;\texttt{find\_package(…)}只考虑\texttt{CONFIG}包和\texttt{find\_package(…)}中指定的包是必需的。在随后的行中，一个常规的可执行文件定义为ch4\_ex05\_consumer，它在ch4\_ex05\_lib命名空间(ch4\_ex05\_lib::ch4\_ex05\_lib)中链接到ch4\_ex05\_lib。ch4\_ex05\_lib::ch4\_ex05\_lib是我们在包中定义的实际目标。来看看源文件src/main.cpp:
+前几行中，可以看到关于项目是否是顶层项目的验证。这个示例是一个外部应用程序，所以不应该是根示例项目的一部分。因此，可以保证用包导出的目标，而不是根项目的目标，根项目也不包括ex05\_consumer文件夹。接下来，有一个\texttt{find\_package(…)}，其中ch4\_ex05\_lib作为包名给出。还明确要求包的主版本为1；\texttt{find\_package(…)}只考虑\texttt{CONFIG}包和\texttt{find\_package(…)}中指定的包是必需的。在随后的行中，一个常规的可执行文件定义为ch4\_ex05\_consumer，它在ch4\_ex05\_lib命名空间(ch4\_ex05\_lib::ch4\_ex05\_lib)中链接到ch4\_ex05\_lib。ch4\_ex05\_lib::ch4\_ex05\_lib是我们在包中定义的实际目标。来看看源文件src/main.cpp:
 
 \begin{lstlisting}[style=styleCXX]
-#include <chapter4/ex05/lib.hpp>
+#include <chapter04/ex05/lib.hpp>
 int main(void){
-	chapter4::ex05::greeter g;
+	chapter04::ex05::greeter g;
 	g.greet();
 }
 \end{lstlisting}
 
-这是一个包含chapter4/ex05/lib.hpp的简单应用程序，创建了一个greeter类的实例，并调用了greet()函数。试着编译并运行这个应用程序:
+这是一个包含chapter04/ex05/lib.hpp的简单应用程序，创建了一个greeter类的实例，并调用了greet()函数。试着编译并运行这个应用程序:
 
 \begin{tcblisting}{commandshell={}}
-cd chapter_4/ex05_consumer
+cd chapter04/ex05_consumer
 cmake -S . -B build/ -DCMAKE_PREFIX_PATH:STRING=/tmp/install-test
 cmake --build build/
 ./build/ch4_ex05_consumer

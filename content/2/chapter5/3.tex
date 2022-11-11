@@ -184,10 +184,10 @@ find模块如何找到必要的头文件和二进制文件，以及为CMake创�
 \begin{tcblisting}{commandshell={}}
 ├── dep <-- The folder where we locally keep dependencies
 ├── cmake
-│       └── FindLibImagePipeline.cmake <-- This is what we need to write
+│     └── FindLibImagePipeline.cmake <-- This is what we need to write
 ├── CMakeLists.txt <-- Main CmakeLists.txt
 ├── src
-│       ├── *.cpp files
+│     ├── *.cpp files
 \end{tcblisting}
 
 要做的第一件事是将cmake文件夹添加到CMAKE\_MODULE\_PATH中，这是一个列表。因此，可在CMakeLists.txt文件中添加以下行:
@@ -240,11 +240,10 @@ find_package_handle_standard_args(
 mark_as_advanced(OBSCURE_LIBRARY OBSCURE_INCLUDE_DIR)
 
 if(NOT TARGET Obscure::Obscure)
-	add_library(Obscure::Obscure UNKNOWN IMPORTED )
+	add_library(Obscure::Obscure UNKNOWN IMPORTED)
 	set_target_properties(Obscure::Obscure PROPERTIES
 		IMPORTED_LOCATION "${OBSCURE_LIBRARY}"
-		INTERFACE_INCLUDE_DIRECTORIES
-			"${OBSCURE_INCLUDE_DIR}"
+		INTERFACE_INCLUDE_DIRECTORIES "${OBSCURE_INCLUDE_DIR}"
 		IMPORTED_LINK_INTERFACE_LANGUAGES "CXX"
 	)
 endif()

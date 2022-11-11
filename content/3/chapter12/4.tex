@@ -25,8 +25,7 @@ add_test(NAME exampleTest COMMAND exampleExe)
 当运行CTest时，测试命令转换为以下内容:
 
 \begin{tcblisting}{commandshell={}}
-qemu-arm "-L" "/path/to/arm/sysroot/" "/path/to/build-dir/
-  exampleExe"
+qemu-arm "-L" "/path/to/arm/sysroot/" "/path/to/build-dir/exampleExe"
 \end{tcblisting}
 
 模拟器中运行测试可以加快开发人员的工作流程，因为它消除了主机工具链和目标工具链之间切换的必要，并且不需要为每个表面测试将构建构件移动到目标硬件。在持续集成(CI)构建中，使用这样的仿真器也很方便。
@@ -43,7 +42,7 @@ qemu-arm "-L" "/path/to/arm/sysroot/" "/path/to/build-dir/
 
 与其密切相关的是\texttt{try\_run()}，该指令在内部调用\texttt{try\_compile()}，若成功，将尝试运行程序。对于常规编译器检查，不使用\texttt{try\_run()}，对它的使用通常都会在项目中定义。
 
-要编写自定义检查，而不是直接调用\texttt{try\_compile()}和\texttt{try\_run()}，建议使用checksourcecompile或CheckSourceRuns模块的\texttt{check\_source\_compiles()}或\texttt{check\_source\_runs()}，这些指令自CMake 3.19起就已经可用了。大多数情况下，足以生成所需的信息，而不需要处理更复杂的\texttt{try\_compile()}或\texttt{try\_run()}。这两个指令的签名非常相似:
+要编写自定义检查，而不是直接调用\texttt{try\_compile()}和\texttt{try\_run()}，建议使用CheckSourceCompiles或CheckSourceRuns模块的\texttt{check\_source\_compiles()}或\texttt{check\_source\_runs()}，这些指令自CMake 3.19起就已经可用了。大多数情况下，足以生成所需的信息，而不需要处理更复杂的\texttt{try\_compile()}或\texttt{try\_run()}。这两个指令的签名非常相似:
 
 \begin{lstlisting}[style=styleCMake]
 check_source_compiles(<lang> <code> <resultVar>
@@ -129,12 +128,10 @@ if(WALL_FLAG_SUPPORTED)
 	
 	# Preserve -Wall and add more things for extra checks
 	cmake_push_check_state()
-	set(CMAKE_REQUIRED_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}
-		/include)
+	set(CMAKE_REQUIRED_INCLUDES ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 	include(CheckSymbolExists)
-	check_symbol_exists(hello "hello.hpp" HAVE_HELLO_
-		SYMBOL)
+	check_symbol_exists(hello "hello.hpp" HAVE_HELLO_SYMBOL)
 	
 	cmake_pop_check_state()
 endif()
@@ -154,9 +151,12 @@ CheckLanguage模块是检查某一语言的编译器是否可用的测试，若�
 
 \begin{lstlisting}[style=styleCMake]
 Include(CheckLanguage)
-check_language(Fortran)if(CMAKE_Fortran_COMPILER)
-enable_language(Fortran)else() message(STATUS "No Fortran
-support")endif()
+check_language(Fortran)
+if(CMAKE_Fortran_COMPILER)
+	enable_language(Fortran)
+else()
+	message(STATUS "No Fortran support")
+endif()
 \end{lstlisting}
 
 若检查成功，则设置相应的CMAKE\_<LANG>\_COMPILER变量。若变量是在检查之前设置的，则没有效果。

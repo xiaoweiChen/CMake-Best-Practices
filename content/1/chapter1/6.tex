@@ -31,10 +31,10 @@ CMake会将各种构建工件(如库、可执行文件、测试和文档)组织�
 
 \begin{lstlisting}[style=styleCMake]
 project(
-  "chapter1"
+  ch1_simple_executable
   VERSION 1.0
-  DESCRIPTION "A simple C++ project to demonstrate basic CMake
-  usage" LANGUAGES CXX
+  DESCRIPTION "A simple C++ project to demonstrate basic CMake usage"
+  LANGUAGES CXX
 )
 \end{lstlisting}
 
@@ -70,11 +70,11 @@ PROJECT\_VERSION\_TWEAK: 版本字符串的第四个数字
 \begin{tcblisting}{commandshell={}}
 .
 ├── CMakeLists.txt #defines project("CMakeBestPractices"...)
-├── chapter_1
+├── simple_executable
 │      ├── CMakeLists.txt # defines project("Chapter 1"...)
 \end{tcblisting}
 
-当解析根目录下的CMakeLists.txt文件时，PROJECT\_NAME和CMAKE\_PROJECT\_NAME都将是CMakeBestPractices。当解析chapter\_1/CMakeLists.txt时，PROJECT\_NAME变量将变为“chapter\_1”，但CMAKE\_PROJECT\_NAME还是CMakeBestPractices，并设置在根文件夹中。
+当解析根目录下的CMakeLists.txt文件时，PROJECT\_NAME和CMAKE\_PROJECT\_NAME都将是CMakeBestPractices。当解析chapter01/CMakeLists.txt时，PROJECT\_NAME变量将变为“chapter1”，但CMAKE\_PROJECT\_NAME还是CMakeBestPractices，并设置在根文件夹中。
 
 尽管项目可以嵌套，但最好以独立的方式编写。虽然它们可能依赖于文件层次结构中较低的其他项目，但应该没有必要将一个项目作为另一个项目的子项目的必要。可以在同一个CMakeLists.txt文件中使用多个\texttt{project()}，但并不推荐这样做，其会使项目混乱，难以维护。通常，最好为每个项目创建一个CMakeLists.txt文件，并用子文件夹组织结构。
 
@@ -143,7 +143,7 @@ set(MYLIST "abc;def;ghi")
 使用\texttt{list}指令可以通过修改列表内容、重新排序或查找内容来操作列表。下面的代码将在MYLIST中查询abc值的索引，然后检索该值并将其存储在名为ABC的变量中:
 
 \begin{lstlisting}[style=styleCMake]
-list(FIND MYLIST abc ABC_INDEX)
+list(FIND MYLIST def ABC_INDEX) 
 list(GET MYLIST ${ABC_INDEX} ABC)
 \end{lstlisting}
 
@@ -179,13 +179,13 @@ set(ch1_MYVAR foo CACHE STRING "Variable foo that configures bar")
 对于简单的布尔型缓存变量，CMake还提供了\texttt{option}指令，默认值为OFF，除非另有说明。也可以通过CMakeDependentOption模块相互依赖:
 
 \begin{lstlisting}[style=styleCMake]
-option(CHAPTER1_PRINT_LANGUAGE_EXAMPLES "Print examples for 
-	each language" OFF)
+option(CHAPTER1_PRINT_LANGUAGE_EXAMPLES
+	"Print examples for each language" OFF)
 
 include(CMakeDependentOption)
-cmake_dependent_option(CHAPTER1_PRINT_HELLO_WORLD "print a
-	greeting from chapter1 " ON CHAPTER1_PRINT_LANGUAGE_EXAMPLES
-		ON)
+cmake_dependent_option(CHAPTER1_PRINT_HELLO_WORLD
+	"Print a nice greeting from chapter1" ON
+	CHAPTER1_PRINT_LANGUAGE_EXAMPLES ON)
 \end{lstlisting}
 
 选项通常是指定简单项目配置的方法，是bool类型的缓存变量。若已经存在与该选项同名的变量，则\texttt{option}不会执行任何操作。
@@ -270,7 +270,7 @@ if(DEFINED MY_VAR)
 
 \begin{itemize}
 \item 
-\texttt{EXISTS}: 若给定的文件或目录退出，则为True
+\texttt{EXISTS}: 若给定的文件或目录存在，则为True
 
 \item 
 \texttt{IS\_DIRECTORY}: 检查提供的路径是否为目录
@@ -292,7 +292,7 @@ if(MYVAR STREQUAL "FOO")
 
 \begin{itemize}
 \item 
-\texttt{LESS} \texttt{GREATER}，\texttt{EQUAL}，\texttt{LESS\_EQUAL}和\texttt{GREATER\_EQUAL}: 比较数值。
+\texttt{LESS}，\texttt{GREATER}，\texttt{EQUAL}，\texttt{LESS\_EQUAL}和\texttt{GREATER\_EQUAL}: 比较数值。
 
 \item 
 \texttt{STRLESS}，\texttt{STREQUAL}，\texttt{STRGREATER}，\texttt{STRLESS\_EQUAL}和\texttt{STRGREATER\_EQUAL}: 按字典序比较字符串。
@@ -332,7 +332,7 @@ endforeach()
 for循环可以使用\texttt{RANGE}关键字:
 
 \begin{lstlisting}[style=styleCMake]
-foreach(ITEM RANGE 0 10)
+foreach(ITEM RANGE 0 5)
 # do something with ${ITEM}
 endforeach()
 \end{lstlisting}

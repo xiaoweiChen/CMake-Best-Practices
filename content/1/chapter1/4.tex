@@ -1,15 +1,15 @@
 现在，试试安装的CMake是否有效。我们提供了一个\texttt{hello world}示例，可以立即下载，并进行构建。打开一个控制台，输入以下内容:
 
 \begin{tcblisting}{commandshell={}}
-git clone https://github.com/PacktPublishing/CMake-BestPractices.git
-cd CMake-Best-Practices/chapter_1
+git clone https://github.com/PacktPublishing/CMake-Best-Practices.git
+cd CMake-Best-Practices/chapter01
 mkdir build
 cd build
 cmake ..
 cmake -–build .
 \end{tcblisting}
 
-这将产生名为\texttt{Chapter\_1}的可执行文件，在控制台上输出\texttt{Welcome to CMake Best Practices}。
+这将产生名为\texttt{chapter1}的可执行文件，在控制台上输出\texttt{Welcome to CMake Best Practices}。
 
 详细看看这里发生了什么:
 
@@ -33,7 +33,7 @@ cmake -–build .
 配置步骤中，将检查构建需求，解析依赖关系，并生成构建指令。
 
 \item 
-项目还会创建一个名为CMakeCache.txt的文件，其中包含创建构建指令所需的信息。\texttt{cmake -{}-build}的下一个阶段，通过内部调用CMake来执行构建;若在Windows上，则通过调用Visual Studio编译器来实现，这是编译二进制文件的实际方式。若一切顺利，在构建文件夹中会有一个名为\texttt{Chapter1}的可执行文件。
+项目还会创建一个名为CMakeCache.txt的文件，其中包含创建构建指令所需的信息。\texttt{cmake -{}-build}的下一个阶段，通过内部调用CMake来执行构建;若在Windows上，则通过调用Visual Studio编译器来实现，这是编译二进制文件的实际方式。若一切顺利，在构建文件夹中会有一个名为\texttt{chapter1}的可执行文件。
 \end{enumerate}
 
 简单起见，前面的示例中进入构建目录，并使用相对路径来查找源文件夹。这通常很方便，但想从其他地方使用CMake，可以使用\texttt{-{}-S}选项来选择源文件，以及使用\texttt{-{}-B}选项来指定构建文件夹:
@@ -52,13 +52,13 @@ cmake -build /path/to/build
 \begin{lstlisting}[style=styleCMake]
 cmake_minimum_required(VERSION 3.21)
 project(
-  "chapter1"
+  ch1_simple_executable
   VERSION 1.0
-  DESCRIPTION "A simple project to demonstrate basic CMake
-    usage" LANGUAGES CXX)
+  DESCRIPTION "A simple C++ project to demonstrate basic CMake usage"
+  LANGUAGES CXX)
 
-add_executable(Chapter1)
-target_sources(Chapter1 PRIVATE src/main.cpp)
+add_executable(chapter1)
+target_sources(chapter1 PRIVATE src/main.cpp)
 \end{lstlisting}
 
 更详细地说明一下:
@@ -74,7 +74,7 @@ target_sources(Chapter1 PRIVATE src/main.cpp)
 \texttt{add\_executable}告诉CMake要构建一个可执行文件(与库或自定义目标不同)。
 
 \item 
-\texttt{target\_sources}告诉CMake在哪里查找名为\texttt{Chapter1}的可执行文件的源文件，并且源文件的可见性仅限于可执行文件。
+\texttt{target\_sources}告诉CMake在哪里查找名为\texttt{chapter1}的可执行文件的源文件，并且源文件的可见性仅限于可执行文件。
 \end{itemize}
 
 祝贺你——现在可以用CMake创建程序了。为了理解这些指令背后发生了什么，需要继续了解一下CMake的构建过程。

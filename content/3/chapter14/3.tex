@@ -12,7 +12,7 @@ cmake -S <sourceDir> -B <buildDir> --profiling-output
 图14.1  CMake项目在Google Chrome中的概要图示例
 \end{center}
 
-配置项目时，有个\texttt{add\_subdirectory}占用了大部分时间。本例中，这是chapter\_5子目录，需要3秒多一点的时间来完成。深入研究一下，就会发现这些例子都使用了Conan包管理器，即两次调用conan\_cmake\_install使得配置的开销相对较大，将对Conan的调用集中到一个更高的目录中，可以将CMake的配置运行时间减少一半。
+配置项目时，有个\texttt{add\_subdirectory}占用了大部分时间。本例中，这是chapter05子目录，需要3秒多一点的时间来完成。深入研究一下，就会发现这些例子都使用了Conan包管理器，即两次调用conan\_cmake\_install使得配置的开销相对较大，将对Conan的调用集中到一个更高的目录中，可以将CMake的配置运行时间减少一半。
 
 为了正确地解释分析输出，有助于相互比较不同的CMake运行情况，特别是将CMake运行在干净的缓存上与使用缓存信息的缓存上进行比较。若CMake只在干净的缓存上运行，但增量运行足够快，这对开发人员来说仍然可以接受。然而，若增量CMake运行也需要很久，这可能会造成更大的问题。分析它们可以确定每次运行配置时是否执行了不必要的步骤。
 
