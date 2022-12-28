@@ -14,6 +14,8 @@
 >
 > <p align="right"> — 云风，程序员修炼之道第2版译者</p>
 
+PDF可在本库的[Release页面](https://github.com/xiaoweiChen/CMake-Best-Practices/releases)获取。
+
 ## 本书概述
 
 CMake是一个强大的工具，用于执行各种各样的任务，所以很难找到一个起点进行学习CMake。这本书更专注于了最常见的任务，边实践边学习CMake。CMake文档很全面，但缺少具有代表性的例子，说明如何将源码组合在一起，特别是互联网上还有有很奇淫技巧和过时的解决方案。本书的重点是帮助读者把需要做的事情串在一起，编写CMake，从而创建简洁和可维护的项目。
